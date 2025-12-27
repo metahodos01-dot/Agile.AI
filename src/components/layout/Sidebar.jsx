@@ -160,6 +160,7 @@ const Sidebar = () => {
 
     // Handle new project with confirmation
     const handleNewProject = () => {
+        console.log("Sidebar: handleNewProject clicked");
         if (project.name) {
             setShowSaveModal(true);
         } else {
@@ -262,9 +263,9 @@ const Sidebar = () => {
                 />
             )}
 
-            <aside className="w-72 h-screen fixed left-0 top-0 flex flex-col bg-zinc-950/80 backdrop-blur-xl border-r border-white/5 z-[100] pointer-events-auto">
+            <aside className="fixed left-0 top-0 w-72 h-screen flex flex-col bg-zinc-950/80 backdrop-blur-xl border-r border-white/5 z-50 pointer-events-auto">
                 {/* Logo Section */}
-                <div className="p-6 border-b border-white/5">
+                <div className="p-6 border-b border-white/5 flex-shrink-0">
                     <div className="flex items-center gap-4">
                         <img
                             src="/logo-metahodos.png"
@@ -283,7 +284,7 @@ const Sidebar = () => {
                 </div>
 
                 {/* New Project Button */}
-                <div className="px-3 py-4 border-b border-zinc-800/50">
+                <div className="px-3 py-4 border-b border-zinc-800/50 flex-shrink-0 relative z-50">
                     <button
                         onClick={handleNewProject}
                         className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-colors cursor-pointer active:scale-95"

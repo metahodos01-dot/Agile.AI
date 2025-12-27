@@ -7,13 +7,15 @@ const Layout = () => {
     const location = useLocation();
 
     return (
-        <div className="flex min-h-screen font-sans text-zinc-100 bg-zinc-950 relative overflow-hidden">
-            {/* Animated Mesh Background */}
-            <div className="mesh-gradient-bg" />
+        <div className="flex min-h-screen font-sans text-zinc-100 bg-zinc-950 relative">
+            {/* Animated Mesh Background - Fixed & Behind everything */}
+            <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
+                <div className="mesh-gradient-bg absolute inset-0" />
 
-            {/* Floating Orbs (Optional for extra cool factor) */}
-            <div className="fixed top-[-10%] right-[-5%] w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[100px] pointer-events-none animate-pulse" />
-            <div className="fixed bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[100px] pointer-events-none animate-pulse delay-1000" />
+                {/* Floating Orbs */}
+                <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[100px] animate-pulse" />
+                <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[100px] animate-pulse delay-1000" />
+            </div>
 
             <Sidebar />
 
@@ -21,11 +23,11 @@ const Layout = () => {
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={location.pathname}
-                        initial={{ opacity: 0, y: 20, scale: 0.98 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -20, scale: 0.98 }}
-                        transition={{ duration: 0.4, ease: "easeOut" }}
-                        className="p-8 h-full overflow-y-auto"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.3 }}
+                        className="p-8 min-h-screen"
                     >
                         <Outlet />
                     </motion.div>
