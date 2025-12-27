@@ -473,7 +473,25 @@ const Sidebar = () => {
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-white truncate mb-1">{user?.email?.split('@')[0] || 'User'}</p>
                             <button
-                                onClick={handleLogout}
+                                onClick={async (e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    console.log("FORCE LOGOUT TRIGGERED");
+
+                                    // 1. Clear local storage explicitly
+                                    localStorage.clear();
+                                    sessionStorage.clear();
+
+                                    // 2. Try Supabase signOut but don't wait too long
+                                    try {
+                                        await signOut();
+                                    } catch (err) {
+                                        console.error("Supabase signout failed", err);
+                                    }
+
+                                    // 3. Force hard redirect to login
+                                    window.location.replace('/login');
+                                }}
                                 className="flex items-center gap-2 px-2 py-1 text-xs font-medium text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-all w-full justify-center border border-red-500/10 hover:border-red-500/30 cursor-pointer active:scale-95"
                             >
                                 <LogOut size={12} />
