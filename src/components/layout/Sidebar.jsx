@@ -344,15 +344,19 @@ const Sidebar = () => {
                             }`
                         }
                     >
-                        <LayoutDashboard size={18} />
-                        <span className="font-medium relative z-10">Dashboard</span>
-                        {isActive && (
-                            <motion.div
-                                layoutId="activeNav"
-                                className="absolute inset-0 bg-indigo-500/10 border border-indigo-500/20 rounded-xl"
-                                initial={false}
-                                transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                            />
+                        {({ isActive }) => (
+                            <>
+                                <LayoutDashboard size={18} />
+                                <span className="font-medium relative z-10">Dashboard</span>
+                                {isActive && (
+                                    <motion.div
+                                        layoutId="activeNav"
+                                        className="absolute inset-0 bg-indigo-500/10 border border-indigo-500/20 rounded-xl"
+                                        initial={false}
+                                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                    />
+                                )}
+                            </>
                         )}
                     </NavLink>
 
@@ -392,17 +396,21 @@ const Sidebar = () => {
                                         }`
                                     }
                                 >
-                                    <Icon size={17} className="flex-shrink-0" />
-                                    <span className="font-medium text-sm truncate relative z-10">{step.name}</span>
-                                    {isActive && (
-                                        <motion.div
-                                            layoutId="activeNav"
-                                            className={`absolute inset-0 rounded-xl ${isIntro
-                                                ? 'bg-amber-500/10 border border-amber-500/20'
-                                                : 'bg-indigo-500/10 border border-indigo-500/20'}`}
-                                            initial={false}
-                                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                        />
+                                    {({ isActive }) => (
+                                        <>
+                                            <Icon size={17} className="flex-shrink-0" />
+                                            <span className="font-medium text-sm truncate relative z-10">{step.name}</span>
+                                            {isActive && (
+                                                <motion.div
+                                                    layoutId="activeNav"
+                                                    className={`absolute inset-0 rounded-xl ${isIntro
+                                                        ? 'bg-amber-500/10 border border-amber-500/20'
+                                                        : 'bg-indigo-500/10 border border-indigo-500/20'}`}
+                                                    initial={false}
+                                                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                                />
+                                            )}
+                                        </>
                                     )}
                                 </NavLink>
                             );
