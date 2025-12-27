@@ -244,26 +244,30 @@ const Sidebar = () => {
         <>
             {/* Modals */}
             {showSaveModal && (
-                <SaveConfirmModal
-                    projectName={project.name}
-                    onSave={handleSaveAndCreate}
-                    onDiscard={handleDiscardAndCreate}
-                    onCancel={() => setShowSaveModal(false)}
-                />
+                <div className="relative z-[10000]">
+                    <SaveConfirmModal
+                        projectName={project.name}
+                        onSave={handleSaveAndCreate}
+                        onDiscard={handleDiscardAndCreate}
+                        onCancel={() => setShowSaveModal(false)}
+                    />
+                </div>
             )}
 
             {showDeleteModal && projectToDelete && (
-                <DeleteConfirmModal
-                    projectName={projectToDelete.name}
-                    onConfirm={confirmDelete}
-                    onCancel={() => {
-                        setShowDeleteModal(false);
-                        setProjectToDelete(null);
-                    }}
-                />
+                <div className="relative z-[10000]">
+                    <DeleteConfirmModal
+                        projectName={projectToDelete.name}
+                        onConfirm={confirmDelete}
+                        onCancel={() => {
+                            setShowDeleteModal(false);
+                            setProjectToDelete(null);
+                        }}
+                    />
+                </div>
             )}
 
-            <aside className="fixed left-0 top-0 w-72 h-screen flex flex-col bg-zinc-950/80 backdrop-blur-xl border-r border-white/5 z-50 pointer-events-auto">
+            <aside className="fixed left-0 top-0 w-72 h-screen flex flex-col bg-zinc-950/90 backdrop-blur-xl border-r border-white/5 z-[9999] shadow-2xl">
                 {/* Logo Section */}
                 <div className="p-6 border-b border-white/5 flex-shrink-0">
                     <div className="flex items-center gap-4">
@@ -284,10 +288,19 @@ const Sidebar = () => {
                 </div>
 
                 {/* New Project Button */}
-                <div className="px-3 py-4 border-b border-zinc-800/50 flex-shrink-0 relative z-50">
+                <div className="px-3 py-4 border-b border-zinc-800/50 flex-shrink-0 relative z-[10001]">
                     <button
-                        onClick={handleNewProject}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-colors cursor-pointer active:scale-95"
+                        onClick={(e) => {
+                            try {
+                                console.log("New Project Clicked");
+                                e.stopPropagation();
+                                handleNewProject();
+                            } catch (err) {
+                                console.error("New Project Error:", err);
+                                alert("Errore: " + err.message);
+                            }
+                        }}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-colors cursor-pointer active:scale-95 shadow-lg shadow-indigo-900/20"
                     >
                         <Plus size={18} />
                         Nuovo Progetto
@@ -333,30 +346,31 @@ const Sidebar = () => {
                 )}
 
                 {/* Current Project Info - Editable */}
-                <div className="px-4 py-3 bg-zinc-900/50 border-b border-zinc-800/50">
+                <div className="px-4 py-3 bg-zinc-900/50 border-b border-zinc-800/50 relative z-[10001]">
                     <p className="text-[10px] text-zinc-600 uppercase tracking-wider mb-1">Progetto attuale</p>
 
                     {editingName ? (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 relative z-[10002]">
                             <input
                                 type="text"
                                 value={tempName}
                                 onChange={(e) => setTempName(e.target.value)}
                                 onKeyDown={handleNameKeyDown}
-                                className="flex-1 bg-zinc-800 border border-zinc-600 rounded-lg px-2 py-1 text-sm text-white focus:border-indigo-500 focus:outline-none"
+                                onClick={(e) => e.stopPropagation()}
+                                className="flex-1 bg-zinc-800 border border-zinc-600 rounded-lg px-2 py-1 text-sm text-white focus:border-indigo-500 focus:outline-none cursor-text"
                                 placeholder="Nome progetto..."
                                 autoFocus
                             />
                             <button
-                                onClick={saveName}
-                                className="p-1 hover:bg-green-500/20 rounded transition-colors"
+                                onClick={(e) => { e.stopPropagation(); saveName(); }}
+                                className="p-1 hover:bg-green-500/20 rounded transition-colors cursor-pointer"
                                 title="Salva"
                             >
                                 <Check size={16} className="text-green-400" />
                             </button>
                             <button
-                                onClick={cancelEditingName}
-                                className="p-1 hover:bg-zinc-700 rounded transition-colors"
+                                onClick={(e) => { e.stopPropagation(); cancelEditingName(); }}
+                                className="p-1 hover:bg-zinc-700 rounded transition-colors cursor-pointer"
                                 title="Annulla"
                             >
                                 <X size={16} className="text-zinc-400" />
