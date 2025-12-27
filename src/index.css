@@ -26,25 +26,52 @@ body {
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  @apply inline-flex items-center justify-center gap-2 px-5 py-2.5;
-  @apply bg-zinc-800/50 border border-zinc-700 text-zinc-300 font-medium;
-  @apply rounded-xl transition-all duration-200;
-  @apply hover:bg-zinc-800 hover:text-white hover:border-zinc-600;
+  @apply bg-zinc-950 text-zinc-100 overflow-x-hidden;
+}
+
+/* Utilities */
+.glass-panel {
+  @apply bg-zinc-900/60 backdrop-blur-xl border border-white/5 rounded-2xl shadow-xl;
+}
+
+.glass-card {
+  @apply bg-zinc-900/40 backdrop-blur-lg border border-white/5 rounded-xl transition-all duration-300;
+}
+
+/* Animated Mesh Background */
+.mesh-gradient-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.08), transparent 25%);
+  background-color: #09090b;
 }
 
 /* Form Elements */
 input,
 textarea,
 select {
-  @apply w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-xl;
+  @apply w-full px-4 py-3 bg-zinc-900/50 border border-zinc-800 rounded-xl;
   @apply text-white placeholder-zinc-500;
-  @apply focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20;
+  @apply focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10;
   @apply transition-all duration-200;
 }
 
 /* Text Gradient */
 .text-gradient {
   @apply bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent;
+}
+
+/* Button Base */
+.btn {
+  @apply inline-flex items-center justify-center gap-2 px-5 py-2.5;
+  @apply font-medium rounded-xl transition-all duration-200;
 }
 
 /* Scrollbar */
@@ -58,16 +85,16 @@ select {
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-zinc-700 rounded-full;
+  @apply bg-zinc-800 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-zinc-600;
+  @apply bg-zinc-700;
 }
 
 /* Selection */
 ::selection {
-  @apply bg-indigo-500 text-white;
+  @apply bg-indigo-500/30 text-indigo-100;
 }
 
 /* Animation */
