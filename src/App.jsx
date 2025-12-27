@@ -3,7 +3,13 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import Home from './pages/Home';
 import Vision from './pages/Vision';
+import { AuthProvider } from './context/AuthContext';
 import { ProjectProvider } from './context/ProjectContext';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import AuthGuard from './components/common/AuthGuard';
+import AdminGuard from './components/common/AdminGuard';
+import AdminDashboard from './pages/AdminDashboard';
 
 import Objectives from './pages/Objectives';
 import Kpis from './pages/Kpis';
@@ -25,26 +31,40 @@ const Placeholder = ({ title }) => (
 
 function App() {
   return (
-    <ProjectProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="mindset" element={<Mindset />} />
-            <Route path="vision" element={<Vision />} />
-            <Route path="objectives" element={<Objectives />} />
-            <Route path="kpi" element={<Kpis />} />
-            <Route path="team" element={<Team />} />
-            <Route path="obeya" element={<Obeya />} />
-            <Route path="backlog" element={<Backlog />} />
-            <Route path="estimates" element={<Estimates />} />
-            <Route path="roadmap" element={<Roadmap />} />
-            <Route path="sprint" element={<Sprint />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </ProjectProvider>
+    <AuthProvider>
+      <ProjectProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+
+            <Route path="/" element={
+              <AuthGuard>
+                <Layout />
+              </AuthGuard>
+            }>
+              <Route index element={<Home />} />
+              <Route path="mindset" element={<Mindset />} />
+              <Route path="admin" element={
+                <AdminGuard>
+                  <AdminDashboard />
+                </AdminGuard>
+              } />
+              <Route path="vision" element={<Vision />} />
+              <Route path="objectives" element={<Objectives />} />
+              <Route path="kpi" element={<Kpis />} />
+              <Route path="team" element={<Team />} />
+              <Route path="obeya" element={<Obeya />} />
+              <Route path="backlog" element={<Backlog />} />
+              <Route path="estimates" element={<Estimates />} />
+              <Route path="roadmap" element={<Roadmap />} />
+              <Route path="sprint" element={<Sprint />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </ProjectProvider>
+    </AuthProvider>
   );
 }
 

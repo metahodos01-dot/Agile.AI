@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useProject } from '../../context/ProjectContext';
 import {
     Target, Eye, LayoutDashboard, Sliders, Users,
     Map, Database, Clock, Play, Plus, Folder, FolderOpen, RefreshCw,
-    Trash2, Pencil, Check, X, AlertCircle
+    Trash2, Pencil, Check, X, AlertCircle, LogOut, Shield
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const steps = [
     { path: '/mindset', name: '0. Mindset Agile', icon: RefreshCw },
@@ -106,7 +108,18 @@ const DeleteConfirmModal = ({ projectName, onConfirm, onCancel }) => (
 
 const Sidebar = () => {
     const { project, savedProjects, createNewProject, loadProject, deleteProject, updateProject, saveProject } = useProject();
+    const { user, role, signOut } = useAuth();
     const navigate = useNavigate();
+
+    // Handle Logout
+    const handleLogout = async () => {
+        try {
+            await signOut();
+            navigate('/login');
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
+    };
 
     // Modal states
     const [showSaveModal, setShowSaveModal] = useState(false);
@@ -211,9 +224,9 @@ const Sidebar = () => {
                 />
             )}
 
-            <aside className="w-72 h-screen fixed left-0 top-0 flex flex-col bg-zinc-950 border-r border-zinc-800/50">
+            <aside className="w-72 h-screen fixed left-0 top-0 flex flex-col bg-zinc-950/80 backdrop-blur-xl border-r border-white/5 z-50">
                 {/* Logo Section */}
-                <div className="p-6 border-b border-zinc-800/50">
+                <div className="p-6 border-b border-white/5">
                     <div className="flex items-center gap-4">
                         <img
                             src="/logo-metahodos.png"
@@ -253,8 +266,8 @@ const Sidebar = () => {
                                 <div
                                     key={p.id}
                                     className={`group flex items-center gap-2 px-3 py-2 rounded-lg transition-all cursor-pointer ${project.id === p.id
-                                            ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
-                                            : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
+                                        ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
+                                        : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
                                         }`}
                                     onClick={() => handleLoadProject(p.id)}
                                 >
@@ -332,8 +345,31 @@ const Sidebar = () => {
                         }
                     >
                         <LayoutDashboard size={18} />
-                        <span className="font-medium">Dashboard</span>
+                        <span className="font-medium relative z-10">Dashboard</span>
+                        {isActive && (
+                            <motion.div
+                                layoutId="activeNav"
+                                className="absolute inset-0 bg-indigo-500/10 border border-indigo-500/20 rounded-xl"
+                                initial={false}
+                                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                            />
+                        )}
                     </NavLink>
+
+                    {role === 'admin' && (
+                        <NavLink
+                            to="/admin"
+                            className={({ isActive }) =>
+                                `flex items-center gap-3 px-4 py-3 rounded-xl mb-1 transition-all duration-200 ${isActive
+                                    ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+                                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
+                                }`
+                            }
+                        >
+                            <Shield size={18} />
+                            <span className="font-medium">Admin Panel</span>
+                        </NavLink>
+                    )}
 
                     <div className="px-4 py-3 mt-2">
                         <p className="text-[11px] font-semibold text-zinc-600 uppercase tracking-wider">Fasi del progetto</p>
@@ -357,7 +393,17 @@ const Sidebar = () => {
                                     }
                                 >
                                     <Icon size={17} className="flex-shrink-0" />
-                                    <span className="font-medium text-sm truncate">{step.name}</span>
+                                    <span className="font-medium text-sm truncate relative z-10">{step.name}</span>
+                                    {isActive && (
+                                        <motion.div
+                                            layoutId="activeNav"
+                                            className={`absolute inset-0 rounded-xl ${isIntro
+                                                ? 'bg-amber-500/10 border border-amber-500/20'
+                                                : 'bg-indigo-500/10 border border-indigo-500/20'}`}
+                                            initial={false}
+                                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                        />
+                                    )}
                                 </NavLink>
                             );
                         })}
@@ -368,11 +414,16 @@ const Sidebar = () => {
                 <div className="p-4 border-t border-zinc-800/50">
                     <div className="flex items-center gap-3 px-2 py-2">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-500/20">
-                            F
+                            {user?.email?.charAt(0).toUpperCase() || 'U'}
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-white truncate">Franz</p>
-                            <p className="text-xs text-zinc-500">Product Owner</p>
+                            <p className="text-sm font-medium text-white truncate">{user?.email?.split('@')[0] || 'User'}</p>
+                            <button
+                                onClick={handleLogout}
+                                className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1 mt-0.5"
+                            >
+                                <LogOut size={10} /> Esci
+                            </button>
                         </div>
                     </div>
                 </div>

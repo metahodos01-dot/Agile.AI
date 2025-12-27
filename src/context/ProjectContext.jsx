@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '../services/supabaseClient';
+import { useAuth } from './AuthContext';
 
 const ProjectContext = createContext();
 
@@ -21,84 +23,147 @@ const emptyProject = {
 };
 
 export const ProjectProvider = ({ children }) => {
+    const { user } = useAuth();
     const [project, setProject] = useState({ ...emptyProject });
     const [savedProjects, setSavedProjects] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    // Load projects from localStorage on mount
-    useEffect(() => {
-        const saved = localStorage.getItem('savedProjects');
-        if (saved) {
-            setSavedProjects(JSON.parse(saved));
+    // Fetch projects from Supabase
+    const fetchProjects = async () => {
+        if (!user) {
+            setSavedProjects([]);
+            return;
         }
+
+        setLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('projects')
+                .select('*')
+                .order('updated_at', { ascending: false });
+
+            if (error) throw error;
+
+            const projects = data.map(row => ({
+                ...row.data,
+                id: row.id, // Use Supabase UUID
+                name: row.name,
+                createdAt: row.created_at,
+                updatedAt: row.updated_at
+            }));
+
+            setSavedProjects(projects);
+        } catch (error) {
+            console.error('Error fetching projects:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Load projects when user changes
+    useEffect(() => {
+        if (user) fetchProjects();
+
+        // Recover current project from local storage if needed
         const current = localStorage.getItem('currentProject');
         if (current) {
             setProject(JSON.parse(current));
         }
-    }, []);
+    }, [user]);
 
-    // Update current project
+    // Update current project state locally
     const updateProject = (updates) => {
         const newProject = {
             ...project,
             ...updates,
-            id: project.id || Date.now().toString(),
-            createdAt: project.createdAt || new Date().toISOString()
         };
         setProject(newProject);
         localStorage.setItem('currentProject', JSON.stringify(newProject));
     };
 
-    // Save project to the list of saved projects
-    const saveProject = () => {
+    // Save project to Supabase
+    const saveProject = async () => {
         if (!project.name) return false;
+        if (!user) return false;
 
-        const projectToSave = {
-            ...project,
-            id: project.id || Date.now().toString(),
-            completedAt: new Date().toISOString()
-        };
+        setLoading(true);
+        try {
+            const projectData = { ...project };
+            delete projectData.id;
+            delete projectData.name;
+            delete projectData.createdAt;
 
-        // Check if project already exists
-        const existingIndex = savedProjects.findIndex(p => p.id === projectToSave.id);
-        let newSavedProjects;
+            const payload = {
+                name: project.name,
+                data: projectData,
+                user_id: user.id
+            };
 
-        if (existingIndex >= 0) {
-            // Update existing
-            newSavedProjects = [...savedProjects];
-            newSavedProjects[existingIndex] = projectToSave;
-        } else {
-            // Add new
-            newSavedProjects = [...savedProjects, projectToSave];
+            let data, error;
+
+            // Check if it's a UUID (existing Supabase project) or a temp/new ID
+            const isUUID = project.id && project.id.length > 20;
+
+            if (isUUID) {
+                // Update
+                ({ data, error } = await supabase
+                    .from('projects')
+                    .update({
+                        ...payload,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', project.id)
+                    .select());
+            } else {
+                // Insert
+                ({ data, error } = await supabase
+                    .from('projects')
+                    .insert(payload)
+                    .select());
+            }
+
+            if (error) throw error;
+
+            if (data && data[0]) {
+                const savedProject = {
+                    ...data[0].data,
+                    id: data[0].id,
+                    name: data[0].name,
+                    createdAt: data[0].created_at,
+                    updatedAt: data[0].updated_at
+                };
+
+                setProject(savedProject);
+                localStorage.setItem('currentProject', JSON.stringify(savedProject));
+                await fetchProjects(); // Refresh list
+                return true;
+            }
+        } catch (error) {
+            console.error('Error saving project:', error);
+            return false;
+        } finally {
+            setLoading(false);
         }
-
-        setSavedProjects(newSavedProjects);
-        localStorage.setItem('savedProjects', JSON.stringify(newSavedProjects));
-        return true;
     };
 
-    // Create new project (saves current one first)
-    const createNewProject = () => {
-        // Save current project if it has a name
+    // Create new project
+    const createNewProject = async () => {
+        // Save current if has name
         if (project.name) {
-            saveProject();
+            await saveProject();
         }
 
-        // Reset to empty project
         const newProject = {
-            ...emptyProject,
-            id: Date.now().toString(),
-            createdAt: new Date().toISOString()
+            ...emptyProject
         };
         setProject(newProject);
-        localStorage.setItem('currentProject', JSON.stringify(newProject));
+        localStorage.removeItem('currentProject');
     };
 
     // Load a saved project
-    const loadProject = (projectId) => {
-        // Save current project first
+    const loadProject = async (projectId) => {
         if (project.name && project.id !== projectId) {
-            saveProject();
+            await saveProject();
         }
 
         const projectToLoad = savedProjects.find(p => p.id === projectId);
@@ -109,16 +174,24 @@ export const ProjectProvider = ({ children }) => {
     };
 
     // Delete a project
-    const deleteProject = (projectId) => {
-        const newSavedProjects = savedProjects.filter(p => p.id !== projectId);
-        setSavedProjects(newSavedProjects);
-        localStorage.setItem('savedProjects', JSON.stringify(newSavedProjects));
+    const deleteProject = async (projectId) => {
+        try {
+            const { error } = await supabase
+                .from('projects')
+                .delete()
+                .eq('id', projectId);
 
-        // If deleting current project, reset
-        if (project.id === projectId) {
-            const newProject = { ...emptyProject, id: Date.now().toString() };
-            setProject(newProject);
-            localStorage.setItem('currentProject', JSON.stringify(newProject));
+            if (error) throw error;
+
+            await fetchProjects();
+
+            if (project.id === projectId) {
+                const newProject = { ...emptyProject };
+                setProject(newProject);
+                localStorage.removeItem('currentProject');
+            }
+        } catch (error) {
+            console.error('Error deleting project:', error);
         }
     };
 

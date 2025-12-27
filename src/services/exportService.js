@@ -3,6 +3,8 @@
  * Handles exporting project data to various formats including Google Docs
  */
 
+import { supabase } from './supabaseClient';
+
 /**
  * Formats the project data into a structured document
  * @param {Object} project - The project data from context
@@ -354,51 +356,207 @@ export const sectionsToPlainText = (sections) => {
 };
 
 /**
- * Converts sections to HTML format
+ * Converts sections to Professional HTML format
  * @param {Array} sections - Document sections
  * @returns {string} HTML document
  */
 export const sectionsToHTML = (sections) => {
+    const today = new Date().toLocaleDateString('it-IT', { year: 'numeric', month: 'long', day: 'numeric' });
+
     let html = `<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Progetto Agile - Export</title>
+    <title>Agile.AI Project Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { 
-            font-family: 'Segoe UI', Arial, sans-serif; 
-            max-width: 800px; 
-            margin: 0 auto; 
-            padding: 40px 20px; 
-            line-height: 1.6;
-            color: #333;
+        :root {
+            --primary: #4F46E5;
+            --secondary: #10B981;
+            --bg: #F9FAFB;
+            --surface: #FFFFFF;
+            --text-main: #111827;
+            --text-muted: #6B7280;
+            --border: #E5E7EB;
         }
-        h1 { color: #4F46E5; border-bottom: 2px solid #4F46E5; padding-bottom: 10px; margin-top: 40px; }
-        h2 { color: #6366F1; margin-top: 30px; }
-        h3 { color: #818CF8; margin-top: 20px; }
-        .title { font-size: 2em; text-align: center; margin-bottom: 10px; }
-        .subtitle { text-align: center; color: #666; margin-bottom: 40px; }
-        table { border-collapse: collapse; width: 100%; margin: 20px 0; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #4F46E5; color: white; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        ul { padding-left: 20px; }
-        li { margin: 8px 0; }
-        strong { color: #4F46E5; }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary: #818CF8;
+                --secondary: #34D399;
+                --bg: #111827;
+                --surface: #1F2937;
+                --text-main: #F9FAFB;
+                --text-muted: #9CA3AF;
+                --border: #374151;
+            }
+        }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--surface);
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        .header-banner {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        .header-brand {
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+        .report-title {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1.2;
+        }
+        .report-meta {
+            margin-top: 20px;
+            font-size: 0.9em;
+            opacity: 0.9;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .content {
+            padding: 60px 50px;
+        }
+        h1 { 
+            color: var(--primary); 
+            font-size: 1.8em; 
+            border-bottom: 2px solid var(--border); 
+            padding-bottom: 15px; 
+            margin-top: 50px; 
+            margin-bottom: 25px;
+        }
+        h1:first-of-type { margin-top: 0; }
+        h2 { 
+            font-size: 1.4em; 
+            margin-top: 35px; 
+            margin-bottom: 15px; 
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        h3 { 
+            font-size: 1.1em; 
+            color: var(--text-muted); 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 25px;
+        }
+        p { margin-bottom: 1.5em; color: var(--text-muted); }
+        strong { color: var(--text-main); font-weight: 600; }
+        
+        .card {
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+        
+        table { 
+            width: 100%; 
+            border-collapse: separate; 
+            border-spacing: 0; 
+            margin: 25px 0; 
+            font-size: 0.95em;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        th { 
+            background-color: var(--bg); 
+            color: var(--text-muted); 
+            text-transform: uppercase;
+            font-size: 0.75em;
+            letter-spacing: 1px;
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        td { 
+            padding: 15px; 
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+        }
+        tr:last-child td { border-bottom: none; }
+        
+        ul { padding-left: 20px; color: var(--text-muted); }
+        li { margin-bottom: 8px; position: relative; }
+        
+        .tag {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 500;
+            background: var(--bg);
+            border: 1px solid var(--border);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 40px;
+            background: var(--bg);
+            color: var(--text-muted);
+            font-size: 0.8em;
+            border-top: 1px solid var(--border);
+        }
+
+        @media print {
+            body { background: white; color: black; }
+            .container { box-shadow: none; max-width: 100%; }
+            .header-banner { background: white; color: black; border-bottom: 2px solid #000; padding: 20px 0; }
+            .header-banner * { color: black !important; }
+            h1 { border-bottom: 1px solid #000; }
+            .card { border: 1px solid #ccc; }
+        }
     </style>
 </head>
 <body>
+    <div class="container">
 `;
 
+    // Process sections to find title for header
+    const titleSection = sections.find(s => s.type === 'title');
+    const projectTitle = titleSection ? escapeHtml(titleSection.content.replace('📋 ', '').split(' - ')[0]) : 'Project Report';
+
+    html += `
+        <div class="header-banner">
+            <div class="header-brand">Agile.AI Platform</div>
+            <h1 class="report-title">${projectTitle}</h1>
+            <div class="report-meta">
+                <span>📅 ${today}</span>
+                <span>📑 Professional Export</span>
+            </div>
+        </div>
+        <div class="content">
+    `;
+
     sections.forEach(section => {
+        if (section.type === 'title' || section.type === 'subtitle') return; // Handled in header
+
         switch (section.type) {
-            case 'title':
-                html += `<h1 class="title">${escapeHtml(section.content)}</h1>\n`;
-                break;
-            case 'subtitle':
-                html += `<p class="subtitle">${escapeHtml(section.content)}</p>\n`;
-                break;
             case 'heading':
                 html += `<h${section.level}>${escapeHtml(section.content)}</h${section.level}>\n`;
                 break;
@@ -409,6 +567,7 @@ export const sectionsToHTML = (sections) => {
                 html += `<ul><li>${formatMarkdownInline(section.content)}</li></ul>\n`;
                 break;
             case 'table':
+                html += '<div class="card" style="padding:0; border:none; background:transparent;">';
                 html += '<table>\n<thead><tr>\n';
                 section.headers.forEach(h => html += `<th>${escapeHtml(h)}</th>\n`);
                 html += '</tr></thead>\n<tbody>\n';
@@ -417,12 +576,23 @@ export const sectionsToHTML = (sections) => {
                     row.forEach(cell => html += `<td>${escapeHtml(cell || '')}</td>\n`);
                     html += '</tr>\n';
                 });
-                html += '</tbody></table>\n';
+                html += '</tbody></table></div>\n';
                 break;
+            default:
+                // Fallback
+                if (section.content) html += `<p>${escapeHtml(section.content)}</p>`;
         }
     });
 
-    html += '</body></html>';
+    html += `
+        </div>
+        <div class="footer">
+            <p>Generated by Agile.AI • Empowering Teams with Intelligence</p>
+        </div>
+    </div>
+</body>
+</html>`;
+
     return html;
 };
 
@@ -521,4 +691,47 @@ export const downloadAsText = (project) => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+};
+
+/**
+ * Publishes the project report to the web via Supabase Storage
+ * @param {Object} project - Project data
+ * @returns {Promise<Object>} Result with public URL
+ */
+export const publishToWeb = async (project) => {
+    try {
+        const sections = formatProjectDocument(project);
+        const html = sectionsToHTML(sections);
+        const blob = new Blob([html], { type: 'text/html' });
+
+        const safeName = (project.name || 'project').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+        const filename = `${safeName}-${Date.now()}.html`;
+        const filePath = `${filename}`;
+
+        const { data, error } = await supabase.storage
+            .from('public-exports')
+            .upload(filePath, blob, {
+                cacheControl: '3600',
+                upsert: false,
+                contentType: 'text/html; charset=utf-8'
+            });
+
+        if (error) throw error;
+
+        const { data: { publicUrl } } = supabase.storage
+            .from('public-exports')
+            .getPublicUrl(filePath);
+
+        return {
+            success: true,
+            url: publicUrl,
+            message: 'Report pubblicato con successo!'
+        };
+    } catch (error) {
+        console.error('Publish error:', error);
+        return {
+            success: false,
+            message: 'Errore durante la pubblicazione: ' + error.message
+        };
+    }
 };

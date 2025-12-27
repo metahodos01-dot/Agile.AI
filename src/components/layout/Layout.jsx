@@ -1,24 +1,35 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const Layout = () => {
+    const location = useLocation();
+
     return (
-        <div className="min-h-screen bg-[#09090b]">
-            {/* Ambient Gradient Background */}
-            <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-                <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-indigo-600/8 rounded-full blur-[120px]" />
-                <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-600/5 rounded-full blur-[100px]" />
-            </div>
+        <div className="flex min-h-screen font-sans text-zinc-100 bg-zinc-950 relative overflow-hidden">
+            {/* Animated Mesh Background */}
+            <div className="mesh-gradient-bg" />
+
+            {/* Floating Orbs (Optional for extra cool factor) */}
+            <div className="fixed top-[-10%] right-[-5%] w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[100px] pointer-events-none animate-pulse" />
+            <div className="fixed bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[100px] pointer-events-none animate-pulse delay-1000" />
 
             <Sidebar />
 
-            <main className="ml-72 min-h-screen">
-                <div className="max-w-6xl mx-auto px-8 py-10">
-                    <div className="animate-fade-in">
+            <main className="flex-1 ml-72 relative z-10">
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={location.pathname}
+                        initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -20, scale: 0.98 }}
+                        transition={{ duration: 0.4, ease: "easeOut" }}
+                        className="p-8 h-full overflow-y-auto"
+                    >
                         <Outlet />
-                    </div>
-                </div>
+                    </motion.div>
+                </AnimatePresence>
             </main>
         </div>
     );

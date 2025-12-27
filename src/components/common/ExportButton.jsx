@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { FileDown, FileText, Globe, Copy, Check, X, ExternalLink } from 'lucide-react';
+import { FileDown, FileText, Globe, Copy, Check, X, ExternalLink, Cloud } from 'lucide-react';
 import { useProject } from '../../context/ProjectContext';
-import { exportToGoogleDocs, downloadAsHTML, downloadAsText } from '../../services/exportService';
+import { useAuth } from '../../context/AuthContext';
+import { exportToGoogleDocs, downloadAsHTML, downloadAsText, publishToWeb } from '../../services/exportService';
 
 const ExportButton = () => {
     const { project } = useProject();
+    const { user } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const [exporting, setExporting] = useState(false);
     const [copied, setCopied] = useState(false);
@@ -42,6 +44,21 @@ const ExportButton = () => {
     const handleTextExport = () => {
         downloadAsText(project);
         setIsOpen(false);
+    };
+
+    const handlePublish = async () => {
+        setExporting(true);
+        try {
+            const result = await publishToWeb(project);
+            if (result.success) {
+                window.open(result.url, '_blank');
+                setIsOpen(false);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setExporting(false);
+        }
     };
 
     return (
@@ -92,6 +109,36 @@ const ExportButton = () => {
 
                         {/* Export Options */}
                         <div className="p-4 space-y-2">
+                            {/* Cloud Publish Option */}
+                            {/* Cloud Publish Option */}
+                            <button
+                                onClick={handlePublish}
+                                disabled={exporting || !user}
+                                className={`w-full flex items-center gap-4 p-3 rounded-xl border transition-all duration-200 group relative overflow-hidden ${user
+                                        ? 'bg-gradient-to-r from-blue-900/40 to-indigo-900/40 hover:from-blue-900/60 hover:to-indigo-900/60 border-blue-500/30 hover:border-blue-400/50'
+                                        : 'bg-zinc-800/40 border-zinc-700/50 opacity-60 cursor-not-allowed'
+                                    }`}
+                            >
+                                <div className={`absolute inset-0 transition-opacity ${user ? 'bg-blue-500/10 opacity-0 group-hover:opacity-100' : 'hidden'}`} />
+                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg ${user ? 'bg-gradient-to-br from-cyan-500 to-blue-500 shadow-blue-500/20' : 'bg-zinc-700'}`}>
+                                    <Cloud size={20} className="text-white" />
+                                </div>
+                                <div className="flex-1 text-left relative z-10">
+                                    <div className="flex items-center gap-2">
+                                        <span className={`font-medium text-sm ${user ? 'text-white' : 'text-zinc-500'}`}>Pubblica Online</span>
+                                        {user ? (
+                                            <span className="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded border border-blue-500/30">CLOUD</span>
+                                        ) : (
+                                            <span className="text-[10px] bg-zinc-700 text-zinc-400 px-1.5 py-0.5 rounded border border-zinc-600">LOGIN REQ</span>
+                                        )}
+                                    </div>
+                                    <p className="text-zinc-400 text-xs mt-0.5">
+                                        {user ? 'Genera link web condivisibile' : 'Accedi per pubblicare'}
+                                    </p>
+                                </div>
+                                <ExternalLink size={18} className="text-zinc-500 group-hover:text-blue-400 transition-colors" />
+                            </button>
+
                             {/* Google Docs Option */}
                             <button
                                 onClick={handleGoogleDocsExport}
@@ -108,6 +155,9 @@ const ExportButton = () => {
                                     </div>
                                     <p className="text-zinc-400 text-xs mt-0.5">
                                         {exporting ? 'Preparazione in corso...' : 'Copia e apri Google Docs'}
+                                    </p>
+                                    <p className="text-amber-400 text-xs mt-1 font-medium">
+                                        ⚠️ Dopo l'apertura, premi Ctrl+V (o Cmd+V) per incollare
                                     </p>
                                 </div>
                                 {copied ? (

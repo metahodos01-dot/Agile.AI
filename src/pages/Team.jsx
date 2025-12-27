@@ -13,11 +13,11 @@ const Team = () => {
         setLoading(true);
         setTimeout(() => {
             setTeam([
-                { role: "Product Owner", skills: "Visione prodotto, stakeholder management", count: 1 },
+                { role: "Product Owner", skills: "Conoscenza processi produttivi, stakeholder management", count: 1 },
                 { role: "Scrum Master", skills: "Facilitazione, coaching, rimozione impedimenti", count: 1 },
-                { role: "Sviluppatore Frontend", skills: "React, CSS, TypeScript", count: 2 },
-                { role: "Sviluppatore Backend", skills: "Node.js, PostgreSQL, API REST", count: 2 },
-                { role: "UX/UI Designer", skills: "Figma, User Research, Prototipazione", count: 1 }
+                { role: "Ingegnere di processo", skills: "Lean manufacturing, analisi flussi, ottimizzazione", count: 2 },
+                { role: "Tecnico automazione", skills: "PLC, SCADA, integrazione sistemi", count: 2 },
+                { role: "Specialista qualità", skills: "SPC, controllo qualità, normative ISO", count: 1 }
             ]);
             setLoading(false);
         }, 1200);
@@ -70,9 +70,9 @@ const Team = () => {
                         <div className="bg-zinc-800/50 rounded-lg p-4">
                             <p className="text-xs text-indigo-400 font-semibold uppercase tracking-wider mb-2">📌 Esempio pratico</p>
                             <p className="text-zinc-300 text-sm">
-                                Per un'app mobile di e-commerce, il team potrebbe essere:<br />
-                                <strong>1 PO</strong> (esperto del mercato) + <strong>1 SM</strong> +
-                                <strong>2 Dev Mobile</strong> (iOS/Android) + <strong>1 Backend Dev</strong> + <strong>1 Designer</strong>
+                                Per un progetto di digitalizzazione della linea produttiva, il team potrebbe essere:<br />
+                                <strong>1 PO</strong> (responsabile produzione) + <strong>1 SM</strong> +
+                                <strong>2 Ingegneri di processo</strong> + <strong>2 Tecnici automazione</strong> + <strong>1 Specialista qualità</strong>
                             </p>
                         </div>
                     </div>
@@ -112,7 +112,7 @@ const Team = () => {
                                             value={member.role}
                                             onChange={(e) => updateMember(index, 'role', e.target.value)}
                                             className="w-full bg-transparent border-b border-zinc-700 focus:border-indigo-500 py-1"
-                                            placeholder="es. Sviluppatore"
+                                            placeholder="es. Ingegnere di processo"
                                         />
                                     </div>
                                     <div className="col-span-5">
@@ -121,7 +121,7 @@ const Team = () => {
                                             value={member.skills}
                                             onChange={(e) => updateMember(index, 'skills', e.target.value)}
                                             className="w-full bg-transparent border-b border-zinc-700 focus:border-indigo-500 py-1"
-                                            placeholder="es. React, Node.js"
+                                            placeholder="es. Lean, PLC, SCADA"
                                         />
                                     </div>
                                     <div className="col-span-2">

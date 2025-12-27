@@ -261,33 +261,24 @@ const Sprint = () => {
         }));
     };
 
+    const [isSaving, setIsSaving] = useState(false);
+
     const handleSaveProject = async () => {
+        setIsSaving(true);
+        // Optimize: Update local context first without waiting for server response
+        // to prevent UI freezing, but await actual save for the success state
         updateProject({ sprint: { ...retroItems, kpis: sprintData } });
 
-        // TODO: Supabase integration - uncomment when configured
-        // try {
-        //   const { data, error } = await supabase
-        //     .from('sprint_kpis')
-        //     .insert({
-        //       project_id: project.id,
-        //       sprint_number: sprintData.historicalKpis.length + 1,
-        //       velocity: sprintData.velocity,
-        //       capacity: sprintData.capacity,
-        //       performance: sprintData.performance,
-        //       moods: sprintData.moods,
-        //       burndown: sprintData.burndownData,
-        //       burnup: sprintData.burnupData,
-        //       created_at: new Date().toISOString()
-        //     });
-        //   if (error) throw error;
-        // } catch (err) {
-        //   console.error('Error saving to Supabase:', err);
-        // }
-
-        const success = saveProject();
-        if (success) {
-            setSaved(true);
-            setTimeout(() => setSaved(false), 3000);
+        try {
+            const success = await saveProject();
+            if (success) {
+                setSaved(true);
+                setTimeout(() => setSaved(false), 3000);
+            }
+        } catch (error) {
+            console.error("Save failed", error);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -547,21 +538,23 @@ const Sprint = () => {
             {/* Save Project Button */}
             <div className="flex justify-center gap-4 pt-4">
                 <button
+                    key={saved ? "saved-state" : isSaving ? "saving-state" : "idle-state"}
                     onClick={handleSaveProject}
-                    disabled={!project.name}
+                    disabled={!project.name || isSaving}
                     className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-bold text-lg transition-all ${saved
                         ? 'bg-green-600 text-white'
                         : 'bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-500 hover:to-emerald-500 shadow-lg shadow-green-500/25'
-                        }`}
+                        } ${isSaving ? 'opacity-75 cursor-wait' : ''}`}
                 >
                     {saved ? (
-                        <>
-                            <CheckCircle size={24} /> Dati Salvati!
-                        </>
+                        <div className="flex items-center gap-2">
+                            <CheckCircle size={24} /> <span>Dati Salvati!</span>
+                        </div>
                     ) : (
-                        <>
-                            <Save size={24} /> Salva Sprint e KPI
-                        </>
+                        <div className="flex items-center gap-2">
+                            {isSaving ? <Activity className="animate-spin" size={24} /> : <Save size={24} />}
+                            <span>{isSaving ? 'Salvataggio...' : 'Salva Sprint e KPI'}</span>
+                        </div>
                     )}
                 </button>
 

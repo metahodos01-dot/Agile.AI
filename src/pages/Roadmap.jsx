@@ -9,7 +9,7 @@ const Roadmap = () => {
     const [loading, setLoading] = useState(false);
 
     const [releases, setReleases] = useState(
-        project.roadmap?.releases || ['MVP', 'Versione 1.0', 'Versione 2.0', 'Futuro']
+        project.roadmap?.releases || ['Pilota', 'Linea 1', 'Tutte le linee', 'Futuro']
     );
     const [assignments, setAssignments] = useState(project.roadmap?.assignments || {});
 
@@ -115,9 +115,9 @@ const Roadmap = () => {
                         <div className="bg-zinc-800/50 rounded-lg p-4">
                             <p className="text-xs text-indigo-400 font-semibold uppercase tracking-wider mb-2">📌 Esempio pratico</p>
                             <p className="text-zinc-300 text-sm">
-                                <strong>MVP:</strong> Login + Dashboard base (validare l'idea)<br />
-                                <strong>V1.0:</strong> Notifiche + Report (acquisire utenti)<br />
-                                <strong>V2.0:</strong> Integrazioni + API (scalare il business)
+                                <strong>Pilota:</strong> Monitoraggio OEE su una linea (validare la soluzione)<br />
+                                <strong>Linea 1:</strong> Deploy completo + manutenzione predittiva<br />
+                                <strong>Tutte le linee:</strong> Estensione a tutto lo stabilimento + integrazione ERP
                             </p>
                         </div>
                     </div>
