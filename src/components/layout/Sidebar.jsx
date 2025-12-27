@@ -112,9 +112,12 @@ const Sidebar = () => {
     const navigate = useNavigate();
 
     // Handle Logout
-    const handleLogout = async () => {
+    const handleLogout = async (e) => {
+        if (e) e.preventDefault();
+        console.log("Logout requested");
         try {
             await signOut();
+            console.log("SignOut successful, navigating to login");
             navigate('/login');
         } catch (error) {
             console.error("Logout failed:", error);
@@ -419,18 +422,19 @@ const Sidebar = () => {
                 </nav>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-zinc-800/50">
-                    <div className="flex items-center gap-3 px-2 py-2">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-500/20">
+                <div className="p-4 border-t border-white/5 bg-black/20">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-500/20 ring-2 ring-white/10">
                             {user?.email?.charAt(0).toUpperCase() || 'U'}
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-white truncate">{user?.email?.split('@')[0] || 'User'}</p>
+                            <p className="text-sm font-medium text-white truncate mb-1">{user?.email?.split('@')[0] || 'User'}</p>
                             <button
                                 onClick={handleLogout}
-                                className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1 mt-0.5"
+                                className="flex items-center gap-2 px-2 py-1 text-xs font-medium text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-all w-full justify-center border border-red-500/10 hover:border-red-500/30"
                             >
-                                <LogOut size={10} /> Esci
+                                <LogOut size={12} />
+                                Disconnetti
                             </button>
                         </div>
                     </div>
