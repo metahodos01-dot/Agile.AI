@@ -5,7 +5,7 @@ import { useProject } from '../../context/ProjectContext';
 import {
     Target, Eye, LayoutDashboard, Sliders, Users,
     Map, Database, Clock, Play, Plus, Folder, FolderOpen, RefreshCw,
-    Trash2, Pencil, Check, X, AlertCircle, LogOut, Shield
+    Trash2, Pencil, Check, X, AlertCircle, LogOut, Shield, Zap
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -21,6 +21,25 @@ const steps = [
     { path: '/roadmap', name: '8. Roadmap', icon: Map },
     { path: '/sprint', name: '9. Sprint', icon: Play },
 ];
+
+const MOTO_DEMO_PROJECT = {
+    name: 'Moto Elettrica Future',
+    vision: 'Creare la moto elettrica più avanzata e sostenibile del mondo, combinando prestazioni elevate con un design italiano iconico e zero emissioni.',
+    objectives: [
+        { id: 1, text: 'Raggiungere 300km di autonomia', completed: false },
+        { id: 2, text: 'Ricarica 0-80% in 15 minuti', completed: true },
+        { id: 3, text: 'Design premiato al Red Dot', completed: false }
+    ],
+    kpis: [
+        { id: 1, name: 'Autonomia', target: '300 km', current: '250', unit: 'km' },
+        { id: 2, name: 'Peso', target: '180 kg', current: '195', unit: 'kg' }
+    ],
+    team: [
+        { id: 1, name: 'Marco Rossi', role: 'Product Owner' },
+        { id: 2, name: 'Laura Bianchi', role: 'Scrum Master' },
+        { id: 3, name: 'Team Engineering', role: 'Developers' }
+    ]
+};
 
 // Save Confirmation Modal Component
 const SaveConfirmModal = ({ projectName, onSave, onDiscard, onCancel }) => (
@@ -150,11 +169,21 @@ const Sidebar = () => {
     };
 
     // Confirm save and create new
-    const handleSaveAndCreate = () => {
-        saveProject();
+    const handleSaveAndCreate = async () => {
+        await saveProject();
         createNewProject();
         setShowSaveModal(false);
         navigate('/mindset');
+    };
+
+    const handleLoadDemo = async () => {
+        await createNewProject();
+        updateProject(MOTO_DEMO_PROJECT);
+        navigate('/mindset');
+        // Auto save the demo after loading to persist it
+        setTimeout(() => {
+            saveProject();
+        }, 500);
     };
 
     // Discard and create new
@@ -261,6 +290,13 @@ const Sidebar = () => {
                     >
                         <Plus size={18} />
                         Nuovo Progetto
+                    </button>
+                    <button
+                        onClick={handleLoadDemo}
+                        className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium rounded-lg transition-colors border border-zinc-700"
+                    >
+                        <Zap size={14} className="text-yellow-500" />
+                        Carica Demo Moto
                     </button>
                 </div>
 

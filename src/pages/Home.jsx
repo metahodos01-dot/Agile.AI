@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Sparkles, Zap, Layers, Target, BarChart3, FileDown } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
 import ExportButton from '../components/common/ExportButton';
@@ -15,7 +15,13 @@ const FeatureCard = ({ icon: Icon, title, description, color }) => (
 );
 
 const Home = () => {
-    const { project } = useProject();
+    const { project, createNewProject } = useProject();
+    const navigate = useNavigate();
+
+    const handleStartNewProject = () => {
+        createNewProject();
+        navigate('/mindset');
+    };
 
     return (
         <div className="space-y-16 py-4">
@@ -48,10 +54,10 @@ const Home = () => {
                 </div>
 
                 <div className="flex flex-wrap gap-4 pt-4">
-                    <Link to="/mindset" className="btn-primary text-base px-7 py-4">
+                    <button onClick={handleStartNewProject} className="btn-primary text-base px-7 py-4">
                         Inizia un nuovo progetto
                         <ArrowRight size={18} />
-                    </Link>
+                    </button>
                     <button className="glass-button px-6 py-4">
                         <span className="text-zinc-300">Scopri di più</span>
                     </button>

@@ -74,6 +74,14 @@ select {
   @apply font-medium rounded-xl transition-all duration-200;
 }
 
+.btn-primary {
+  @apply btn bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/25 border border-indigo-400/20;
+}
+
+.glass-button {
+  @apply btn bg-white/5 hover:bg-white/10 text-white border border-white/10 backdrop-blur-sm;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
