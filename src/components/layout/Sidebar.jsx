@@ -262,7 +262,7 @@ const Sidebar = () => {
                 />
             )}
 
-            <aside className="w-72 h-screen fixed left-0 top-0 flex flex-col bg-zinc-950/80 backdrop-blur-xl border-r border-white/5 z-50">
+            <aside className="w-72 h-screen fixed left-0 top-0 flex flex-col bg-zinc-950/80 backdrop-blur-xl border-r border-white/5 z-[100] pointer-events-auto">
                 {/* Logo Section */}
                 <div className="p-6 border-b border-white/5">
                     <div className="flex items-center gap-4">
@@ -286,14 +286,14 @@ const Sidebar = () => {
                 <div className="px-3 py-4 border-b border-zinc-800/50">
                     <button
                         onClick={handleNewProject}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-colors"
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-colors cursor-pointer active:scale-95"
                     >
                         <Plus size={18} />
                         Nuovo Progetto
                     </button>
                     <button
                         onClick={handleLoadDemo}
-                        className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium rounded-lg transition-colors border border-zinc-700"
+                        className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium rounded-lg transition-colors border border-zinc-700 cursor-pointer active:scale-95"
                     >
                         <Zap size={14} className="text-yellow-500" />
                         Carica Demo Moto
@@ -473,7 +473,7 @@ const Sidebar = () => {
                             <p className="text-sm font-medium text-white truncate mb-1">{user?.email?.split('@')[0] || 'User'}</p>
                             <button
                                 onClick={handleLogout}
-                                className="flex items-center gap-2 px-2 py-1 text-xs font-medium text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-all w-full justify-center border border-red-500/10 hover:border-red-500/30"
+                                className="flex items-center gap-2 px-2 py-1 text-xs font-medium text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-all w-full justify-center border border-red-500/10 hover:border-red-500/30 cursor-pointer active:scale-95"
                             >
                                 <LogOut size={12} />
                                 Disconnetti
