@@ -81,12 +81,25 @@ export const AuthProvider = ({ children }) => {
     };
 
     const signOut = async () => {
+        console.log("AuthContext: signOut called");
         try {
+            // Clear local state first for immediate UI update
             setUser(null);
             setRole(null);
-            await supabase.auth.signOut();
+
+            // Sign out from Supabase with global scope (clears all tabs/sessions)
+            const { error } = await supabase.auth.signOut({ scope: 'global' });
+
+            if (error) {
+                console.error("Supabase signOut error:", error);
+                throw error;
+            }
+
+            console.log("AuthContext: signOut successful");
+            return { success: true };
         } catch (error) {
-            console.error("SignOut Error", error);
+            console.error("SignOut Error:", error);
+            return { success: false, error };
         }
     };
 
