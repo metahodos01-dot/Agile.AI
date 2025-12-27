@@ -82,19 +82,21 @@ export const ProjectProvider = ({ children }) => {
     };
 
     // Save project to Supabase
-    const saveProject = async () => {
-        if (!project.name) return false;
+    const saveProject = async (dataToSave = null) => {
+        const projectCurrent = dataToSave || project;
+
+        if (!projectCurrent.name) return false;
         if (!user) return false;
 
         setLoading(true);
         try {
-            const projectData = { ...project };
+            const projectData = { ...projectCurrent };
             delete projectData.id;
             delete projectData.name;
             delete projectData.createdAt;
 
             const payload = {
-                name: project.name,
+                name: projectCurrent.name,
                 data: projectData,
                 user_id: user.id
             };
@@ -102,7 +104,7 @@ export const ProjectProvider = ({ children }) => {
             let data, error;
 
             // Check if it's a UUID (existing Supabase project) or a temp/new ID
-            const isUUID = project.id && project.id.length > 20;
+            const isUUID = projectCurrent.id && projectCurrent.id.length > 20;
 
             if (isUUID) {
                 // Update
@@ -112,7 +114,7 @@ export const ProjectProvider = ({ children }) => {
                         ...payload,
                         updated_at: new Date().toISOString()
                     })
-                    .eq('id', project.id)
+                    .eq('id', projectCurrent.id)
                     .select());
             } else {
                 // Insert

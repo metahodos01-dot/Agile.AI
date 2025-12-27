@@ -182,9 +182,20 @@ const Sidebar = () => {
         updateProject(MOTO_DEMO_PROJECT);
         navigate('/mindset');
         // Auto save the demo after loading to persist it
-        setTimeout(() => {
-            saveProject();
-        }, 500);
+        // Use the new argument capability of saveProject to avoid state closure issues
+        // We pass the demo project data directly to save it
+        console.log("Loading Demo Project...");
+        try {
+            await createNewProject();
+            // Important: We must set the state locally for UI...
+            updateProject(MOTO_DEMO_PROJECT);
+            // ...AND pass it explicitly to saveProject because 'project' state is stale in this closure
+            await saveProject(MOTO_DEMO_PROJECT);
+            navigate('/mindset');
+        } catch (e) {
+            console.error("Demo Load Error:", e);
+            alert("Errore nel caricamento della demo");
+        }
     };
 
     // Discard and create new
@@ -306,7 +317,10 @@ const Sidebar = () => {
                         Nuovo Progetto
                     </button>
                     <button
-                        onClick={handleLoadDemo}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleLoadDemo();
+                        }}
                         className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium rounded-lg transition-colors border border-zinc-700 cursor-pointer active:scale-95"
                     >
                         <Zap size={14} className="text-yellow-500" />
@@ -316,7 +330,7 @@ const Sidebar = () => {
 
                 {/* Saved Projects */}
                 {savedProjects.length > 0 && (
-                    <div className="px-3 py-4 border-b border-zinc-800/50 max-h-48 overflow-y-auto">
+                    <div className="px-3 py-4 border-b border-zinc-800/50 max-h-48 overflow-y-auto flex-shrink-0 z-50">
                         <p className="text-[11px] font-semibold text-zinc-600 uppercase tracking-wider px-2 mb-2">
                             Progetti salvati ({savedProjects.length})
                         </p>
@@ -377,12 +391,11 @@ const Sidebar = () => {
                             </button>
                         </div>
                     ) : (
-                        <div className="flex items-center gap-2 group">
+                        <div className="flex items-center gap-2 group cursor-pointer" onClick={startEditingName}>
                             <p className="text-sm font-medium text-white truncate flex-1">
                                 {project.name || '(Senza nome)'}
                             </p>
                             <button
-                                onClick={startEditingName}
                                 className="opacity-0 group-hover:opacity-100 p-1 hover:bg-zinc-700 rounded transition-all"
                                 title="Modifica nome"
                             >
@@ -393,7 +406,7 @@ const Sidebar = () => {
                 </div>
 
                 {/* Navigation */}
-                <nav className="flex-1 px-3 py-4 overflow-y-auto">
+                <nav className="flex-1 px-3 py-4 overflow-y-auto z-40">
                     <NavLink
                         to="/"
                         end
@@ -479,7 +492,7 @@ const Sidebar = () => {
                 </nav>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-white/5 bg-black/20">
+                <div className="p-4 border-t border-white/5 bg-black/20 z-50">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-500/20 ring-2 ring-white/10">
                             {user?.email?.charAt(0).toUpperCase() || 'U'}
@@ -490,21 +503,29 @@ const Sidebar = () => {
                                 onClick={async (e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    console.log("FORCE LOGOUT TRIGGERED");
+                                    console.log("FORCE LOGOUT: Sequence Start");
 
-                                    // 1. Clear local storage explicitly
-                                    localStorage.clear();
-                                    sessionStorage.clear();
+                                    // 1. Force redirect safety trigger
+                                    setTimeout(() => {
+                                        console.log("FORCE LOGOUT: Timeout Fallback Triggered");
+                                        localStorage.clear();
+                                        sessionStorage.clear();
+                                        window.location.href = '/login';
+                                    }, 1500);
 
-                                    // 2. Try Supabase signOut but don't wait too long
+                                    // 2. Try Supabase signOut
                                     try {
                                         await signOut();
+                                        console.log("FORCE LOGOUT: Supabase success");
                                     } catch (err) {
-                                        console.error("Supabase signout failed", err);
+                                        console.error("FORCE LOGOUT: Supabase failed", err);
                                     }
 
-                                    // 3. Force hard redirect to login
-                                    window.location.replace('/login');
+                                    // 3. Clean up and go
+                                    console.log("FORCE LOGOUT: Main Redirect");
+                                    localStorage.clear();
+                                    sessionStorage.clear();
+                                    window.location.href = '/login';
                                 }}
                                 className="flex items-center gap-2 px-2 py-1 text-xs font-medium text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-all w-full justify-center border border-red-500/10 hover:border-red-500/30 cursor-pointer active:scale-95"
                             >
