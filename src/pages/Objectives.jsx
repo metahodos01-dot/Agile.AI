@@ -9,7 +9,9 @@ const Objectives = () => {
     const [loading, setLoading] = useState(false);
 
     const [objectives, setObjectives] = useState(
-        project.objectives.length > 0 ? project.objectives : ['', '', '']
+        project.objectives.length > 0
+            ? project.objectives.map(obj => typeof obj === 'object' ? (obj.text || obj.title || '') : obj)
+            : ['', '', '']
     );
 
     const handleGenerate = async () => {

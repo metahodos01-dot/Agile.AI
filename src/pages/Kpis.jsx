@@ -106,7 +106,7 @@ const Kpis = () => {
                         <div className="flex items-start justify-between mb-6 pb-4 border-b border-zinc-800">
                             <div>
                                 <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">Obiettivo {index + 1}</span>
-                                <h3 className="text-lg font-medium text-white mt-1">{obj}</h3>
+                                <h3 className="text-lg font-medium text-white mt-1">{typeof obj === 'object' ? (obj.text || obj.title || obj.name || JSON.stringify(obj)) : obj}</h3>
                             </div>
                             <button
                                 onClick={() => handleGenerate(index)}
