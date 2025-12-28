@@ -124,7 +124,7 @@ const Kpis = () => {
                                 <div className="col-span-1"></div>
                             </div>
 
-                            {kpis[index]?.map((kpi, kIndex) => (
+                            {Array.isArray(kpis[index]) && kpis[index].map((kpi, kIndex) => (
                                 <div key={kIndex} className="grid grid-cols-12 gap-4 items-center bg-zinc-800/30 p-3 rounded-lg">
                                     <div className="col-span-6">
                                         <input
