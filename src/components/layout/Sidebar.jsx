@@ -244,19 +244,14 @@ const Sidebar = () => {
     };
 
     const handleLoadDemo = async () => {
-        await createNewProject();
-        updateProject(MOTO_DEMO_PROJECT);
-        navigate('/mindset');
-        // Auto save the demo after loading to persist it
-        // Use the new argument capability of saveProject to avoid state closure issues
-        // We pass the demo project data directly to save it
         console.log("Loading Demo Project...");
         try {
             await createNewProject();
-            // Important: We must set the state locally for UI...
+            // Update local state immediately for UI responsiveness
             updateProject(MOTO_DEMO_PROJECT);
-            // ...AND pass it explicitly to saveProject because 'project' state is stale in this closure
+            // Save to DB to persist and get an ID
             await saveProject(MOTO_DEMO_PROJECT);
+            // Navigate after save structure is ensured
             navigate('/mindset');
         } catch (e) {
             console.error("Demo Load Error:", e);

@@ -1,7 +1,10 @@
+```javascript
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
 import { Sparkles, ArrowRight, Clock, BookOpen } from 'lucide-react';
+
+import { calculateTotalHours, calculateSprintsNeeded } from '../utils/estimations';
 
 const Estimates = () => {
     const { project, updateProject } = useProject();
@@ -9,9 +12,14 @@ const Estimates = () => {
     const [loading, setLoading] = useState(false);
     const [estimates, setEstimates] = useState(project.estimates || {});
 
+    // Safely access backlog, defaulting to empty array if undefined
     const allStories = (project.backlog || []).flatMap(epic =>
         epic.stories.map(story => ({ ...story, epicTitle: epic.title, epicId: epic.id }))
     );
+
+    const totalHours = calculateTotalHours(estimates);
+    const teamSize = project.team ? project.team.length : 0; // Assuming project.team is an array of members
+    const sprintsNeeded = calculateSprintsNeeded(totalHours, teamSize);
 
     const handleSuggest = () => {
         setLoading(true);
@@ -106,7 +114,7 @@ const Estimates = () => {
                         <div className="mt-6 p-4 bg-zinc-800/50 rounded-xl text-center">
                             <p className="text-xs text-zinc-500 uppercase mb-1">Totale Ore Stimate</p>
                             <p className="text-3xl font-bold text-indigo-400">{totalHours}</p>
-                            <p className="text-xs text-zinc-500 mt-1">~{Math.ceil(totalHours / 40)} sprint (40h/sprint)</p>
+                            <p className="text-xs text-zinc-500 mt-1">~{sprintsNeeded} sprint (stima)</p>
                         </div>
                     </div>
                 </div>
