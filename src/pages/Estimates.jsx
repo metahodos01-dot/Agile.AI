@@ -41,7 +41,7 @@ const Estimates = () => {
         navigate('/roadmap');
     };
 
-    const totalHours = Object.values(estimates).reduce((a, b) => a + b, 0);
+
 
     if (!project.backlog || project.backlog.length === 0) {
         return (
