@@ -388,9 +388,9 @@ export const formatProjectDocument = (project) => {
             project.sprint.continue.forEach(s => s && sections.push({ type: 'bullet', content: s }));
         }
     }
-}
 
-return sections;
+
+    return sections;
 };
 
 /**
