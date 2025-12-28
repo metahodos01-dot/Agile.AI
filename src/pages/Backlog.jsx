@@ -195,9 +195,9 @@ const Backlog = () => {
                         <div className="bg-zinc-800/50 rounded-lg p-4">
                             <p className="text-xs text-indigo-400 font-semibold uppercase tracking-wider mb-2">📌 Esempio pratico</p>
                             <p className="text-zinc-300 text-sm">
-                                <strong>Epic:</strong> Monitoraggio efficienza linea<br />
-                                <strong>User story 1:</strong> "Come responsabile produzione, voglio vedere l'OEE in tempo reale per identificare le perdite."<br />
-                                <strong>User story 2:</strong> "Come operatore, voglio ricevere alert sui fermi macchina per intervenire subito."
+                                <strong>Epic:</strong> "Sistema di Guida Intelligente"<br />
+                                <strong>User Story 1:</strong> "Come <strong>pilota urbano</strong>, voglio selezionare la modalità 'Eco' per estendere l'autonomia del 20%."<br />
+                                <strong>User Story 2:</strong> "Come <strong>meccanico</strong>, voglio accedere ai log della centralina via Bluetooth per diagnosi rapida."
                             </p>
                         </div>
                     </div>

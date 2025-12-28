@@ -70,9 +70,9 @@ const Team = () => {
                         <div className="bg-zinc-800/50 rounded-lg p-4">
                             <p className="text-xs text-indigo-400 font-semibold uppercase tracking-wider mb-2">📌 Esempio pratico</p>
                             <p className="text-zinc-300 text-sm">
-                                Per un progetto di digitalizzazione della linea produttiva, il team potrebbe essere:<br />
-                                <strong>1 PO</strong> (responsabile produzione) + <strong>1 SM</strong> +
-                                <strong>2 Ingegneri di processo</strong> + <strong>2 Tecnici automazione</strong> + <strong>1 Specialista qualità</strong>
+                                Per il progetto **Moto Elettrica Future**, il team ideale include:<br />
+                                <strong>1 PO</strong> (Vision & Mercato) + <strong>1 SM</strong> (Agile Coach) +
+                                <strong>3 Ingegneri</strong> (Meccanici/Elettrici) + <strong>1 Esperto Batterie</strong> + <strong>1 UX Designer</strong> (Dashboard).
                             </p>
                         </div>
                     </div>

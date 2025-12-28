@@ -87,8 +87,9 @@ const Estimates = () => {
                         <div className="bg-zinc-800/50 rounded-lg p-4">
                             <p className="text-xs text-indigo-400 font-semibold uppercase tracking-wider mb-2">📌 Esempio pratico</p>
                             <p className="text-zinc-300 text-sm">
-                                Se il team ha una <strong>velocity</strong> di 40 ore/sprint (2 settimane) e il backlog
-                                totale è stimato in 200 ore, serviranno circa <strong>5 sprint</strong> per completare tutto.
+                                Se stimiamo la **"Mappatura Motore Eco"** a **5 punti** e il **"Sistema di Raffreddamento"** a **13 punti**,
+                                stiamo dicendo che il raffreddamento è circa 2.5 volte più complesso (o rischioso) della mappatura software.
+                                La velocity ci dirà quanti punti completiamo in ogni sprint.
                             </p>
                         </div>
                     </div>

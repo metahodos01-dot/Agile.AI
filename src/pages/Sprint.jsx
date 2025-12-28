@@ -313,6 +313,15 @@ const Sprint = () => {
                             <strong>Capacity</strong> (% di disponibilità effettiva), <strong>Burndown</strong> (lavoro rimanente),
                             <strong>Burnup</strong> (lavoro completato), e <strong>Team Mood</strong> (benessere del team).
                         </p>
+                        <div className="bg-zinc-800/50 rounded-lg p-4 mt-4">
+                            <p className="text-xs text-green-400 font-semibold uppercase tracking-wider mb-2">📌 Esempio pratico</p>
+                            <p className="text-zinc-300 text-sm">
+                                Nello <strong>Sprint Review</strong> della <strong>Moto Elettrica Future</strong>, il team non mostra slide, ma <strong>porta la moto in cortile</strong>
+                                e fa provare la nuova mappatura "Sport" agli stakeholder.<br />
+                                <strong>Feedback immediato:</strong> "L'accelerazione è troppo brusca". <br />
+                                <strong>Azione per il prossimo sprint:</strong> "Ammorbidire curva di coppia".
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -464,15 +473,15 @@ const Sprint = () => {
                         <div className="space-y-3">
                             {[
                                 'Dimostrare le User Story "Done" agli stakeholder',
-                                'Discutere cosa è andato bene e cosa può migliorare',
-                                'Aggiornare il Product Backlog con nuove priorità',
-                                'Rivedere timeline e budget se necessario'
+                                'Raccogliere feedback dagli stakeholder e dagli utenti finali',
+                                'Discutere eventuali cambiamenti al Product Backlog'
                             ].map((item, i) => (
                                 <label key={i} className="flex items-center gap-4 p-4 bg-zinc-800/50 rounded-xl cursor-pointer hover:bg-zinc-800 transition-colors">
                                     <input type="checkbox" className="w-5 h-5 rounded border-zinc-600 bg-zinc-700 text-indigo-500 focus:ring-indigo-500" />
                                     <span className="text-zinc-200">{item}</span>
                                 </label>
-                            ))}
+                            ))
+                            }
                         </div>
                     </div>
                 )}

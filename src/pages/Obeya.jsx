@@ -90,9 +90,8 @@ const Obeya = () => {
                         <div className="bg-zinc-800/50 rounded-lg p-4">
                             <p className="text-xs text-indigo-400 font-semibold uppercase tracking-wider mb-2">📌 Esempio pratico</p>
                             <p className="text-zinc-300 text-sm">
-                                Una Obeya tipica include: <strong>Kanban Board</strong> centrale con le colonne To Do/In Progress/Done,
-                                <strong>Burndown Chart</strong> aggiornato quotidianamente, <strong>Vision Statement</strong> stampato in grande,
-                                e uno <strong>spazio per i Post-it</strong> delle retrospettive.
+                                Nell'Obeya della <strong>Moto Elettrica</strong>: <strong>Prototipo fisico</strong> al centro, paratia con <strong>mappe motore stampate</strong>,
+                                <strong>grafici di autonomia</strong> batteria in tempo reale, e <strong>Kanban Board</strong> fisica per il tracciamento dei componenti meccanici ed elettronici.
                             </p>
                         </div>
                     </div>
