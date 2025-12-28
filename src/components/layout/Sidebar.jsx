@@ -26,19 +26,85 @@ const MOTO_DEMO_PROJECT = {
     name: 'Moto Elettrica Future',
     vision: 'Creare la moto elettrica più avanzata e sostenibile del mondo, combinando prestazioni elevate con un design italiano iconico e zero emissioni.',
     objectives: [
-        { id: 1, text: 'Raggiungere 300km di autonomia', completed: false },
-        { id: 2, text: 'Ricarica 0-80% in 15 minuti', completed: true },
-        { id: 3, text: 'Design premiato al Red Dot', completed: false }
+        'Raggiungere 300km di autonomia (WLTP)',
+        'Ricarica 0-80% in 15 minuti',
+        'Design premiato al Red Dot Award'
     ],
     kpis: [
         { id: 1, name: 'Autonomia', target: '300 km', current: '250', unit: 'km' },
         { id: 2, name: 'Peso', target: '180 kg', current: '195', unit: 'kg' }
     ],
     team: [
-        { id: 1, name: 'Marco Rossi', role: 'Product Owner' },
-        { id: 2, name: 'Laura Bianchi', role: 'Scrum Master' },
-        { id: 3, name: 'Team Engineering', role: 'Developers' }
-    ]
+        { role: 'Product Owner', skills: 'Vision, Stakeholder Mgmt', count: 1 },
+        { role: 'Scrum Master', skills: 'Agile Coaching, Facilitazione', count: 1 },
+        { role: 'Team Engineering', skills: 'Mechanical & Electrical Eng', count: 3 },
+        { role: 'Battery Specialist', skills: 'Chemistry, Thermal Mgmt', count: 1 },
+        { role: 'UX/UI Designer', skills: 'Dashboard, App Interface', count: 1 }
+    ],
+    obeya: {
+        items: [
+            { category: "Layout Fisico", item: "Open space con 8 postazioni e area demo", checked: true },
+            { category: "Radiatori Informativi", item: "Vision e Roadmap stampate 2m x 1m", checked: true },
+            { category: "Attrezzature", item: "Kanban Board fisica con swimlanes", checked: true },
+            { category: "Monitoraggio", item: "Monitor 55'' per Dashboard Telemetria", checked: true },
+            { category: "Regole", item: "Daily Standup alle 09:30 tassativo", checked: true }
+        ]
+    },
+    backlog: [
+        {
+            id: 1,
+            title: "Sistema Batteria & Powertrain",
+            stories: [
+                { id: 101, title: "Come utente, voglio ricaricare l'80% in 15 minuti per ridurre le soste.", keyResult: "Contribuisce a: Ricarica rapida < 20 min", points: 13 },
+                { id: 102, title: "Come ingegnere, voglio monitorare la temperatura delle celle per sicurezza.", keyResult: "Contribuisce a: Zero incidenti termici", points: 8 },
+                { id: 103, title: "Come pilota, voglio mappature motore Eco/Sport per gestire l'autonomia.", keyResult: "Contribuisce a: Autonomia 300km", points: 5 }
+            ]
+        },
+        {
+            id: 2,
+            title: "Esperienza Digitale & App",
+            stories: [
+                { id: 201, title: "Come pilota, voglio vedere l'autonomia residua sul dashboard.", keyResult: "Contribuisce a: UX Score > 4.5/5", points: 3 },
+                { id: 202, title: "Come utente, voglio localizzare la moto tramite app.", keyResult: "Contribuisce a: Sicurezza percepita", points: 5 },
+                { id: 203, title: "Come manutentore, voglio diagnosi remota via cloud.", keyResult: "Contribuisce a: Riduzione costi assistenza", points: 8 }
+            ]
+        }
+    ],
+    estimates: {
+        101: 13, 102: 8, 103: 5,
+        201: 3, 202: 5, 203: 8
+    },
+    roadmap: {
+        releases: ['Prototipo Alpha', 'Beta Test', 'Lancio Commerciale', 'V2.0 OTA'],
+        assignments: {
+            1: 'Prototipo Alpha', // Batteria & Powertrain -> Alpha
+            2: 'Beta Test' // Esperienza Digitale -> Beta
+        }
+    },
+    sprint: {
+        start: ["Test su strada ogni venerdì", "Pair programming su firmware BMS"],
+        stop: ["Meeting senza agenda", "Interruzioni durante focus time"],
+        continue: ["Daily standup puntuali", "Code review rigorosa"],
+        kpis: {
+            capacity: 85,
+            performance: 92,
+            velocity: 42,
+            moods: { great: 4, good: 2, neutral: 1, difficult: 0, critical: 0 },
+            burndownData: [
+                { day: 'Lun', actual: 42 }, { day: 'Mar', actual: 38 }, { day: 'Mer', actual: 25 },
+                { day: 'Gio', actual: 12 }, { day: 'Ven', actual: 0 }
+            ],
+            burnupData: [
+                { day: 'Lun', actual: 0 }, { day: 'Mar', actual: 5 }, { day: 'Mer', actual: 17 },
+                { day: 'Gio', actual: 30 }, { day: 'Ven', actual: 42 }
+            ],
+            historicalKpis: [
+                { sprint: 'Sprint 1', velocity: 30, capacity: 70, performance: 80 },
+                { sprint: 'Sprint 2', velocity: 35, capacity: 75, performance: 85 },
+                { sprint: 'Sprint 3', velocity: 42, capacity: 85, performance: 92 }
+            ]
+        }
+    }
 };
 
 // Save Confirmation Modal Component
