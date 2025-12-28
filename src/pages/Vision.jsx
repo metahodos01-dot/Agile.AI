@@ -67,10 +67,10 @@ const Vision = () => {
                         <div className="bg-zinc-800/50 rounded-lg p-4">
                             <p className="text-xs text-indigo-400 font-semibold uppercase tracking-wider mb-2">📌 Esempio pratico</p>
                             <p className="text-zinc-300 text-sm italic">
-                                "Per le <strong>aziende manifatturiere</strong> che <strong>faticano a monitorare l'efficienza delle linee produttive</strong>,
-                                <strong>SmartFactory Monitor</strong> è un <strong>sistema di monitoraggio industriale</strong> che
-                                <strong>fornisce visibilità in tempo reale su OEE e fermi macchina</strong>. A differenza dei sistemi legacy,
-                                il nostro prodotto <strong>si integra con qualsiasi PLC e non richiede infrastruttura dedicata</strong>."
+                                "Per i <strong>motociclisti urbani ed ecologici</strong> che <strong>cercano prestazioni emozionanti senza inquinare</strong>,
+                                <strong>Moto Elettrica Future</strong> è una <strong>moto sportiva a zero emissioni</strong> che
+                                <strong>offre un'accelerazione istantanea e un'autonomia di 300km</strong>. A differenza delle moto elettriche attuali,
+                                il nostro prodotto <strong>utilizza batterie a stato solido e un'AI predittiva per la gestione dell'energia</strong>."
                             </p>
                         </div>
                     </div>

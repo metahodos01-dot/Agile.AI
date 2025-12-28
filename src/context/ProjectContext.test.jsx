@@ -8,10 +8,10 @@ import { AuthProvider } from './AuthContext';
 vi.mock('../services/supabaseClient', () => ({
     supabase: {
         from: () => ({
-            select: () => ({ order: () => ({ data: [], error: null }) }),
-            insert: () => ({ select: () => ({ data: [{ id: '123', name: 'Test' }], error: null }) }),
-            update: () => ({ select: () => ({ data: [], error: null }) }),
-            delete: () => ({ eq: () => ({ error: null }) })
+            select: () => ({ order: () => Promise.resolve({ data: [], error: null }) }),
+            insert: () => ({ select: () => Promise.resolve({ data: [{ id: '123', name: 'Test' }], error: null }) }),
+            update: () => ({ select: () => Promise.resolve({ data: [], error: null }) }),
+            delete: () => ({ eq: () => Promise.resolve({ error: null }) })
         })
     }
 }));
@@ -41,25 +41,29 @@ describe('ProjectContext', () => {
         localStorage.clear();
     });
 
-    it('provides default project state', () => {
-        render(
-            <AuthProvider>
-                <ProjectProvider>
-                    <TestComponent />
-                </ProjectProvider>
-            </AuthProvider>
-        );
+    it('provides default project state', async () => {
+        await act(async () => {
+            render(
+                <AuthProvider>
+                    <ProjectProvider>
+                        <TestComponent />
+                    </ProjectProvider>
+                </AuthProvider>
+            );
+        });
         expect(screen.getByTestId('project-name')).toHaveTextContent('');
     });
 
     it('updates project state', async () => {
-        render(
-            <AuthProvider>
-                <ProjectProvider>
-                    <TestComponent />
-                </ProjectProvider>
-            </AuthProvider>
-        );
+        await act(async () => {
+            render(
+                <AuthProvider>
+                    <ProjectProvider>
+                        <TestComponent />
+                    </ProjectProvider>
+                </AuthProvider>
+            );
+        });
 
         const button = screen.getByText('Update');
         await act(async () => {

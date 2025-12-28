@@ -286,22 +286,111 @@ export const formatProjectDocument = (project) => {
                 content: `**Sprint Goal:** ${project.sprint.goal}`
             });
         }
-        if (project.sprint.items && project.sprint.items.length > 0) {
+    }
+
+    // Kanban Section
+    if (project.sprint.kanban && project.sprint.kanban.length > 0) {
+        sections.push({
+            type: 'heading',
+            level: 2,
+            content: '📌 Kanban Board Status'
+        });
+
+        const columns = [
+            { key: 'todo', label: 'Da Fare (To Do)' },
+            { key: 'doing', label: 'In Corso (Doing)' },
+            { key: 'done', label: 'Fatto (Done)' }
+        ];
+
+        columns.forEach(col => {
+            const tasks = project.sprint.kanban.filter(t => t.status === col.key);
+            if (tasks.length > 0) {
+                sections.push({
+                    type: 'heading',
+                    level: 3,
+                    content: col.label
+                });
+                tasks.forEach(task => {
+                    sections.push({
+                        type: 'bullet',
+                        content: `**${task.title}** ${task.assignee ? `(Assegnato a: ${task.assignee})` : ''}`
+                    });
+                });
+            }
+        });
+
+        // Handle any tasks with unknown status
+        const unknownTasks = project.sprint.kanban.filter(t => !['todo', 'doing', 'done'].includes(t.status));
+        if (unknownTasks.length > 0) {
             sections.push({
                 type: 'heading',
-                level: 2,
-                content: 'Sprint Backlog'
+                level: 3,
+                content: 'Altri Task'
             });
-            project.sprint.items.forEach(item => {
+            unknownTasks.forEach(task => {
                 sections.push({
                     type: 'bullet',
-                    content: `${item.title || item.name || item.description || 'Item'}${item.points ? ` (${item.points} pts)` : ''}`
+                    content: `[${task.status}] **${task.title}** ${task.assignee ? `(Assegnato a: ${task.assignee})` : ''}`
                 });
             });
         }
     }
 
-    return sections;
+    // Calendar Section
+    if (project.sprint.calendar && project.sprint.calendar.length > 0) {
+        sections.push({
+            type: 'heading',
+            level: 2,
+            content: '📅 Calendario Eventi'
+        });
+
+        // Sort events by date
+        const sortedEvents = [...project.sprint.calendar].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        sortedEvents.forEach(event => {
+            sections.push({
+                type: 'bullet',
+                content: `**${event.date}**: ${event.title}`
+            });
+        });
+    }
+
+    // Notes Section
+    if (project.sprint.notes) {
+        sections.push({
+            type: 'heading',
+            level: 2,
+            content: '📝 Note Daily Standup'
+        });
+        sections.push({
+            type: 'paragraph',
+            content: project.sprint.notes
+        });
+    }
+
+    // Retro Section
+    if (project.sprint.start || project.sprint.stop || project.sprint.continue) {
+        sections.push({
+            type: 'heading',
+            level: 2,
+            content: '🔄 Retrospettiva'
+        });
+        if (project.sprint.start && project.sprint.start.some(s => s)) {
+            sections.push({ type: 'heading', level: 3, content: 'Iniziare a Fare' });
+            project.sprint.start.forEach(s => s && sections.push({ type: 'bullet', content: s }));
+        }
+        if (project.sprint.stop && project.sprint.stop.some(s => s)) {
+            sections.push({ type: 'heading', level: 3, content: 'Smettere di Fare' });
+            project.sprint.stop.forEach(s => s && sections.push({ type: 'bullet', content: s }));
+        }
+        if (project.sprint.continue && project.sprint.continue.some(s => s)) {
+            sections.push({ type: 'heading', level: 3, content: 'Continuare a Fare' });
+            project.sprint.continue.forEach(s => s && sections.push({ type: 'bullet', content: s }));
+        }
+    }
+}
+
+return sections;
 };
 
 /**

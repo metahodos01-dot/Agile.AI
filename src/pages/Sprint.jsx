@@ -5,7 +5,7 @@ import ExportButton from '../components/common/ExportButton';
 import {
     Play, CheckSquare, Pause, RotateCcw, Save, CheckCircle, Target, BookOpen,
     TrendingUp, TrendingDown, Smile, Meh, Frown, BarChart3, Activity, Users,
-    Calendar, Zap, Database
+    Calendar, Zap, Database, Plus, X
 } from 'lucide-react';
 
 // Gauge Component (Windshield Wiper Style)
@@ -180,41 +180,82 @@ const KpiCard = ({ title, value, change, icon: Icon, color }) => {
     );
 };
 
+// Kanban Column Component
+const KanbanColumn = ({ title, status, tasks, onMove, onAdd, color }) => (
+    <div className="flex flex-col h-full bg-zinc-900/50 rounded-xl p-4 border border-zinc-800/50 min-h-[400px]">
+        <div className={`flex items-center justify-between mb-4 pb-3 border-b border-zinc-800 ${color}`}>
+            <h4 className="font-bold">{title}</h4>
+            <span className="bg-zinc-800 text-xs px-2 py-0.5 rounded-full text-zinc-400">{tasks.length}</span>
+        </div>
+        <div className="flex-1 space-y-3 overflow-y-auto custom-scrollbar">
+            {tasks.map(task => (
+                <div key={task.id} className="bg-zinc-800 p-3 rounded-lg border border-zinc-700 hover:border-indigo-500/50 transition-all group relative">
+                    <p className="text-sm text-zinc-200 mb-1">{task.title}</p>
+                    {task.assignee && (
+                        <div className="flex items-center gap-1.5 mt-2">
+                            <div className="w-5 h-5 rounded-full bg-indigo-500 flex items-center justify-center text-[10px] text-white font-bold">
+                                {task.assignee.charAt(0)}
+                            </div>
+                            <span className="text-xs text-zinc-500">{task.assignee}</span>
+                        </div>
+                    )}
+
+                    {/* Move Actions */}
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity bg-zinc-900/90 rounded-md p-0.5">
+                        {status !== 'todo' && (
+                            <button onClick={() => onMove(task.id, 'prev')} className="p-1 hover:text-white text-zinc-400" title="Sposta indietro">
+                                <TrendingDown className="rotate-90" size={14} />
+                            </button>
+                        )}
+                        {status !== 'done' && (
+                            <button onClick={() => onMove(task.id, 'next')} className="p-1 hover:text-white text-zinc-400" title="Sposta avanti">
+                                <TrendingUp className="rotate-90" size={14} />
+                            </button>
+                        )}
+                        <button onClick={() => onMove(task.id, 'delete')} className="p-1 hover:text-red-400 text-zinc-400" title="Elimina">
+                            <X size={14} />
+                        </button>
+                    </div>
+                </div>
+            ))}
+            {tasks.length === 0 && (
+                <div className="text-center py-8 border-2 border-dashed border-zinc-800 rounded-lg text-zinc-600 text-xs">
+                    Nessun task
+                </div>
+            )}
+        </div>
+        {status === 'todo' && (
+            <button
+                onClick={onAdd}
+                className="mt-3 w-full py-2 border border-dashed border-zinc-700 text-zinc-500 hover:text-white hover:border-zinc-500 rounded-lg text-sm flex items-center justify-center gap-2 transition-colors"
+            >
+                <Plus size={14} /> Aggiungi Task
+            </button>
+        )}
+    </div>
+);
+
 const Sprint = () => {
     const { project, updateProject, saveProject } = useProject();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('kpis');
     const [saved, setSaved] = useState(false);
 
-    // Sprint Data State
-    const [sprintData, setSprintData] = useState({
+    // Initial State Loading
+    const [sprintData, setSprintData] = useState(() => project.sprint?.kpis || {
         capacity: 75,
         performance: 82,
         velocity: 34,
         moods: { great: 3, good: 5, neutral: 2, difficult: 1, critical: 0 },
         burndownData: [
-            { day: 'Lun', actual: 40 },
-            { day: 'Mar', actual: 35 },
-            { day: 'Mer', actual: 28 },
-            { day: 'Gio', actual: 22 },
-            { day: 'Ven', actual: 15 },
-            { day: 'Lun', actual: 10 },
-            { day: 'Mar', actual: 5 },
-            { day: 'Mer', actual: null },
-            { day: 'Gio', actual: null },
-            { day: 'Ven', actual: null }
+            { day: 'Lun', actual: 40 }, { day: 'Mar', actual: 35 }, { day: 'Mer', actual: 28 },
+            { day: 'Gio', actual: 22 }, { day: 'Ven', actual: 15 }, { day: 'Lun', actual: 10 },
+            { day: 'Mar', actual: 5 }, { day: 'Mer', actual: null }, { day: 'Gio', actual: null }, { day: 'Ven', actual: null }
         ],
         burnupData: [
-            { day: 'Lun', actual: 0 },
-            { day: 'Mar', actual: 5 },
-            { day: 'Mer', actual: 12 },
-            { day: 'Gio', actual: 18 },
-            { day: 'Ven', actual: 25 },
-            { day: 'Lun', actual: 30 },
-            { day: 'Mar', actual: 35 },
-            { day: 'Mer', actual: null },
-            { day: 'Gio', actual: null },
-            { day: 'Ven', actual: null }
+            { day: 'Lun', actual: 0 }, { day: 'Mar', actual: 5 }, { day: 'Mer', actual: 12 },
+            { day: 'Gio', actual: 18 }, { day: 'Ven', actual: 25 }, { day: 'Lun', actual: 30 },
+            { day: 'Mar', actual: 35 }, { day: 'Mer', actual: null }, { day: 'Gio', actual: null }, { day: 'Ven', actual: null }
         ],
         historicalKpis: [
             { sprint: 'Sprint 1', velocity: 28, capacity: 70, performance: 75 },
@@ -223,15 +264,37 @@ const Sprint = () => {
         ]
     });
 
-    // Daily Standup Timer
+    // Kanban State
+    const [kanbanTasks, setKanbanTasks] = useState(() => project.sprint?.kanban || [
+        { id: 1, title: 'Analisi requisiti user story #1', status: 'todo', assignee: 'Marco' },
+        { id: 2, title: 'Setup ambiente di sviluppo', status: 'doing', assignee: 'Laura' },
+        { id: 3, title: 'Design database schema', status: 'done', assignee: 'Giulia' }
+    ]);
+
+    // Calendar State
+    const [calendarEvents, setCalendarEvents] = useState(() => project.sprint?.calendar || [
+        { id: 1, title: 'Daily Standup', date: '09:30', type: 'recurring' },
+        { id: 2, title: 'Sprint Review', date: 'Ven 15:00', type: 'once' }
+    ]);
+    const [newEvent, setNewEvent] = useState('');
+
+    // Notes State
+    const [sprintNotes, setSprintNotes] = useState(() => project.sprint?.notes || '');
+
+    // Retro Board State
+    const [retroItems, setRetroItems] = useState(() => ({
+        start: project.sprint?.start || ['', ''],
+        stop: project.sprint?.stop || ['', ''],
+        continue: project.sprint?.continue || ['', '']
+    }));
+
+    // Daily Timer
     const [timer, setTimer] = useState(900);
     const [isRunning, setIsRunning] = useState(false);
 
     useEffect(() => {
         let interval;
-        if (isRunning && timer > 0) {
-            interval = setInterval(() => setTimer(t => t - 1), 1000);
-        }
+        if (isRunning && timer > 0) interval = setInterval(() => setTimer(t => t - 1), 1000);
         return () => clearInterval(interval);
     }, [isRunning, timer]);
 
@@ -241,12 +304,50 @@ const Sprint = () => {
         return `${m}:${s < 10 ? '0' : ''}${s}`;
     };
 
-    // Retro Board State
-    const [retroItems, setRetroItems] = useState({
-        start: ['', ''],
-        stop: ['', ''],
-        continue: ['', '']
-    });
+    // Kanban Logic
+    const moveTask = (taskId, direction) => {
+        if (direction === 'delete') {
+            setKanbanTasks(prev => prev.filter(t => t.id !== taskId));
+            return;
+        }
+
+        const stages = ['todo', 'doing', 'done'];
+        setKanbanTasks(prev => prev.map(task => {
+            if (task.id === taskId) {
+                const currentIndex = stages.indexOf(task.status);
+                const nextIndex = direction === 'next'
+                    ? Math.min(currentIndex + 1, stages.length - 1)
+                    : Math.max(currentIndex - 1, 0);
+                return { ...task, status: stages[nextIndex] };
+            }
+            return task;
+        }));
+    };
+
+    const addTask = () => {
+        const title = prompt("Inserisci il titolo del task:");
+        if (title) {
+            setKanbanTasks([...kanbanTasks, {
+                id: Date.now(),
+                title,
+                status: 'todo',
+                assignee: 'Team'
+            }]);
+        }
+    };
+
+    const addCalendarEvent = (e) => {
+        e.preventDefault();
+        if (!newEvent.trim()) return;
+        setCalendarEvents([...calendarEvents, {
+            id: Date.now(),
+            title: newEvent,
+            date: 'TBD',
+            type: 'once'
+        }]);
+        setNewEvent('');
+    }
+    const removeEvent = (id) => setCalendarEvents(calendarEvents.filter(e => e.id !== id));
 
     const handleRetroChange = (type, index, value) => {
         const newItems = { ...retroItems };
@@ -265,12 +366,18 @@ const Sprint = () => {
 
     const handleSaveProject = async () => {
         setIsSaving(true);
-        // Optimize: Update local context first without waiting for server response
-        // to prevent UI freezing, but await actual save for the success state
-        updateProject({ sprint: { ...retroItems, kpis: sprintData } });
+        const sprintPayload = {
+            ...retroItems,
+            kpis: sprintData,
+            kanban: kanbanTasks,
+            calendar: calendarEvents,
+            notes: sprintNotes
+        };
+
+        updateProject({ sprint: sprintPayload });
 
         try {
-            const success = await saveProject();
+            const success = await saveProject({ ...project, sprint: sprintPayload });
             if (success) {
                 setSaved(true);
                 setTimeout(() => setSaved(false), 3000);
@@ -293,45 +400,21 @@ const Sprint = () => {
                         </div>
                         <span className="text-sm font-medium text-green-400">Fase 9 di 9 - Sprint Dashboard</span>
                     </div>
-                    <h1 className="text-3xl font-bold text-white">Sprint e KPI</h1>
-                    <p className="text-zinc-400 mt-2">Monitora le performance del team con metriche Scrum.</p>
+                    <h1 className="text-3xl font-bold text-white">Sprint & Standup</h1>
+                    <p className="text-zinc-400 mt-2">Gestisci il lavoro quotidiano, traccia i progressi e collabora con il team.</p>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20">
                     <Database size={14} className="text-green-400" />
-                    <span className="text-green-400 text-xs font-medium">Dati Sincronizzati</span>
-                </div>
-            </div>
-
-            {/* Educational Section */}
-            <div className="glass-panel p-6 border-l-4 border-green-500">
-                <div className="flex items-start gap-4">
-                    <BookOpen size={24} className="text-green-400 flex-shrink-0 mt-1" />
-                    <div>
-                        <h3 className="text-lg font-semibold text-white mb-2">KPI scrum</h3>
-                        <p className="text-zinc-400 text-sm leading-relaxed">
-                            I KPI scrum aiutano a misurare la salute del team: <strong>Velocity</strong> (punti completati per Sprint),
-                            <strong>Capacity</strong> (% di disponibilità effettiva), <strong>Burndown</strong> (lavoro rimanente),
-                            <strong>Burnup</strong> (lavoro completato), e <strong>Team Mood</strong> (benessere del team).
-                        </p>
-                        <div className="bg-zinc-800/50 rounded-lg p-4 mt-4">
-                            <p className="text-xs text-green-400 font-semibold uppercase tracking-wider mb-2">📌 Esempio pratico</p>
-                            <p className="text-zinc-300 text-sm">
-                                Nello <strong>Sprint Review</strong> della <strong>Moto Elettrica Future</strong>, il team non mostra slide, ma <strong>porta la moto in cortile</strong>
-                                e fa provare la nuova mappatura "Sport" agli stakeholder.<br />
-                                <strong>Feedback immediato:</strong> "L'accelerazione è troppo brusca". <br />
-                                <strong>Azione per il prossimo sprint:</strong> "Ammorbidire curva di coppia".
-                            </p>
-                        </div>
-                    </div>
+                    <span className="text-green-400 text-xs font-medium">Auto-Sync Attivo</span>
                 </div>
             </div>
 
             {/* Tabs */}
             <div className="flex gap-1 p-1 bg-zinc-900 rounded-xl w-fit">
                 {[
-                    { id: 'kpis', label: '📊 KPI Dashboard' },
                     { id: 'daily', label: '⏱️ Daily Standup' },
-                    { id: 'review', label: '✅ Sprint review' },
+                    { id: 'kpis', label: '📊 KPI & Mood' },
+                    { id: 'review', label: '✅ Sprint Review' },
                     { id: 'retro', label: '🔄 Retrospettiva' }
                 ].map(tab => (
                     <button
@@ -347,45 +430,124 @@ const Sprint = () => {
                 ))}
             </div>
 
-            <div className="glass-panel p-8 min-h-[500px]">
+            <div className="glass-panel p-6 min-h-[600px]">
+                {/* DAILY STANDUP TAB */}
+                {activeTab === 'daily' && (
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+                        {/* Left Column: Timer & Calendar */}
+                        <div className="space-y-6">
+                            {/* Timer Card */}
+                            <div className="bg-zinc-800/30 p-5 rounded-xl text-center border border-zinc-700/50">
+                                <h3 className="text-zinc-400 text-sm font-semibold uppercase tracking-wider mb-4">Standup Timer</h3>
+                                <div className="text-5xl font-mono font-bold text-white mb-4 tracking-wider">
+                                    {formatTime(timer)}
+                                </div>
+                                <div className="flex justify-center gap-3">
+                                    <button
+                                        onClick={() => setIsRunning(!isRunning)}
+                                        className={`p-3 rounded-lg transition-all ${isRunning ? 'bg-amber-500/20 text-amber-400' : 'bg-green-500/20 text-green-400'}`}
+                                    >
+                                        {isRunning ? <Pause size={24} /> : <Play size={24} />}
+                                    </button>
+                                    <button onClick={() => { setIsRunning(false); setTimer(900); }} className="p-3 rounded-lg bg-zinc-700/50 text-zinc-300">
+                                        <RotateCcw size={24} />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Calendar Section */}
+                            <div className="bg-zinc-800/30 p-5 rounded-xl border border-zinc-700/50 flex-1">
+                                <h3 className="text-zinc-400 text-sm font-semibold uppercase tracking-wider mb-4 flex items-center gap-2">
+                                    <Calendar size={16} /> Calendario Sprint
+                                </h3>
+                                <form onSubmit={addCalendarEvent} className="flex gap-2 mb-4">
+                                    <input
+                                        type="text"
+                                        value={newEvent}
+                                        onChange={(e) => setNewEvent(e.target.value)}
+                                        placeholder="Aggiungi evento..."
+                                        className="flex-1 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-1.5 text-sm focus:ring-1 focus:ring-indigo-500 outline-none"
+                                    />
+                                    <button type="submit" className="p-1.5 bg-indigo-500/20 text-indigo-400 rounded-lg hover:bg-indigo-500/30">
+                                        <Plus size={18} />
+                                    </button>
+                                </form>
+                                <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                                    {calendarEvents.map(event => (
+                                        <div key={event.id} className="flex items-center justify-between p-2 bg-zinc-900/50 rounded-lg border border-zinc-800/50">
+                                            <div>
+                                                <p className="text-sm font-medium text-zinc-200">{event.title}</p>
+                                                <p className="text-xs text-zinc-500">{event.date}</p>
+                                            </div>
+                                            <button onClick={() => removeEvent(event.id)} className="text-zinc-600 hover:text-red-400"><X size={14} /></button>
+                                        </div>
+                                    ))}
+                                    {calendarEvents.length === 0 && <p className="text-xs text-zinc-600 text-center py-2">Nessun evento</p>}
+                                </div>
+                            </div>
+
+                            {/* Notes Section */}
+                            <div className="bg-zinc-800/30 p-5 rounded-xl border border-zinc-700/50">
+                                <h3 className="text-zinc-400 text-sm font-semibold uppercase tracking-wider mb-2">Note del Giorno</h3>
+                                <textarea
+                                    value={sprintNotes}
+                                    onChange={(e) => setSprintNotes(e.target.value)}
+                                    className="w-full h-32 bg-zinc-900/50 border border-zinc-700 rounded-lg p-3 text-sm text-zinc-300 focus:ring-1 focus:ring-indigo-500 resize-none outline-none"
+                                    placeholder="Annotazioni veloci, impediment..."
+                                />
+                            </div>
+                        </div>
+
+                        {/* Right Column: Kanban */}
+                        <div className="lg:col-span-2 bg-zinc-800/10 rounded-2xl p-1">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-full">
+                                <KanbanColumn
+                                    title="Da Fare"
+                                    status="todo"
+                                    tasks={kanbanTasks.filter(t => t.status === 'todo')}
+                                    onMove={moveTask}
+                                    onAdd={addTask}
+                                    color="border-l-4 border-l-zinc-500 text-zinc-300"
+                                />
+                                <KanbanColumn
+                                    title="In Corso"
+                                    status="doing"
+                                    tasks={kanbanTasks.filter(t => t.status === 'doing')}
+                                    onMove={moveTask}
+                                    color="border-l-4 border-l-blue-500 text-blue-400"
+                                />
+                                <KanbanColumn
+                                    title="Fatto"
+                                    status="done"
+                                    tasks={kanbanTasks.filter(t => t.status === 'done')}
+                                    onMove={moveTask}
+                                    color="border-l-4 border-l-green-500 text-green-400"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {activeTab === 'kpis' && (
                     <div className="space-y-8">
-                        {/* Top KPI Cards */}
+                        {/* KPI Content Unchanged */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <KpiCard title="Velocity (Story Points)" value={sprintData.velocity} change={6} icon={Zap} color="#22c55e" />
                             <KpiCard title="Capacity Utilizzata" value={`${sprintData.capacity}%`} change={3} icon={Users} color="#6366f1" />
                             <KpiCard title="Performance" value={`${sprintData.performance}%`} change={4} icon={Activity} color="#f59e0b" />
                             <KpiCard title="Sprint Corrente" value="Sprint 3" change={0} icon={Calendar} color="#8b5cf6" />
                         </div>
-
-                        {/* Gauges */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="bg-zinc-800/30 p-6 rounded-2xl">
-                                <GaugeChart
-                                    value={sprintData.capacity}
-                                    max={100}
-                                    label="Capacity del Team"
-                                    color="#6366f1"
-                                    icon={Users}
-                                />
+                                <GaugeChart value={sprintData.capacity} max={100} label="Capacity del Team" color="#6366f1" icon={Users} />
                             </div>
                             <div className="bg-zinc-800/30 p-6 rounded-2xl">
-                                <GaugeChart
-                                    value={sprintData.performance}
-                                    max={100}
-                                    label="Performance Sprint"
-                                    color="#22c55e"
-                                    icon={Activity}
-                                />
+                                <GaugeChart value={sprintData.performance} max={100} label="Performance Sprint" color="#22c55e" icon={Activity} />
                             </div>
                         </div>
-
-                        {/* Mood Meter */}
                         <div className="bg-zinc-800/30 p-6 rounded-2xl">
                             <MoodMeter moods={sprintData.moods} onVote={handleMoodVote} />
                         </div>
-
-                        {/* Burn Charts */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="bg-zinc-800/30 p-6 rounded-2xl">
                                 <BurnChart data={sprintData.burndownData} type="burndown" totalPoints={40} />
@@ -393,74 +555,6 @@ const Sprint = () => {
                             <div className="bg-zinc-800/30 p-6 rounded-2xl">
                                 <BurnChart data={sprintData.burnupData} type="burnup" totalPoints={40} />
                             </div>
-                        </div>
-
-                        {/* Historical Data */}
-                        <div className="bg-zinc-800/30 p-6 rounded-2xl">
-                            <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
-                                <BarChart3 size={18} className="text-purple-400" /> Storico sprint (Business Intelligence)
-                            </h4>
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-sm">
-                                    <thead>
-                                        <tr className="border-b border-zinc-700">
-                                            <th className="text-left py-3 px-4 text-zinc-400">Sprint</th>
-                                            <th className="text-center py-3 px-4 text-zinc-400">Velocity</th>
-                                            <th className="text-center py-3 px-4 text-zinc-400">Capacity</th>
-                                            <th className="text-center py-3 px-4 text-zinc-400">Performance</th>
-                                            <th className="text-center py-3 px-4 text-zinc-400">Trend</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {sprintData.historicalKpis.map((kpi, i) => (
-                                            <tr key={i} className="border-b border-zinc-800">
-                                                <td className="py-3 px-4 text-white font-medium">{kpi.sprint}</td>
-                                                <td className="py-3 px-4 text-center text-zinc-300">{kpi.velocity} pts</td>
-                                                <td className="py-3 px-4 text-center text-zinc-300">{kpi.capacity}%</td>
-                                                <td className="py-3 px-4 text-center text-zinc-300">{kpi.performance}%</td>
-                                                <td className="py-3 px-4 text-center">
-                                                    {i > 0 && kpi.velocity > sprintData.historicalKpis[i - 1].velocity ? (
-                                                        <TrendingUp size={16} className="text-green-400 mx-auto" />
-                                                    ) : i > 0 ? (
-                                                        <TrendingDown size={16} className="text-red-400 mx-auto" />
-                                                    ) : (
-                                                        <span className="text-zinc-600">-</span>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {activeTab === 'daily' && (
-                    <div className="flex flex-col items-center justify-center space-y-8 py-8">
-                        <div className="text-7xl font-mono font-bold tracking-widest text-white">
-                            {formatTime(timer)}
-                        </div>
-                        <div className="flex gap-4">
-                            <button
-                                onClick={() => setIsRunning(!isRunning)}
-                                className={`p-5 rounded-2xl transition-all ${isRunning
-                                    ? 'bg-amber-500/20 text-amber-400 hover:bg-amber-500/30'
-                                    : 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
-                                    }`}
-                            >
-                                {isRunning ? <Pause size={36} /> : <Play size={36} />}
-                            </button>
-                            <button
-                                onClick={() => { setIsRunning(false); setTimer(900); }}
-                                className="p-5 rounded-2xl bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white transition-all"
-                            >
-                                <RotateCcw size={36} />
-                            </button>
-                        </div>
-                        <div className="text-center max-w-md">
-                            <p className="text-zinc-300 italic mb-2">"Cosa ho fatto ieri? Cosa farò oggi? Ci sono blocchi?"</p>
-                            <p className="text-xs uppercase tracking-wider font-bold text-zinc-600">Le 3 Domande del Daily Standup</p>
                         </div>
                     </div>
                 )}
@@ -470,6 +564,7 @@ const Sprint = () => {
                         <h3 className="text-xl font-bold text-white flex items-center gap-3">
                             <CheckSquare className="text-indigo-400" /> Checklist Sprint review
                         </h3>
+                        {/* Review Content Unchanged */}
                         <div className="space-y-3">
                             {[
                                 'Dimostrare le User Story "Done" agli stakeholder',
@@ -488,54 +583,29 @@ const Sprint = () => {
 
                 {activeTab === 'retro' && (
                     <div className="space-y-6">
+                        {/* Retro Content Unchanged */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div className="bg-green-500/5 p-5 rounded-2xl border border-green-500/20">
-                                <h4 className="text-green-400 font-bold mb-4 flex items-center gap-2">
-                                    <Play size={18} /> Iniziare a Fare
-                                </h4>
+                                <h4 className="text-green-400 font-bold mb-4 flex items-center gap-2"><Play size={18} /> Iniziare a Fare</h4>
                                 <div className="space-y-2">
                                     {retroItems.start.map((val, i) => (
-                                        <input
-                                            key={i}
-                                            value={val}
-                                            onChange={(e) => handleRetroChange('start', i, e.target.value)}
-                                            className="w-full bg-zinc-900/50 rounded-lg p-3 text-sm"
-                                            placeholder="Cosa dovremmo iniziare..."
-                                        />
+                                        <input key={i} value={val} onChange={(e) => handleRetroChange('start', i, e.target.value)} className="w-full bg-zinc-900/50 rounded-lg p-3 text-sm" placeholder="..." />
                                     ))}
                                 </div>
                             </div>
-
                             <div className="bg-red-500/5 p-5 rounded-2xl border border-red-500/20">
-                                <h4 className="text-red-400 font-bold mb-4 flex items-center gap-2">
-                                    <Pause size={18} /> Smettere di Fare
-                                </h4>
+                                <h4 className="text-red-400 font-bold mb-4 flex items-center gap-2"><Pause size={18} /> Smettere di Fare</h4>
                                 <div className="space-y-2">
                                     {retroItems.stop.map((val, i) => (
-                                        <input
-                                            key={i}
-                                            value={val}
-                                            onChange={(e) => handleRetroChange('stop', i, e.target.value)}
-                                            className="w-full bg-zinc-900/50 rounded-lg p-3 text-sm"
-                                            placeholder="Cosa dovremmo smettere..."
-                                        />
+                                        <input key={i} value={val} onChange={(e) => handleRetroChange('stop', i, e.target.value)} className="w-full bg-zinc-900/50 rounded-lg p-3 text-sm" placeholder="..." />
                                     ))}
                                 </div>
                             </div>
-
                             <div className="bg-blue-500/5 p-5 rounded-2xl border border-blue-500/20">
-                                <h4 className="text-blue-400 font-bold mb-4 flex items-center gap-2">
-                                    <RotateCcw size={18} /> Continuare a Fare
-                                </h4>
+                                <h4 className="text-blue-400 font-bold mb-4 flex items-center gap-2"><RotateCcw size={18} /> Continuare a Fare</h4>
                                 <div className="space-y-2">
                                     {retroItems.continue.map((val, i) => (
-                                        <input
-                                            key={i}
-                                            value={val}
-                                            onChange={(e) => handleRetroChange('continue', i, e.target.value)}
-                                            className="w-full bg-zinc-900/50 rounded-lg p-3 text-sm"
-                                            placeholder="Cosa dovremmo continuare..."
-                                        />
+                                        <input key={i} value={val} onChange={(e) => handleRetroChange('continue', i, e.target.value)} className="w-full bg-zinc-900/50 rounded-lg p-3 text-sm" placeholder="..." />
                                     ))}
                                 </div>
                             </div>
@@ -544,10 +614,9 @@ const Sprint = () => {
                 )}
             </div>
 
-            {/* Save Project Button */}
+            {/* Save Projects & Exports */}
             <div className="flex justify-center gap-4 pt-4">
                 <button
-                    key={saved ? "saved-state" : isSaving ? "saving-state" : "idle-state"}
                     onClick={handleSaveProject}
                     disabled={!project.name || isSaving}
                     className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-bold text-lg transition-all ${saved
@@ -556,9 +625,7 @@ const Sprint = () => {
                         } ${isSaving ? 'opacity-75 cursor-wait' : ''}`}
                 >
                     {saved ? (
-                        <div className="flex items-center gap-2">
-                            <CheckCircle size={24} /> <span>Dati Salvati!</span>
-                        </div>
+                        <div className="flex items-center gap-2"><CheckCircle size={24} /> <span>Dati Salvati!</span></div>
                     ) : (
                         <div className="flex items-center gap-2">
                             {isSaving ? <Activity className="animate-spin" size={24} /> : <Save size={24} />}
@@ -566,35 +633,21 @@ const Sprint = () => {
                         </div>
                     )}
                 </button>
-
                 {project.name && <ExportButton />}
             </div>
-
-            {/* Export Section */}
+            {/* Footer Info */}
             {project.name && (
                 <div className="glass-panel p-6 mt-8 border-l-4 border-purple-500">
                     <div className="flex items-center justify-between">
                         <div>
                             <h3 className="text-lg font-semibold text-white mb-2">📄 Esporta la documentazione completa</h3>
-                            <p className="text-zinc-400 text-sm">
-                                Hai completato tutte le fasi! Esporta il tuo progetto completo su Google Docs
-                                o scaricalo in altri formati per condividerlo con il team e gli stakeholder.
-                            </p>
+                            <p className="text-zinc-400 text-sm">Hai completato tutte le fasi! Esporta il tuo progetto completo.</p>
                         </div>
-                        <div className="ml-6">
-                            <ExportButton />
-                        </div>
+                        <div className="ml-6"><ExportButton /></div>
                     </div>
                 </div>
-            )}
-
-            {!project.name && (
-                <p className="text-center text-zinc-500 text-sm">
-                    Per salvare il progetto, devi prima definire un nome nella Fase 1 (Product Vision).
-                </p>
             )}
         </div>
     );
 };
-
 export default Sprint;

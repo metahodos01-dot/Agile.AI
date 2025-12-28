@@ -18,9 +18,9 @@ const Objectives = () => {
         setLoading(true);
         await new Promise(resolve => setTimeout(resolve, 1200));
         setObjectives([
-            "Ridurre i tempi di fermo macchina non pianificati del 30% entro Q2.",
-            "Migliorare l'OEE (Overall Equipment Effectiveness) raggiungendo l'85%.",
-            "Implementare tracciabilità completa dei lotti su tutte le linee produttive."
+            "Completare il prototipo funzionante entro Q4 per validare le prestazioni del powertrain.",
+            "Raggiungere un'autonomia certificata di 300km con una singola ricarica.",
+            "Ottenere un Net Promoter Score (NPS) > 50 dai beta tester."
         ]);
         setLoading(false);
     };
@@ -73,9 +73,9 @@ const Objectives = () => {
                         <div className="bg-zinc-800/50 rounded-lg p-4">
                             <p className="text-xs text-indigo-400 font-semibold uppercase tracking-wider mb-2">📌 Esempio pratico</p>
                             <p className="text-zinc-300 text-sm">
-                                <strong>Obiettivo:</strong> "Diventare lo stabilimento più efficiente del gruppo entro fine anno"<br />
+                                <strong>Obiettivo:</strong> "Diventare il brand di riferimento per la mobilità urbana sostenibile"<br />
                                 <span className="text-zinc-500">Questo obiettivo sarà poi misurato con KPI come:
-                                    OEE &gt; 85%, scarti &lt; 2%, lead time ridotto del 20%.</span>
+                                    Quota di mercato > 15%, Autonomia > 300km, Tempo di ricarica < 20min.</span>
                             </p>
                         </div>
                     </div>
