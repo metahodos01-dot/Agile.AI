@@ -7,7 +7,7 @@ const Backlog = () => {
     const { project, updateProject } = useProject();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-    const [backlog, setBacklog] = useState(project.backlog.length > 0 ? project.backlog : []);
+    const [backlog, setBacklog] = useState((project.backlog && project.backlog.length > 0) ? project.backlog : []);
     const [expandedEpics, setExpandedEpics] = useState({});
 
     const toggleEpic = (id) => setExpandedEpics(prev => ({ ...prev, [id]: !prev[id] }));

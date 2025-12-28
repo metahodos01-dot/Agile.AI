@@ -71,7 +71,7 @@ const Roadmap = () => {
         navigate('/sprint');
     };
 
-    if (project.backlog.length === 0) {
+    if (!project.backlog || project.backlog.length === 0) {
         return (
             <div className="text-center pt-20">
                 <h2 className="text-2xl font-bold text-white mb-4">Nessun backlog trovato</h2>

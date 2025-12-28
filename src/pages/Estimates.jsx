@@ -9,7 +9,7 @@ const Estimates = () => {
     const [loading, setLoading] = useState(false);
     const [estimates, setEstimates] = useState(project.estimates || {});
 
-    const allStories = project.backlog.flatMap(epic =>
+    const allStories = (project.backlog || []).flatMap(epic =>
         epic.stories.map(story => ({ ...story, epicTitle: epic.title, epicId: epic.id }))
     );
 
@@ -36,7 +36,7 @@ const Estimates = () => {
 
     const totalHours = Object.values(estimates).reduce((a, b) => a + b, 0);
 
-    if (project.backlog.length === 0) {
+    if (!project.backlog || project.backlog.length === 0) {
         return (
             <div className="text-center pt-20">
                 <h2 className="text-2xl font-bold text-white mb-4">Nessun backlog trovato</h2>

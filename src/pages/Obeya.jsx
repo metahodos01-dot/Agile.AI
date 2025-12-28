@@ -7,7 +7,7 @@ const Obeya = () => {
     const { project, updateProject } = useProject();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-    const [setupItems, setSetupItems] = useState(project.obeya.items || []);
+    const [setupItems, setSetupItems] = useState(project.obeya?.items || []);
 
     const handleGenerate = () => {
         setLoading(true);

@@ -7,7 +7,7 @@ const Team = () => {
     const { project, updateProject } = useProject();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-    const [team, setTeam] = useState(project.team.length > 0 ? project.team : []);
+    const [team, setTeam] = useState(project.team || []);
 
     const handleSuggest = () => {
         setLoading(true);
