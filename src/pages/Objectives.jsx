@@ -75,7 +75,7 @@ const Objectives = () => {
                             <p className="text-zinc-300 text-sm">
                                 <strong>Obiettivo:</strong> "Diventare il brand di riferimento per la mobilità urbana sostenibile"<br />
                                 <span className="text-zinc-500">Questo obiettivo sarà poi misurato con KPI come:
-                                    Quota di mercato > 15%, Autonomia > 300km, Tempo di ricarica < 20min.</span>
+                                    Quota di mercato &gt; 15%, Autonomia &gt; 300km, Tempo di ricarica &lt; 20min.</span>
                             </p>
                         </div>
                     </div>
