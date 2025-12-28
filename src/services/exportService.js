@@ -411,17 +411,18 @@ export const sectionsToPlainText = (sections) => {
             case 'subtitle':
                 text += `${section.content}\n\n`;
                 break;
-            case 'heading':
+            case 'heading': {
                 const prefix = '#'.repeat(section.level);
                 text += `\n${prefix} ${section.content}\n\n`;
                 break;
+            }
             case 'paragraph':
                 text += `${section.content}\n\n`;
                 break;
             case 'bullet':
                 text += `• ${section.content}\n`;
                 break;
-            case 'table':
+            case 'table': {
                 // Simple table formatting
                 const colWidths = section.headers.map((h, i) =>
                     Math.max(h.length, ...section.rows.map(r => (r[i] || '').length))
@@ -436,6 +437,7 @@ export const sectionsToPlainText = (sections) => {
                 });
                 text += separator + '\n\n';
                 break;
+            }
             default:
                 text += `${section.content || ''}\n`;
         }

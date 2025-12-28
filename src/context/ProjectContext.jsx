@@ -17,7 +17,8 @@ const emptyProject = {
     backlog: [],
     estimates: {},
     roadmap: [],
-    sprint: {},
+    sprint: {}, // Deprecated, kept for backward compatibility/migration
+    sprints: [], // New multi-sprint array
     createdAt: null,
     completedAt: null
 };
@@ -44,13 +45,27 @@ export const ProjectProvider = ({ children }) => {
 
             if (error) throw error;
 
-            const projects = data.map(row => ({
-                ...row.data,
-                id: row.id, // Use Supabase UUID
-                name: row.name,
-                createdAt: row.created_at,
-                updatedAt: row.updated_at
-            }));
+            const projects = data.map(row => {
+                // MIGRATION LOGIC: If 'sprint' exists but 'sprints' is empty, migrate it.
+                let sprints = row.data.sprints || [];
+                if (sprints.length === 0 && row.data.sprint && Object.keys(row.data.sprint).length > 0) {
+                    sprints = [{
+                        id: 1,
+                        title: 'Sprint 1',
+                        status: 'active', // active, completed, planned
+                        ...row.data.sprint
+                    }];
+                }
+
+                return {
+                    ...row.data,
+                    id: row.id, // Use Supabase UUID
+                    name: row.name,
+                    sprints: sprints, // Ensure sprints array is populated
+                    createdAt: row.created_at,
+                    updatedAt: row.updated_at
+                };
+            });
 
             setSavedProjects(projects);
         } catch (error) {
@@ -67,7 +82,13 @@ export const ProjectProvider = ({ children }) => {
         // Recover current project from local storage if needed
         const current = localStorage.getItem('currentProject');
         if (current) {
-            setProject(JSON.parse(current));
+            const loaded = JSON.parse(current);
+            // Ensure sprints array exists on load from local storage
+            if (!loaded.sprints && loaded.sprint) {
+                loaded.sprints = [{ id: 1, title: 'Sprint 1', status: 'active', ...loaded.sprint }];
+            }
+            if (!loaded.sprints) loaded.sprints = [];
+            setProject(loaded);
         }
     }, [user]);
 
@@ -80,6 +101,36 @@ export const ProjectProvider = ({ children }) => {
         setProject(newProject);
         localStorage.setItem('currentProject', JSON.stringify(newProject));
     };
+
+    // Sprint Management Helpers
+    const addSprint = (newSprintData) => {
+        const nextId = (project.sprints?.length || 0) + 1;
+        const newSprint = {
+            id: nextId,
+            title: `Sprint ${nextId}`,
+            status: 'planned',
+            goals: [],
+            capacity: { total: 0, members: [] }, // New structure for capacity
+            tasks: [],
+            ...newSprintData
+        };
+        const updatedSprints = [...(project.sprints || []), newSprint];
+        updateProject({ sprints: updatedSprints });
+        return newSprint;
+    };
+
+    const updateSprint = (sprintId, updates) => {
+        const updatedSprints = (project.sprints || []).map(s =>
+            s.id === sprintId ? { ...s, ...updates } : s
+        );
+        updateProject({ sprints: updatedSprints });
+    };
+
+    const deleteSprint = (sprintId) => {
+        const updatedSprints = (project.sprints || []).filter(s => s.id !== sprintId);
+        updateProject({ sprints: updatedSprints });
+    };
+
 
     // Save project to Supabase
     const saveProject = async (dataToSave = null) => {
@@ -206,7 +257,10 @@ export const ProjectProvider = ({ children }) => {
             loadProject,
             deleteProject,
             savedProjects,
-            loading
+            loading,
+            addSprint,
+            updateSprint,
+            deleteSprint
         }}>
             {children}
         </ProjectContext.Provider>
