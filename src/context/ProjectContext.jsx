@@ -146,6 +146,14 @@ export const ProjectProvider = ({ children }) => {
 
         setLoading(true);
         try {
+            // 1. Connection Check
+            const { error: pingError } = await supabase.from('profiles').select('id').limit(1).single();
+            if (pingError) {
+                console.error("[SaveProject] Connection/Auth Check Failed:", pingError);
+                throw new Error("Errore di connessione al database. Riprova.");
+            }
+            console.log("[SaveProject] Connection OK");
+
             const projectData = { ...projectCurrent };
             delete projectData.id;
             delete projectData.name;

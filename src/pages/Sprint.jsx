@@ -372,6 +372,8 @@ const Sprint = () => {
             if (success) {
                 setSaved(true);
                 setTimeout(() => setSaved(false), 3000);
+            } else {
+                throw new Error("Salvataggio fallito. Controlla la console.");
             }
         } catch (error) {
             console.error("Save failed", error);
