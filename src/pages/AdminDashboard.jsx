@@ -87,6 +87,42 @@ const AdminDashboard = () => {
                 </div>
             </div>
 
+            {/* System Diagnostics */}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-8">
+                <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                    <Shield className="text-emerald-500" />
+                    Diagnostica Sistema
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-4 bg-zinc-800 rounded-xl">
+                        <p className="text-zinc-400 text-sm mb-1">Stato Supabase</p>
+                        <div className="flex items-center gap-2">
+                            <div className={`w-3 h-3 rounded-full ${loading ? 'bg-yellow-500 animate-pulse' : 'bg-green-500'}`} />
+                            <span className="text-white font-mono">{loading ? 'Verifica in corso...' : 'Connesso'}</span>
+                        </div>
+                    </div>
+                    <div className="p-4 bg-zinc-800 rounded-xl">
+                        <p className="text-zinc-400 text-sm mb-1">Test Scrittura</p>
+                        <button
+                            onClick={async () => {
+                                try {
+                                    const start = Date.now();
+                                    const { error } = await supabase.from('profiles').select('count').single();
+                                    const ms = Date.now() - start;
+                                    if (error) throw error;
+                                    alert(`Test OK! Latency: ${ms}ms`);
+                                } catch (e) {
+                                    alert(`Test Fallito: ${e.message}`);
+                                }
+                            }}
+                            className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs rounded-lg transition-colors"
+                        >
+                            Esegui Ping Test
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             {/* User List */}
             <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-700 overflow-hidden">
                 <div className="p-6 border-b border-zinc-100 dark:border-zinc-700 flex justify-between items-center">
