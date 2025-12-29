@@ -8,6 +8,8 @@ const AdminDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
+    const [pingStatus, setPingStatus] = useState(null);
+
     useEffect(() => {
         fetchData();
     }, []);
@@ -26,9 +28,22 @@ const AdminDashboard = () => {
             setUsers(usersRes.data || []);
             setProjects(projectsRes.data || []);
         } catch (error) {
-            console.error('Error fetching users:', error);
+            console.error('Error fetching data:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handlePingTest = async () => {
+        setPingStatus('testing');
+        const start = Date.now();
+        try {
+            const { error } = await supabase.from('profiles').select('id').limit(1);
+            if (error) throw error;
+            const ms = Date.now() - start;
+            setPingStatus(`OK (${ms}ms)`);
+        } catch (err) {
+            setPingStatus(`ERROR: ${err.message}`);
         }
     };
 
@@ -109,18 +124,8 @@ const AdminDashboard = () => {
                         <p className="text-zinc-400 text-sm mb-1">Test Scrittura</p>
                         <div className="flex flex-col gap-2">
                             <button
-                                onClick={async () => {
-                                    setPingStatus('testing');
-                                    try {
-                                        const start = Date.now();
-                                        const { error } = await supabase.from('profiles').select('count').single();
-                                        const ms = Date.now() - start;
-                                        if (error) throw error;
-                                        setPingStatus(`OK (${ms}ms)`);
-                                    } catch (e) {
-                                        setPingStatus(`ERROR: ${e.message}`);
-                                    }
-                                }}
+                                onClick={handlePingTest}
+                                disabled={pingStatus === 'testing'}
                                 className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs rounded-lg transition-colors w-full text-center"
                             >
                                 {pingStatus === 'testing' ? 'Testing...' : 'Esegui Ping Test'}
