@@ -333,7 +333,7 @@ const Sidebar = () => {
                             className="w-12 h-12 object-contain"
                         />
                         <div>
-                            <h1 className="text-lg font-bold text-white leading-tight">PROGETTOAGILE.AI <span className="text-[10px] text-green-400 font-mono">v1.1</span></h1>
+                            <h1 className="text-lg font-bold text-white leading-tight">PROGETTOAGILE.AI <span className="text-[10px] text-green-400 font-mono">v1.2</span></h1>
                             <img
                                 src="/signature-franz.png"
                                 alt="by Franz"
@@ -364,15 +364,18 @@ const Sidebar = () => {
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
-                            if (confirm("Sei sicuro? Questo cancellerà tutti i dati non salvati del progetto corrente e resetterà l'applicazione.")) {
-                                createNewProject();
+                            if (confirm("HARD RESET: Questo cancellerà brutalmente la memoria locale e ricaricherà la pagina. Usare solo se bloccati.")) {
+                                console.log("HARD RESET TRIGGERED");
+                                localStorage.removeItem('currentProject');
+                                localStorage.removeItem('sb-access-token'); // Optional: clear auth if needed, but maybe too aggressive. Let's just clear project.
+                                // Actually, let's clear project specifically.
                                 window.location.reload();
                             }
                         }}
-                        className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2 bg-zinc-900 hover:bg-red-500/10 text-zinc-400 hover:text-red-400 text-xs font-medium rounded-lg transition-colors border border-zinc-800 hover:border-red-500/20 cursor-pointer active:scale-95"
+                        className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2 bg-red-900/20 hover:bg-red-900/40 text-red-400 hover:text-red-300 text-xs font-bold rounded-lg transition-colors border border-red-500/20 cursor-pointer active:scale-95"
                     >
                         <AlertCircle size={14} />
-                        Reset Totale (Debug)
+                        HARD RESET (Sblocca tutto)
                     </button>
                 </div>
 
