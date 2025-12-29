@@ -151,13 +151,38 @@ export const generateAIResponseV2 = async (prompt, type) => {
             resolve(epics);
 
          } else if (type === 'roadmap_mvp') {
-            // Roadmap AI Calculation
-            const velocity = prompt.velocity || 20;
-            const totalPoints = prompt.totalPoints || 0;
-            const sprintsNeeded = Math.ceil(totalPoints / velocity);
+            // Roadmap AI Calculation - HOURS BASED
+            const devCount = prompt.devCount || 1;
+            const hoursPerDay = prompt.hoursPerDay || 6;
+            const sprintDays = prompt.sprintDays || 10;
+            const sprintDurationWeeks = prompt.sprintDurationWeeks || 2;
 
-            // Simple date calc
-            const weeksNeeded = sprintsNeeded * 2;
+            // Capacity per sprint
+            const teamCapacityPerSprint = devCount * hoursPerDay * sprintDays;
+
+            // AI estimates hours for the scope (simulated)
+            // We can assume roughly 5-10 hours per story point if points exist, or just estimate based on count
+            // Let's verify prompt.selectedScope texts
+            const scopeCount = prompt.selectedScope?.length || 0;
+
+            // Mock logic: Average 15-25 hours per "Story/Feature" in the scope
+            let totalEstimatedHours = 0;
+            (prompt.selectedScope || []).forEach(() => {
+               totalEstimatedHours += Math.floor(Math.random() * 20) + 10; // 10-30 hours per story
+            });
+
+            // Adjust by totalPoints if provided as a multiplier check
+            const pointMultiplier = 8; // approx 8 hours per point
+            if (prompt.totalPoints && prompt.totalPoints > 0) {
+               // Weighted average between pure count and point based
+               const pointEstimate = prompt.totalPoints * pointMultiplier;
+               totalEstimatedHours = Math.floor((totalEstimatedHours + pointEstimate) / 2);
+            }
+
+            const sprintsNeeded = Math.ceil(totalEstimatedHours / teamCapacityPerSprint);
+
+            // Date calc
+            const weeksNeeded = sprintsNeeded * sprintDurationWeeks;
             const today = new Date();
             const projectedDate = new Date(today.setDate(today.getDate() + (weeksNeeded * 7)));
 
@@ -166,11 +191,13 @@ export const generateAIResponseV2 = async (prompt, type) => {
 
             const analysis = {
                sprintsNeeded,
+               teamCapacityPerSprint,
+               totalEstimatedHours,
                achievable,
                projectedDate: projectedDate.toISOString().split('T')[0],
                analysis: achievable
-                  ? `Ottimo! Con una velocity di ${velocity} pt/sprint, puoi completare i ${totalPoints} punti in ${sprintsNeeded} sprint, arrivando prima del ${prompt.targetDate}. Hai un margine di sicurezza.`
-                  : `Attenzione. Servono ${sprintsNeeded} sprint (${weeksNeeded} settimane) per completare il lavoro. La data target ${prompt.targetDate} è troppo vicina. Consigliamo di ridurre lo scope (rimuovere feature non essenziali) o aumentare il team.`
+                  ? `Ottimo! Il team ha una capacità di ${teamCapacityPerSprint} ore/sprint. Il lavoro è stimato in circa ${totalEstimatedHours} ore. Basteranno ${sprintsNeeded} sprint per completare l'MVP entro il ${prompt.targetDate}.`
+                  : `Attenzione. Con ${devCount} sviluppatori (${teamCapacityPerSprint} ore/sprint), servono ${sprintsNeeded} sprint per coprire le ${totalEstimatedHours} ore stimate. La data del ${prompt.targetDate} è a rischio. Consigliamo di ridurre lo scope o aggiungere risorse.`
             };
 
             resolve(analysis);
@@ -200,26 +227,36 @@ export const generateAIResponseV2 = async (prompt, type) => {
             resolve(estimates);
 
          } else if (type === 'sprint_planning') {
-            // Generazione Task Operativi da Stories
+            // Generazione Task Operativi da Stories - WITH ESTIMATED HOURS
             const tasks = [];
             const stories = prompt.stories || [];
+            if (!stories || stories.length === 0) {
+               resolve([]); // Handle empty stories gracefully
+               return;
+            }
+
             let taskIdBase = Date.now();
 
-            // Take top priority stories (first 5-6) or all
-            const targetStories = stories.slice(0, 8);
+            // Limit generation to avoid overwhelming
+            const targetStories = stories.slice(0, 10);
 
             targetStories.forEach((story, idx) => {
                const storyTitle = story.title.substring(0, 40) + (story.title.length > 40 ? '...' : '');
+
+               // Generate Hours
+               const feHours = Math.floor(Math.random() * 4) + 2; // 2-6 hours
+               const beHours = Math.floor(Math.random() * 5) + 3; // 3-8 hours
+               const qaHours = Math.floor(Math.random() * 2) + 1; // 1-3 hours
 
                // Frontend Task
                tasks.push({
                   id: taskIdBase + (idx * 10) + 1,
                   title: `FE: Implementare UI per "${storyTitle}"`,
                   storyId: story.id,
-                  status: 'backlog', // In "Operational Backlog"
+                  status: 'backlog',
                   assignee: 'Frontend Dev',
-                  estimated: 0,
-                  remaining: 0
+                  estimated: feHours,
+                  remaining: feHours
                });
 
                // Backend Task
@@ -229,26 +266,23 @@ export const generateAIResponseV2 = async (prompt, type) => {
                   storyId: story.id,
                   status: 'backlog',
                   assignee: 'Backend Dev',
-                  estimated: 0,
-                  remaining: 0
+                  estimated: beHours,
+                  remaining: beHours
                });
 
                // QA/Test Task
-               if (idx % 2 === 0) { // Add test task for every other story to vary
-                  tasks.push({
-                     id: taskIdBase + (idx * 10) + 3,
-                     title: `QA: Test e verifica per "${storyTitle}"`,
-                     storyId: story.id,
-                     status: 'backlog',
-                     assignee: 'QA',
-                     estimated: 0,
-                     remaining: 0
-                  });
-               }
+               tasks.push({
+                  id: taskIdBase + (idx * 10) + 3,
+                  title: `QA: Test e verifica per "${storyTitle}"`,
+                  storyId: story.id,
+                  status: 'backlog',
+                  assignee: 'QA',
+                  estimated: qaHours,
+                  remaining: qaHours
+               });
             });
 
-            // Ensure ~20 tasks max
-            resolve(tasks.slice(0, 25));
+            resolve(tasks);
 
          } else if (type === 'task_estimates') {
             // Stima Ore per Task Tecnici

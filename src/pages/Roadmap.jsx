@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
 import { generateAIResponseV2 } from '../services/aiService';
-import { Sparkles, ArrowRight, Map, Calendar, Calculator, CheckCircle, AlertTriangle, Target, Briefcase } from 'lucide-react';
+import { Sparkles, ArrowRight, Map, Calendar, Calculator, CheckCircle, AlertTriangle, Target, Briefcase, Users, Clock } from 'lucide-react';
 
 const Roadmap = () => {
     const { project, updateProject } = useProject();
@@ -12,7 +12,11 @@ const Roadmap = () => {
     // MVP State
     const [mvpName, setMvpName] = useState(project.roadmap?.mvpName || 'MVP 1.0');
     const [targetDate, setTargetDate] = useState(project.roadmap?.targetDate || '');
-    const [velocity, setVelocity] = useState(project.roadmap?.velocity || 20); // Story Points per sprint
+
+    // Hourly Planning State
+    const [devCount, setDevCount] = useState(project.roadmap?.devCount || 2);
+    const [hoursPerDay, setHoursPerDay] = useState(project.roadmap?.hoursPerDay || 6);
+    const [sprintDurationWeeks, setSprintDurationWeeks] = useState(project.roadmap?.sprintDurationWeeks || 2); // Default 2 weeks
 
     // Selection state: Set of selected Epic IDs
     const [selectedEpics, setSelectedEpics] = useState(new Set(project.roadmap?.selectedEpics || []));
@@ -21,12 +25,11 @@ const Roadmap = () => {
     const [analysis, setAnalysis] = useState(project.roadmap?.analysis || null);
 
     // Calculators
+    // We display total points just for reference, but calculations are hour-based now
     const totalPoints = (project.backlog || []).reduce((acc, epic) => {
         if (!selectedEpics.has(epic.id)) return acc;
-        // Sum points of stories in this Epic. 
-        // Need to check project.estimates which is { storyId: points }
         const epicPoints = epic.stories.reduce((sum, story) => {
-            return sum + (project.estimates?.[story.id] || 1); // Default 1 point if missing
+            return sum + (project.estimates?.[story.id] || 1);
         }, 0);
         return acc + epicPoints;
     }, 0);
@@ -36,7 +39,6 @@ const Roadmap = () => {
         if (newSet.has(epicId)) newSet.delete(epicId);
         else newSet.add(epicId);
         setSelectedEpics(newSet);
-        // Reset analysis when scope changes
         setAnalysis(null);
     };
 
@@ -50,8 +52,11 @@ const Roadmap = () => {
         const prompt = {
             mvpName,
             targetDate,
-            velocity,
-            totalPoints,
+            devCount,
+            hoursPerDay,
+            sprintDays: sprintDurationWeeks * 5, // 5 work days per week
+            sprintDurationWeeks,
+            totalPoints, // passed for reference/hybrid calculation
             selectedScope: project.backlog.filter(e => selectedEpics.has(e.id)).map(e => e.title)
         };
 
@@ -70,7 +75,9 @@ const Roadmap = () => {
             roadmap: {
                 mvpName,
                 targetDate,
-                velocity,
+                devCount,
+                hoursPerDay,
+                sprintDurationWeeks,
                 selectedEpics: Array.from(selectedEpics),
                 analysis
             }
@@ -99,8 +106,8 @@ const Roadmap = () => {
                         </div>
                         <span className="text-sm font-medium text-indigo-400">Fase 8 di 9</span>
                     </div>
-                    <h1 className="text-3xl font-bold text-white">Roadmap MVP & Release</h1>
-                    <p className="text-zinc-400 mt-2">Definisci l'MVP, seleziona le funzionalità e verifica la fattibilità con l'AI.</p>
+                    <h1 className="text-3xl font-bold text-white">Roadmap MVP & Capacity Plan</h1>
+                    <p className="text-zinc-400 mt-2">Pianifica le release basandoti sulla capacità reale del team (ore/uomo).</p>
                 </div>
             </div>
 
@@ -118,7 +125,7 @@ const Roadmap = () => {
                                 <input
                                     value={mvpName}
                                     onChange={(e) => setMvpName(e.target.value)}
-                                    className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                    className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white outline-none"
                                     placeholder="Es. MVP 1.0"
                                 />
                             </div>
@@ -128,20 +135,60 @@ const Roadmap = () => {
                                     type="date"
                                     value={targetDate}
                                     onChange={(e) => setTargetDate(e.target.value)}
-                                    className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                    className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white outline-none"
                                 />
                             </div>
-                            <div>
-                                <label className="block text-xs font-medium text-zinc-400 mb-1">Velocity Stimata (Punti/Sprint)</label>
-                                <div className="flex items-center gap-2">
+                        </div>
+                    </div>
+
+                    {/* Team Capacity Card */}
+                    <div className="glass-panel p-6">
+                        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                            <Users size={20} className="text-indigo-400" /> Capacità del Team
+                        </h3>
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-medium text-zinc-400 mb-1">Developers</label>
                                     <input
                                         type="number"
-                                        value={velocity}
-                                        onChange={(e) => setVelocity(Number(e.target.value))}
-                                        className="w-24 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                        min="1"
+                                        value={devCount}
+                                        onChange={(e) => setDevCount(Number(e.target.value))}
+                                        className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white outline-none"
                                     />
-                                    <span className="text-xs text-zinc-500">pt / 2 settimane</span>
                                 </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-zinc-400 mb-1">Ore/Giorno</label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        max="12"
+                                        value={hoursPerDay}
+                                        onChange={(e) => setHoursPerDay(Number(e.target.value))}
+                                        className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white outline-none"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-zinc-400 mb-1">Durata Sprint</label>
+                                <select
+                                    value={sprintDurationWeeks}
+                                    onChange={(e) => setSprintDurationWeeks(Number(e.target.value))}
+                                    className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white outline-none"
+                                >
+                                    <option value={1}>1 Settimana</option>
+                                    <option value={2}>2 Settimane</option>
+                                    <option value={3}>3 Settimane</option>
+                                    <option value={4}>4 Settimane</option>
+                                </select>
+                            </div>
+
+                            <div className="p-3 bg-zinc-800/50 rounded-lg text-center border border-zinc-700">
+                                <span className="text-xs text-zinc-500 uppercase tracking-wider">Capacità Totale / Sprint</span>
+                                <p className="text-xl font-bold text-white mt-1">
+                                    {(devCount * hoursPerDay * (sprintDurationWeeks * 5))} Ore
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -152,18 +199,18 @@ const Roadmap = () => {
                             <Calculator size={64} />
                         </div>
                         <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                            <Sparkles size={20} className="text-indigo-400" /> Analisi Fattibilità
+                            <Sparkles size={20} className="text-indigo-400" /> Analisi AI (su Ore)
                         </h3>
 
                         {!analysis ? (
                             <div className="text-center py-6">
-                                <p className="text-zinc-400 text-sm mb-4">Seleziona le Epic e lancia l'analisi.</p>
+                                <p className="text-zinc-400 text-sm mb-4">Configura team e scope, poi calcola.</p>
                                 <button
                                     onClick={handleCalculate}
                                     disabled={loading || totalPoints === 0}
                                     className="w-full btn-primary flex items-center justify-center gap-2"
                                 >
-                                    {loading ? 'Analisi in corso...' : 'Calcola Piano'}
+                                    {loading ? 'Analisi in corso...' : 'Calcola Fattibilità'}
                                 </button>
                             </div>
                         ) : (
@@ -175,19 +222,19 @@ const Roadmap = () => {
                                             {analysis.achievable ? 'Obiettivo Raggiungibile' : 'A Rischio'}
                                         </p>
                                         <p className="text-sm text-zinc-300 mt-1">
-                                            Data stimata fine lavori: <span className="font-mono font-bold text-white">{new Date(analysis.projectedDate).toLocaleDateString()}</span>
+                                            Data stimata: <span className="font-mono font-bold text-white">{new Date(analysis.projectedDate).toLocaleDateString()}</span>
                                         </p>
                                     </div>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="bg-zinc-800 p-3 rounded-lg text-center">
-                                        <p className="text-xs text-zinc-400">Sprint Necessari</p>
-                                        <p className="text-2xl font-bold text-white">{analysis.sprintsNeeded}</p>
+                                        <p className="text-xs text-zinc-400">Totale Ore Stimate</p>
+                                        <p className="text-xl font-bold text-white">{analysis.totalEstimatedHours} h</p>
                                     </div>
                                     <div className="bg-zinc-800 p-3 rounded-lg text-center">
-                                        <p className="text-xs text-zinc-400">Settimane totali</p>
-                                        <p className="text-2xl font-bold text-white">{analysis.sprintsNeeded * 2}</p>
+                                        <p className="text-xs text-zinc-400">Sprint Necessari</p>
+                                        <p className="text-xl font-bold text-white">{analysis.sprintsNeeded}</p>
                                     </div>
                                 </div>
 
@@ -215,10 +262,10 @@ const Roadmap = () => {
                         <div className="flex items-center justify-between mb-6">
                             <div>
                                 <h3 className="text-lg font-semibold text-white">Scope MVP</h3>
-                                <p className="text-sm text-zinc-400">Seleziona le Epic da includere nel rilascio.</p>
+                                <p className="text-sm text-zinc-400">L'AI stimerà le ore per le storie selezionate.</p>
                             </div>
                             <div className="bg-zinc-800 px-4 py-2 rounded-lg border border-zinc-700">
-                                <span className="text-xs text-zinc-400 uppercase tracking-wider mr-2">Totale Punti</span>
+                                <span className="text-xs text-zinc-400 uppercase tracking-wider mr-2">Story Points (Rif.)</span>
                                 <span className="text-xl font-bold text-white">{totalPoints}</span>
                             </div>
                         </div>
@@ -258,7 +305,7 @@ const Roadmap = () => {
 
                     <div className="flex justify-end pt-4">
                         <button onClick={handleNext} className="btn-primary">
-                            Salva e Vai allo Sprint <ArrowRight size={16} />
+                            Salva e Procedi <ArrowRight size={16} />
                         </button>
                     </div>
                 </div>

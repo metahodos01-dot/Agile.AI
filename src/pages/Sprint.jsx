@@ -81,9 +81,12 @@ const KanbanColumn = ({ title, status, tasks, onMove, onAdd, color }) => (
                     </div>
                     <div className="flex items-center justify-between mt-3">
                         <div className="text-xs text-zinc-500 flex items-center gap-1"><Users size={12} /> {task.assignee || 'Team'}</div>
-                        <div className="flex gap-1">
-                            {status !== 'todo' && <button onClick={() => onMove(task.id, 'prev')} className="p-1 hover:bg-zinc-700 rounded"><RotateCcw size={12} /></button>}
-                            {status !== 'done' && <button onClick={() => onMove(task.id, 'next')} className="p-1 hover:bg-zinc-700 rounded"><Play size={12} /></button>}
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs text-indigo-400 font-bold">{task.estimated || 0}h</span>
+                            <div className="flex gap-1">
+                                {status !== 'todo' && <button onClick={() => onMove(task.id, 'prev')} className="p-1 hover:bg-zinc-700 rounded"><RotateCcw size={12} /></button>}
+                                {status !== 'done' && <button onClick={() => onMove(task.id, 'next')} className="p-1 hover:bg-zinc-700 rounded"><Play size={12} /></button>}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -117,30 +120,14 @@ const GaugeChart = ({ value, max, label, color, icon: Icon }) => {
             </div>
             <div className="flex items-center justify-center gap-2 mt-2">
                 <Icon size={16} className={`text-${color.replace('#', '')}`} style={{ color }} />
-                <span className="text-white font-bold text-lg">{value.toFixed(0)}%</span>
+                <span className="text-white font-bold text-lg">{value ? value.toFixed(0) : 0}%</span>
             </div>
             <p className="text-zinc-500 text-xs mt-1">{label}</p>
         </div>
     );
 };
 
-// ... MoodMeter, BurnChart, KpiCard, KanbanColumn ...
-// (I will assume they are present. To avoid deleting them, I must include them or skip the lines. 
-// Since I am replacing from line 1 to 300+, I should include them strictly if I want to keep them.
-// Actually, it's safer to keep them. I'll paste them back in condensed form to save tokens, or effectively just replace the Sprint component part if I can target it.)
-// Strategy: I will target the imports and the Sprint component definition, skipping the helper components in the middle if possible.
-// But `replace_file_content` works on line ranges.
-// Lines 11-236 are helper components. I should probably NOT replace them. 
-// I will target 238-654 to replace the `Sprint` component logic.
-// But I need to update imports at line 1.
-// Let's do imports first (Lines 1-9).
-// Then the main component (Lines 238+).
-
-// RE-STRATEGIZING:
-// 1. Update Imports (Lines 1-9) to include Calculate, AlertTriangle, Lock.
-// 2. Update Sprint Component Logic (Lines 238-654).
-
-// Step 1: Logic
+// --- Main Component ---
 const Sprint = () => {
     const { project, updateSprint, addSprint, saveProject } = useProject();
     // const navigate = useNavigate();
@@ -189,12 +176,33 @@ const Sprint = () => {
                 stop: activeSprint.stop || ['', ''],
                 continue: activeSprint.continue || ['', '']
             });
-            setCapacity(activeSprint.capacity || { total: 0, members: [] });
 
-            // Set tab based on status?
+            // --- CAPACITY INIT ---
+            // If sprint has saved capacity, use it.
+            // If NOT, we try to initialize from roadmap defaults if available, or just empty.
+            if (activeSprint.capacity && activeSprint.capacity.members?.length > 0) {
+                setCapacity(activeSprint.capacity);
+            } else {
+                // Try to init from Roadmap Defaults
+                const roadmap = project.roadmap || {};
+                const defaultHours = roadmap.hoursPerDay || 6;
+                const defaultRoles = ['Frontend Dev', 'Backend Dev', 'QA Specialist'];
+                const members = [];
+
+                // If roadmap has devCount, create mock members
+                const devCount = roadmap.devCount || 2;
+                for (let i = 0; i < devCount; i++) {
+                    members.push({ name: `Dev ${i + 1}`, hours: defaultHours, days: 10, total: defaultHours * 10 });
+                }
+
+                const total = members.reduce((sum, m) => sum + m.total, 0);
+                setCapacity({ members, total });
+            }
+
+            // Set tab based on status
             if (activeSprint.status === 'completed') setActiveTab('retro');
         }
-    }, [activeSprintId, project.sprints]); // Re-run when ID or project data updates
+    }, [activeSprintId, project.sprints, project.roadmap]); // Re-run when ID or project data updates
 
     // Timer Logic
     useEffect(() => {
@@ -256,22 +264,40 @@ const Sprint = () => {
     // Planning: Capacity
     const updateMemberCapacity = (index, field, value) => {
         const newMembers = [...(capacity.members || [])];
-        if (!newMembers[index]) newMembers[index] = { name: '', hours: 0, focus: 0 };
-        newMembers[index][field] = value;
+        if (!newMembers[index]) newMembers[index] = { name: '', hours: 0, days: 10, total: 0 };
 
-        // Recalc Total
-        const total = newMembers.reduce((sum, m) => sum + (Number(m.hours || 0) * (Number(m.focus || 0) / 100)), 0);
-        setCapacity({ members: newMembers, total: Math.round(total) });
+        newMembers[index][field] = value;
+        // Recalc Member Total
+        newMembers[index].total = Number(newMembers[index].hours || 0) * Number(newMembers[index].days || 0);
+
+        // Recalc Sprint Total
+        const total = newMembers.reduce((sum, m) => sum + m.total, 0);
+        setCapacity({ members: newMembers, total });
+
+        // Auto-save local capacity changes debounced preferably, but here we just update local state
+        // handleSaveLocal(); // We can trigger this on blur or distinct save button
     };
 
     const addMemberRow = () => {
-        setCapacity(prev => ({ ...prev, members: [...(prev.members || []), { name: '', hours: 0, focus: 80 }] }));
+        const defaultHours = project.roadmap?.hoursPerDay || 6;
+        setCapacity(prev => {
+            const newMembers = [...(prev.members || []), { name: 'Nuovo Membro', hours: defaultHours, days: 10, total: defaultHours * 10 }];
+            const total = newMembers.reduce((sum, m) => sum + m.total, 0);
+            return { members: newMembers, total };
+        });
+    };
+
+    const removeMemberRow = (index) => {
+        setCapacity(prev => {
+            const newMembers = [...prev.members];
+            newMembers.splice(index, 1);
+            const total = newMembers.reduce((sum, m) => sum + m.total, 0);
+            return { members: newMembers, total };
+        });
     };
 
     // Kanban & Others
-    // ... (Use existing handlers but update local state which then syncs via handleSaveLocal) ...
     const moveTask = (taskId, direction) => {
-        // ... existing logic ...
         if (direction === 'delete') {
             setKanbanTasks(prev => prev.filter(t => t.id !== taskId));
             return;
@@ -289,10 +315,6 @@ const Sprint = () => {
             return task;
         }));
     };
-
-    // ... (Other handlers: addTask, addCalendarEvent, removeEvent, handleRetroChange, handleMoodVote) ...
-    // To save token space, I will re-implement them or just reference "existing logic" if I wasn't replacing the whole block.
-    // Since I am replacing the block, I MUST provide the implementation.
 
     const addTask = () => {
         const title = prompt("Inserisci titolo task:");
@@ -339,7 +361,9 @@ const Sprint = () => {
     };
 
     // Derived Planning Data
-    const totalEstimatedHours = kanbanTasks.reduce((acc, t) => acc + (Number(t.estimated) || 0), 0);
+    // Calculate estimated hours only for tasks IN THE SPRINT (todo/doing/done), not backlog
+    const sprintTasks = kanbanTasks.filter(t => t.status !== 'backlog');
+    const totalEstimatedHours = sprintTasks.reduce((acc, t) => acc + (Number(t.estimated) || 0), 0);
     const totalCapacity = capacity.total || 0;
     const isOverCapacity = totalEstimatedHours > totalCapacity;
 
@@ -426,14 +450,15 @@ const Sprint = () => {
                                     <button
                                         onClick={() => {
                                             const title = prompt("Nuovo Task Operativo:");
+                                            const hours = prompt("Stima Ore:", "2");
                                             if (title) {
                                                 setKanbanTasks(prev => [...prev, {
                                                     id: Date.now(),
                                                     title,
                                                     status: 'backlog',
                                                     assignee: 'Team',
-                                                    estimated: 0,
-                                                    remaining: 0
+                                                    estimated: Number(hours) || 0,
+                                                    remaining: Number(hours) || 0
                                                 }]);
                                                 handleSaveLocal();
                                             }
@@ -453,15 +478,20 @@ const Sprint = () => {
                                                 return;
                                             }
                                             const prompt = { stories: allStories };
-                                            const generated = await generateAIResponseV2(prompt, 'sprint_planning');
-                                            if (Array.isArray(generated)) {
-                                                setKanbanTasks(prev => {
-                                                    const newTasks = [...prev, ...generated];
-                                                    // Deduplicate by ID just in case
-                                                    const uniqueTasks = Array.from(new Map(newTasks.map(item => [item.id, item])).values());
-                                                    return uniqueTasks;
-                                                });
-                                                handleSaveLocal(); // Trigger sync
+                                            try {
+                                                const generated = await generateAIResponseV2(prompt, 'sprint_planning');
+                                                if (Array.isArray(generated) && generated.length > 0) {
+                                                    setKanbanTasks(prev => {
+                                                        const newTasks = [...prev, ...generated];
+                                                        const uniqueTasks = Array.from(new Map(newTasks.map(item => [item.id, item])).values());
+                                                        return uniqueTasks;
+                                                    });
+                                                    handleSaveLocal();
+                                                } else {
+                                                    console.warn("AI returned empty or invalid tasks");
+                                                }
+                                            } catch (err) {
+                                                console.error("AI Gen Failed", err);
                                             }
                                         }}
                                         className="text-xs bg-indigo-500/20 text-indigo-400 px-3 py-1.5 rounded-lg border border-indigo-500/30 hover:bg-indigo-500/30 flex items-center gap-1"
@@ -479,9 +509,16 @@ const Sprint = () => {
                                 )}
                                 {kanbanTasks.filter(t => t.status === 'backlog').map(task => (
                                     <div key={task.id} className="p-3 bg-zinc-800 rounded-lg border border-zinc-700 flex justify-between items-center group">
-                                        <div>
+                                        <div className="flex-1">
                                             <p className="text-sm text-zinc-200 font-medium">{task.title}</p>
-                                            <p className="text-xs text-zinc-500">{task.assignee}</p>
+                                            <div className="flex items-center gap-3 mt-1">
+                                                <p className="text-xs text-zinc-500">{task.assignee}</p>
+                                                {task.estimated > 0 && (
+                                                    <span className="text-xs text-indigo-400 font-bold bg-indigo-500/10 px-1.5 py-0.5 rounded">
+                                                        {task.estimated}h
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                         <button
                                             onClick={() => {
@@ -489,7 +526,7 @@ const Sprint = () => {
                                                 setKanbanTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: 'todo' } : t));
                                             }}
                                             className="p-2 bg-green-500/10 text-green-400 rounded hover:bg-green-500/20"
-                                            title="Sposta in Sprint"
+                                            title="Sposta dopo nella Kanban"
                                         >
                                             <ArrowRight size={16} />
                                         </button>
@@ -500,50 +537,65 @@ const Sprint = () => {
 
                         {/* RIGHT: Sprint To Do & Capacity */}
                         <div className="flex flex-col h-[600px] space-y-4">
-                            {/* Capacity Summary */}
+                            {/* Capacity Planning Widget */}
                             <div className="bg-zinc-800/30 p-4 rounded-xl border border-zinc-700/50">
-                                <div className="flex justify-between items-center mb-2">
-                                    <h3 className="text-sm font-bold text-white">Sprint To Do</h3>
-                                    <div className="flex items-center gap-4">
-                                        <div className="text-right">
-                                            <p className="text-xs text-zinc-400">Totale Ore Stimate</p>
-                                            <p className={`text-lg font-bold ${isOverCapacity ? 'text-red-400' : 'text-green-400'}`}>{totalEstimatedHours}h</p>
+                                <h3 className="text-sm font-bold text-white mb-3 flex items-center justify-between">
+                                    <span>Pianificazione Capacità</span>
+                                    <span className={`text-xs px-2 py-1 rounded ${totalEstimatedHours > capacity.total ? 'bg-red-500/20 text-red-300' : 'bg-green-500/20 text-green-300'}`}>
+                                        {totalEstimatedHours}h Utilizzate / {capacity.total}h Disponibili
+                                    </span>
+                                </h3>
+
+                                <div className="space-y-2 max-h-[120px] overflow-y-auto mb-3 pr-1">
+                                    {capacity.members?.map((member, idx) => (
+                                        <div key={idx} className="flex items-center gap-2 text-xs">
+                                            <input
+                                                value={member.name}
+                                                onChange={(e) => updateMemberCapacity(idx, 'name', e.target.value)}
+                                                className="bg-zinc-900 border border-zinc-700 rounded px-2 py-1 flex-1 text-zinc-300"
+                                                placeholder="Nome"
+                                            />
+                                            <div className="flex items-center gap-1">
+                                                <input
+                                                    type="number"
+                                                    value={member.hours}
+                                                    onChange={(e) => updateMemberCapacity(idx, 'hours', Number(e.target.value))}
+                                                    className="w-12 bg-zinc-900 border border-zinc-700 rounded px-1 py-1 text-center text-zinc-300"
+                                                    title="Ore al giorno"
+                                                />
+                                                <span className="text-zinc-600">h/gg</span>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <input
+                                                    type="number"
+                                                    value={member.days || 10}
+                                                    onChange={(e) => updateMemberCapacity(idx, 'days', Number(e.target.value))}
+                                                    className="w-12 bg-zinc-900 border border-zinc-700 rounded px-1 py-1 text-center text-zinc-300"
+                                                    title="Giorni Sprint"
+                                                />
+                                                <span className="text-zinc-600">gg</span>
+                                            </div>
+                                            <span className="w-10 text-right font-mono font-bold text-indigo-400">{member.total}h</span>
+                                            <button onClick={() => removeMemberRow(idx)} className="text-zinc-600 hover:text-red-400"><X size={12} /></button>
                                         </div>
-                                        <div className="text-right">
-                                            <p className="text-xs text-zinc-400">Capacità Team</p>
-                                            <p className="text-lg font-bold text-zinc-300">{capacity.total}h</p>
-                                        </div>
-                                    </div>
+                                    ))}
                                 </div>
-                                <div className="h-2 bg-zinc-900 rounded-full overflow-hidden">
+
+                                <button onClick={addMemberRow} className="w-full text-xs text-zinc-500 hover:text-zinc-300 border border-dashed border-zinc-700 rounded py-1">
+                                    + Aggiungi Membro
+                                </button>
+
+                                <div className="h-2 bg-zinc-900 rounded-full overflow-hidden mt-3">
                                     <div
-                                        className={`h-full ${isOverCapacity ? 'bg-red-500' : 'bg-green-500'}`}
+                                        className={`h-full transition-all ${isOverCapacity ? 'bg-red-500' : 'bg-green-500'}`}
                                         style={{ width: `${Math.min((totalEstimatedHours / (capacity.total || 1)) * 100, 100)}%` }}
                                     />
                                 </div>
-                                <button
-                                    onClick={async () => {
-                                        // Estimate tasks in To Do
-                                        const todoTasks = kanbanTasks.filter(t => t.status === 'todo');
-                                        if (todoTasks.length === 0) return;
-                                        const prompt = { tasks: todoTasks };
-                                        const estimates = await generateAIResponseV2(prompt, 'task_estimates');
-
-                                        setKanbanTasks(prev => prev.map(t => {
-                                            if (estimates[t.id]) {
-                                                return { ...t, estimated: estimates[t.id], remaining: estimates[t.id] };
-                                            }
-                                            return t;
-                                        }));
-                                    }}
-                                    className="mt-3 w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg flex items-center justify-center gap-2"
-                                >
-                                    <Calculator size={16} /> Stima Ore con AI
-                                </button>
                             </div>
 
                             {/* To Do List */}
                             <div className="flex-1 overflow-y-auto space-y-2 p-2 bg-zinc-900/50 rounded-xl border border-zinc-800">
+                                <h4 className="text-xs font-bold text-zinc-500 uppercase px-2 mb-1">Sprint Tasks (To Do)</h4>
                                 {kanbanTasks.filter(t => t.status === 'todo').length === 0 && (
                                     <p className="text-zinc-500 text-sm text-center py-10">
                                         Trascina qui i task dal Backlog Operativo.
@@ -556,7 +608,16 @@ const Sprint = () => {
                                             <div className="flex items-center gap-2 mt-1">
                                                 <span className="text-xs text-zinc-500 bg-zinc-900 px-2 py-0.5 rounded">{task.assignee}</span>
                                                 <div className="flex items-center gap-1 text-xs text-indigo-400">
-                                                    <Clock size={10} /> {task.estimated}h
+                                                    <Clock size={10} />
+                                                    <input
+                                                        type="number"
+                                                        className="bg-transparent w-8 text-center border-b border-indigo-500/30 outline-none"
+                                                        value={task.estimated}
+                                                        onChange={(e) => {
+                                                            const val = Number(e.target.value);
+                                                            setKanbanTasks(prev => prev.map(t => t.id === task.id ? { ...t, estimated: val, remaining: val } : t));
+                                                        }}
+                                                    /> h
                                                 </div>
                                             </div>
                                         </div>
@@ -800,21 +861,15 @@ const Sprint = () => {
                         </div>
                     )}
                 </button>
-                {project.name && <ExportButton />}
+                {project.name && <ExportButton project={project} />}
             </div>
-            {/* Footer Info */}
-            {project.name && (
-                <div className="glass-panel p-6 mt-8 border-l-4 border-purple-500">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h3 className="text-lg font-semibold text-white mb-2">📄 Esporta la documentazione completa</h3>
-                            <p className="text-zinc-400 text-sm">Hai completato tutte le fasi! Esporta il tuo progetto completo.</p>
-                        </div>
-                        <div className="ml-6"><ExportButton /></div>
-                    </div>
-                </div>
-            )}
+            {/* Auto-save Indicator */}
+            <div className="fixed bottom-4 right-4 flex items-center gap-2 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800 shadow-lg">
+                <div className={`w-2 h-2 rounded-full ${saved ? 'bg-green-500' : 'bg-zinc-600'}`} />
+                <span className="text-xs text-zinc-500">{saved ? 'Salvato' : 'Modifiche non salvate'}</span>
+            </div>
         </div>
     );
 };
+
 export default Sprint;
