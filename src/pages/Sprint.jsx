@@ -479,9 +479,13 @@ const Sprint = () => {
                                             if (isGenerating) return;
                                             setIsGenerating(true);
                                             try {
+                                                console.log("Starting AI Generation...");
                                                 // Generate tasks from Stories
-                                                // We need to fetch all stories from project backlog safely
-                                                const allStories = (project.backlog || []).flatMap(e => e.stories || []);
+                                                const rawBacklog = project.backlog || [];
+                                                console.log("Raw Backlog:", rawBacklog);
+
+                                                const allStories = rawBacklog.flatMap(e => e.stories || []);
+                                                console.log("All Stories Extracted:", allStories);
 
                                                 if (allStories.length === 0) {
                                                     alert("Nessuna storia trovata nel backlog. Crea prima le user stories.");
@@ -489,23 +493,30 @@ const Sprint = () => {
                                                 }
 
                                                 const prompt = { stories: allStories };
+                                                console.log("Sending prompt to AI:", prompt);
+
                                                 const generated = await generateAIResponseV2(prompt, 'sprint_planning');
+                                                console.log("AI Response Received:", generated);
 
                                                 if (Array.isArray(generated) && generated.length > 0) {
                                                     setKanbanTasks(prev => {
                                                         const newTasks = [...prev, ...generated];
+                                                        // Ensure uniqueness by ID
                                                         const uniqueTasks = Array.from(new Map(newTasks.map(item => [item.id, item])).values());
+                                                        console.log("Setting Kanban Tasks. Previous:", prev.length, "New Total:", uniqueTasks.length);
+
                                                         // Save immediately with the verified unique list
                                                         handleSaveLocal({ kanban: uniqueTasks });
                                                         return uniqueTasks;
                                                     });
+                                                    alert(`Generati ${generated.length} task con successo!`);
                                                 } else {
-                                                    console.warn("AI returned empty or invalid tasks");
-                                                    alert("L'AI non ha generato task. Riprova.");
+                                                    console.warn("AI returned empty or invalid tasks. Result:", generated);
+                                                    alert(`L'AI ha risposto ma non ha generato task. Controlla la console. Risultato: ${JSON.stringify(generated)}`);
                                                 }
                                             } catch (err) {
-                                                console.error("AI Gen Failed", err);
-                                                alert("Errore durante la generazione AI: " + err.message);
+                                                console.error("AI Gen Failed Exception:", err);
+                                                alert("Errore CRITICO durante la generazione AI: " + err.message);
                                             } finally {
                                                 setIsGenerating(false);
                                             }
