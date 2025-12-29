@@ -165,6 +165,7 @@ const Sprint = () => {
     // Sync Effect: Load data when Active Sprint changes
     useEffect(() => {
         if (activeSprint) {
+            console.log("Sprint Effect Sync. ActiveSprint ID:", activeSprint.id, "Tasks:", activeSprint.kanban?.length);
             setKanbanTasks(activeSprint.kanban || []);
             setCalendarEvents(activeSprint.calendar || []);
             setSprintNotes(activeSprint.notes || '');
@@ -499,16 +500,16 @@ const Sprint = () => {
                                                 console.log("AI Response Received:", generated);
 
                                                 if (Array.isArray(generated) && generated.length > 0) {
-                                                    setKanbanTasks(prev => {
-                                                        const newTasks = [...prev, ...generated];
-                                                        // Ensure uniqueness by ID
-                                                        const uniqueTasks = Array.from(new Map(newTasks.map(item => [item.id, item])).values());
-                                                        console.log("Setting Kanban Tasks. Previous:", prev.length, "New Total:", uniqueTasks.length);
+                                                    const newTasks = [...kanbanTasks, ...generated];
+                                                    // Ensure uniqueness by ID
+                                                    const uniqueTasks = Array.from(new Map(newTasks.map(item => [item.id, item])).values());
+                                                    console.log("Setting Kanban Tasks (Refactored). Previous:", kanbanTasks.length, "New Total:", uniqueTasks.length);
 
-                                                        // Save immediately with the verified unique list
-                                                        handleSaveLocal({ kanban: uniqueTasks });
-                                                        return uniqueTasks;
-                                                    });
+                                                    // Save immediately (Global Source of Truth)
+                                                    handleSaveLocal({ kanban: uniqueTasks });
+                                                    // Update Local State (Immediate UI Feedback)
+                                                    setKanbanTasks(uniqueTasks);
+
                                                     alert(`Generati ${generated.length} task con successo!`);
                                                 } else {
                                                     console.warn("AI returned empty or invalid tasks. Result:", generated);
@@ -523,8 +524,8 @@ const Sprint = () => {
                                         }}
                                         disabled={isGenerating}
                                         className={`text-xs px-3 py-1.5 rounded-lg border flex items-center gap-1 transition-all ${isGenerating
-                                                ? 'bg-indigo-500/10 border-indigo-500/10 text-indigo-400/50 cursor-wait'
-                                                : 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30 hover:bg-indigo-500/30'
+                                            ? 'bg-indigo-500/10 border-indigo-500/10 text-indigo-400/50 cursor-wait'
+                                            : 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30 hover:bg-indigo-500/30'
                                             }`}
                                     >
                                         <Sparkles size={12} className={isGenerating ? "animate-spin" : ""} />
