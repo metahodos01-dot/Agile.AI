@@ -17,7 +17,6 @@ export const generateAIResponse = async (prompt, type) => {
 🚀 **Value Proposition & Elementi Differenzianti**
 
 ✨ **Innovazione Radicale**: Oltre le soluzioni tradizionali, portiamo ${differentiation} al centro del processo.
-✨ **Innovazione Radicale**: Oltre le soluzioni tradizionali, portiamo ${differentiated} al centro del processo.
 💎 **Impatto Misurabile**: Risoluzione concreta di ${problem} con ROI tangibile.
 🤝 **Focus sull'Utente**: Progettato specificamente per le esigenze di ${target}.
 🔗 **Integrazione Totale**: Si inserisce perfettamente nel workflow esistente.`);
