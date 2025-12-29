@@ -162,6 +162,9 @@ export const ProjectProvider = ({ children }) => {
             // Check if it's a UUID (existing Supabase project) or a temp/new ID
             const isUUID = projectCurrent.id && projectCurrent.id.length > 20;
 
+            console.log(`[SaveProject] Starting save. ID: ${projectCurrent.id}, isUUID: ${isUUID}, User: ${user.id}`);
+            console.log(`[SaveProject] Payload size: ${JSON.stringify(payload).length} characters`);
+
             const dbOperation = async () => {
                 let d, e;
                 if (isUUID) {
