@@ -150,6 +150,101 @@ export const generateAIResponseV2 = async (prompt, type) => {
             ];
             resolve(epics);
 
+         } else if (type === 'estimates') {
+            // Stima Story Points per User Stories
+            const estimates = {};
+            const stories = prompt.stories || [];
+            stories.forEach(story => {
+               // Logic to vary estimates based on keywords/length
+               let points = 1;
+               const text = (story.title || '').toLowerCase();
+               if (text.includes('dashboard') || text.includes('report') || text.includes('analisi')) points = 8;
+               else if (text.includes('api') || text.includes('backend') || text.includes('integrazione')) points = 5;
+               else if (text.includes('form') || text.includes('login') || text.includes('ui')) points = 3;
+               else if (text.includes('setup') || text.includes('config')) points = 2;
+               else points = Math.floor(Math.random() * 5) + 1; // Random variation 1-5 for generic
+
+               // Fibonacci-ish adjustment
+               if (points > 13) points = 13;
+               else if (points > 8) points = 13;
+               else if (points > 5) points = 8;
+               else if (points > 3) points = 5;
+
+               estimates[story.id] = points;
+            });
+            resolve(estimates);
+
+         } else if (type === 'sprint_planning') {
+            // Generazione Task Operativi da Stories
+            const tasks = [];
+            const stories = prompt.stories || [];
+            let taskIdBase = Date.now();
+
+            // Take top priority stories (first 5-6) or all
+            const targetStories = stories.slice(0, 8);
+
+            targetStories.forEach((story, idx) => {
+               const storyTitle = story.title.substring(0, 40) + (story.title.length > 40 ? '...' : '');
+
+               // Frontend Task
+               tasks.push({
+                  id: taskIdBase + (idx * 10) + 1,
+                  title: `FE: Implementare UI per "${storyTitle}"`,
+                  storyId: story.id,
+                  status: 'backlog', // In "Operational Backlog"
+                  assignee: 'Frontend Dev',
+                  estimated: 0,
+                  remaining: 0
+               });
+
+               // Backend Task
+               tasks.push({
+                  id: taskIdBase + (idx * 10) + 2,
+                  title: `BE: API/Logica per "${storyTitle}"`,
+                  storyId: story.id,
+                  status: 'backlog',
+                  assignee: 'Backend Dev',
+                  estimated: 0,
+                  remaining: 0
+               });
+
+               // QA/Test Task
+               if (idx % 2 === 0) { // Add test task for every other story to vary
+                  tasks.push({
+                     id: taskIdBase + (idx * 10) + 3,
+                     title: `QA: Test e verifica per "${storyTitle}"`,
+                     storyId: story.id,
+                     status: 'backlog',
+                     assignee: 'QA',
+                     estimated: 0,
+                     remaining: 0
+                  });
+               }
+            });
+
+            // Ensure ~20 tasks max
+            resolve(tasks.slice(0, 25));
+
+         } else if (type === 'task_estimates') {
+            // Stima Ore per Task Tecnici
+            const estimates = {};
+            const tasks = prompt.tasks || [];
+            tasks.forEach(task => {
+               let hours = 2;
+               const text = (task.title || '').toLowerCase();
+               if (text.includes('fe:')) hours = 4;
+               else if (text.includes('be:')) hours = 6;
+               else if (text.includes('qa:')) hours = 3;
+               else if (text.includes('effettuare')) hours = 2;
+
+               // Randomize slightly
+               hours += Math.floor(Math.random() * 3) - 1; // +/- 1
+               if (hours < 1) hours = 1;
+
+               estimates[task.id] = hours;
+            });
+            resolve(estimates);
+
          } else {
             resolve("Suggerimento generato in base al contesto industriale del tuo progetto.");
          }

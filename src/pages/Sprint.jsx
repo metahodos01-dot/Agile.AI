@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 // import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
+import { generateAIResponseV2 } from '../services/aiService';
 import ExportButton from '../components/common/ExportButton';
 import {
     Play, CheckSquare, Pause, RotateCcw, Save, CheckCircle, Target, BookOpen,
     TrendingUp, TrendingDown, Smile, Meh, Frown, BarChart3, Activity, Users,
-    Calendar, Zap, Database, Plus, X, Calculator, AlertTriangle, Lock
+    Calendar, Zap, Database, Plus, X, Calculator, AlertTriangle, Lock, Sparkles, Clock, Layers, ArrowRight
 } from 'lucide-react';
 
 // --- Helper Components ---
@@ -415,91 +416,134 @@ const Sprint = () => {
                 {/* PLANNING TAB */}
                 {activeTab === 'planning' && (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
-                        {/* Capacity Planning */}
-                        <div className="bg-zinc-800/30 p-6 rounded-2xl border border-zinc-700/50">
-                            <div className="flex items-center justify-between mb-6">
+                        {/* LEFT: Operational Backlog (Pool) */}
+                        <div className="bg-zinc-800/30 p-4 rounded-2xl border border-zinc-700/50 flex flex-col h-[600px]">
+                            <div className="flex items-center justify-between mb-4">
                                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                                    <Users className="text-indigo-400" size={20} /> Capacità del Team
+                                    <Layers className="text-indigo-400" size={20} /> Backlog Operativo
                                 </h3>
-                                <div className="text-right">
-                                    <p className="text-xs text-zinc-400">Totale Ore Disponibili</p>
-                                    <p className="text-2xl font-mono font-bold text-indigo-400">{capacity.total}h</p>
-                                </div>
+                                <button
+                                    onClick={async () => {
+                                        // Generate tasks from Stories
+                                        // We need to fetch all stories from project backlog
+                                        const allStories = (project.backlog || []).flatMap(e => e.stories);
+                                        const prompt = { stories: allStories };
+                                        const generated = await generateAIResponseV2(prompt, 'sprint_planning');
+                                        if (Array.isArray(generated)) {
+                                            // Add to operational backlog (which we need to add to state first)
+                                            // For now, let's assume we use 'kanbanTasks' but with 'backlog' status for operational
+                                            const newTasks = [...kanbanTasks, ...generated];
+                                            setKanbanTasks(newTasks);
+                                            handleSaveLocal(); // Trigger sync
+                                        }
+                                    }}
+                                    className="text-xs bg-indigo-500/20 text-indigo-400 px-3 py-1.5 rounded-lg border border-indigo-500/30 hover:bg-indigo-500/30 flex items-center gap-1"
+                                >
+                                    <Sparkles size={12} /> Genera Task
+                                </button>
                             </div>
 
-                            <div className="space-y-4 mb-6">
-                                {(capacity.members || []).map((member, idx) => (
-                                    <div key={idx} className="flex gap-3 items-center">
-                                        <input
-                                            placeholder="Nome Membro"
-                                            className="bg-zinc-900/50 border border-zinc-700 rounded-lg p-2 text-sm text-zinc-200 flex-1"
-                                            value={member.name}
-                                            onChange={(e) => updateMemberCapacity(idx, 'name', e.target.value)}
-                                            disabled={activeSprint.status === 'completed'}
-                                        />
-                                        <div className="flex items-center gap-2 w-24">
-                                            <input
-                                                type="number"
-                                                placeholder="Ore"
-                                                className="w-full bg-zinc-900/50 border border-zinc-700 rounded-lg p-2 text-sm text-center text-zinc-200"
-                                                value={member.hours}
-                                                onChange={(e) => updateMemberCapacity(idx, 'hours', Number(e.target.value))}
-                                                disabled={activeSprint.status === 'completed'}
-                                            />
+                            <div className="flex-1 overflow-y-auto space-y-2 p-2 bg-zinc-900/50 rounded-xl border border-zinc-800">
+                                {kanbanTasks.filter(t => t.status === 'backlog').length === 0 && (
+                                    <p className="text-zinc-500 text-sm text-center py-10">
+                                        Nessun task nel backlog operativo.<br />Generali con l'AI o aggiungili manualmente.
+                                    </p>
+                                )}
+                                {kanbanTasks.filter(t => t.status === 'backlog').map(task => (
+                                    <div key={task.id} className="p-3 bg-zinc-800 rounded-lg border border-zinc-700 flex justify-between items-center group">
+                                        <div>
+                                            <p className="text-sm text-zinc-200 font-medium">{task.title}</p>
+                                            <p className="text-xs text-zinc-500">{task.assignee}</p>
                                         </div>
-                                        <div className="flex items-center gap-2 w-24">
-                                            <input
-                                                type="number"
-                                                placeholder="Focus %"
-                                                className="w-full bg-zinc-900/50 border border-zinc-700 rounded-lg p-2 text-sm text-center text-zinc-200"
-                                                value={member.focus}
-                                                onChange={(e) => updateMemberCapacity(idx, 'focus', Number(e.target.value))}
-                                                disabled={activeSprint.status === 'completed'}
-                                            />
-                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                // Move to Todo
+                                                setKanbanTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: 'todo' } : t));
+                                            }}
+                                            className="p-2 bg-green-500/10 text-green-400 rounded hover:bg-green-500/20"
+                                            title="Sposta in Sprint"
+                                        >
+                                            <ArrowRight size={16} />
+                                        </button>
                                     </div>
                                 ))}
-                                {activeSprint.status !== 'completed' && (
-                                    <button onClick={addMemberRow} className="text-sm text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1">
-                                        <Plus size={14} /> Aggiungi Membro
-                                    </button>
-                                )}
                             </div>
                         </div>
 
-                        {/* Task Estimation Check */}
-                        <div className="space-y-6">
-                            <div className={`p-6 rounded-2xl border ${isOverCapacity ? 'bg-red-500/10 border-red-500/30' : 'bg-green-500/10 border-green-500/30'}`}>
-                                <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
-                                    {isOverCapacity ? <AlertTriangle className="text-red-400" /> : <CheckCircle className="text-green-400" />}
-                                    Verifica Pianificazione
-                                </h3>
-                                <div className="flex justify-between items-end mb-4">
-                                    <div>
-                                        <p className="text-sm text-zinc-400">Ore Stimate (Tasks)</p>
-                                        <p className={`text-2xl font-bold ${isOverCapacity ? 'text-red-400' : 'text-green-400'}`}>{totalEstimatedHours}h</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-sm text-zinc-400">Vs Capacità</p>
-                                        <p className="text-lg font-medium text-zinc-300">{capacity.total}h</p>
+                        {/* RIGHT: Sprint To Do & Capacity */}
+                        <div className="flex flex-col h-[600px] space-y-4">
+                            {/* Capacity Summary */}
+                            <div className="bg-zinc-800/30 p-4 rounded-xl border border-zinc-700/50">
+                                <div className="flex justify-between items-center mb-2">
+                                    <h3 className="text-sm font-bold text-white">Sprint To Do</h3>
+                                    <div className="flex items-center gap-4">
+                                        <div className="text-right">
+                                            <p className="text-xs text-zinc-400">Totale Ore Stimate</p>
+                                            <p className={`text-lg font-bold ${isOverCapacity ? 'text-red-400' : 'text-green-400'}`}>{totalEstimatedHours}h</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-xs text-zinc-400">Capacità Team</p>
+                                            <p className="text-lg font-bold text-zinc-300">{capacity.total}h</p>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="h-4 bg-zinc-900 rounded-full overflow-hidden">
+                                <div className="h-2 bg-zinc-900 rounded-full overflow-hidden">
                                     <div
                                         className={`h-full ${isOverCapacity ? 'bg-red-500' : 'bg-green-500'}`}
                                         style={{ width: `${Math.min((totalEstimatedHours / (capacity.total || 1)) * 100, 100)}%` }}
                                     />
                                 </div>
+                                <button
+                                    onClick={async () => {
+                                        // Estimate tasks in To Do
+                                        const todoTasks = kanbanTasks.filter(t => t.status === 'todo');
+                                        if (todoTasks.length === 0) return;
+                                        const prompt = { tasks: todoTasks };
+                                        const estimates = await generateAIResponseV2(prompt, 'task_estimates');
+
+                                        setKanbanTasks(prev => prev.map(t => {
+                                            if (estimates[t.id]) {
+                                                return { ...t, estimated: estimates[t.id], remaining: estimates[t.id] };
+                                            }
+                                            return t;
+                                        }));
+                                    }}
+                                    className="mt-3 w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg flex items-center justify-center gap-2"
+                                >
+                                    <Calculator size={16} /> Stima Ore con AI
+                                </button>
                             </div>
 
-                            <div className="bg-zinc-800/30 p-6 rounded-2xl border border-zinc-700/50">
-                                <h3 className="text-lg font-bold text-white mb-4">Gestione Rapida</h3>
-                                <button
-                                    onClick={() => setActiveTab('daily')}
-                                    className="w-full py-3 bg-zinc-700 hover:bg-zinc-600 rounded-xl text-white font-medium flex items-center justify-center gap-2"
-                                >
-                                    <BookOpen size={18} /> Aggiungi Task in Board
-                                </button>
+                            {/* To Do List */}
+                            <div className="flex-1 overflow-y-auto space-y-2 p-2 bg-zinc-900/50 rounded-xl border border-zinc-800">
+                                {kanbanTasks.filter(t => t.status === 'todo').length === 0 && (
+                                    <p className="text-zinc-500 text-sm text-center py-10">
+                                        Trascina qui i task dal Backlog Operativo.
+                                    </p>
+                                )}
+                                {kanbanTasks.filter(t => t.status === 'todo').map(task => (
+                                    <div key={task.id} className="p-3 bg-zinc-800 rounded-lg border border-zinc-700 flex justify-between items-center">
+                                        <div className="flex-1">
+                                            <p className="text-sm text-zinc-200 font-medium">{task.title}</p>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <span className="text-xs text-zinc-500 bg-zinc-900 px-2 py-0.5 rounded">{task.assignee}</span>
+                                                <div className="flex items-center gap-1 text-xs text-indigo-400">
+                                                    <Clock size={10} /> {task.estimated}h
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                // Move back to Backlog
+                                                setKanbanTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: 'backlog' } : t));
+                                            }}
+                                            className="p-1 text-zinc-500 hover:text-red-400"
+                                            title="Rimuovi da Sprint"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>

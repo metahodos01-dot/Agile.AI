@@ -4,6 +4,7 @@ import { useProject } from '../context/ProjectContext';
 import { Sparkles, ArrowRight, Clock, BookOpen } from 'lucide-react';
 
 import { calculateTotalHours, calculateSprintsNeeded } from '../utils/estimations';
+import { generateAIResponseV2 } from '../services/aiService';
 
 const Estimates = () => {
     const { project, updateProject } = useProject();
@@ -20,16 +21,18 @@ const Estimates = () => {
     const teamSize = project.team ? project.team.length : 0; // Assuming project.team is an array of members
     const sprintsNeeded = calculateSprintsNeeded(totalHours, teamSize);
 
-    const handleSuggest = () => {
+    const handleSuggest = async () => {
         setLoading(true);
-        setTimeout(() => {
-            const newEstimates = {};
-            allStories.forEach(story => {
-                newEstimates[story.id] = Math.floor(Math.random() * 13) + 1; // 1-13 ore
-            });
-            setEstimates(newEstimates);
-            setLoading(false);
-        }, 1200);
+        try {
+            const prompt = {
+                stories: allStories.map(s => ({ id: s.id, title: s.title }))
+            };
+            const aiEstimates = await generateAIResponseV2(prompt, 'estimates');
+            setEstimates(prev => ({ ...prev, ...aiEstimates }));
+        } catch (error) {
+            console.error("Error generating estimates:", error);
+        }
+        setLoading(false);
     };
 
     const updateEstimate = (storyId, hours) => {
