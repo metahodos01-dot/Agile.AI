@@ -225,19 +225,19 @@ const Sprint = () => {
         setActiveTab('planning');
     };
 
-    const handleSaveLocal = () => {
-        // Update context immediately
+    const handleSaveLocal = (overrides = {}) => {
+        // Update context immediately with current state or overrides
         const payload = {
             id: activeSprintId,
             status: activeSprint.status, // Preserve status
-            kanban: kanbanTasks,
-            calendar: calendarEvents,
-            notes: sprintNotes,
-            kpis: kpiData,
-            start: retroItems.start,
-            stop: retroItems.stop,
-            continue: retroItems.continue,
-            capacity: capacity
+            kanban: overrides.kanban || kanbanTasks,
+            calendar: overrides.calendar || calendarEvents,
+            notes: overrides.notes || sprintNotes,
+            kpis: overrides.kpis || kpiData,
+            start: overrides.start || retroItems.start,
+            stop: overrides.stop || retroItems.stop,
+            continue: overrides.continue || retroItems.continue,
+            capacity: overrides.capacity || capacity
         };
         updateSprint(activeSprintId, payload);
     };
@@ -452,15 +452,20 @@ const Sprint = () => {
                                             const title = prompt("Nuovo Task Operativo:");
                                             const hours = prompt("Stima Ore:", "2");
                                             if (title) {
-                                                setKanbanTasks(prev => [...prev, {
+                                                const newTask = {
                                                     id: Date.now(),
                                                     title,
                                                     status: 'backlog',
                                                     assignee: 'Team',
                                                     estimated: Number(hours) || 0,
                                                     remaining: Number(hours) || 0
-                                                }]);
-                                                handleSaveLocal();
+                                                };
+                                                setKanbanTasks(prev => {
+                                                    const updated = [...prev, newTask];
+                                                    // Save immediately with the new list
+                                                    handleSaveLocal({ kanban: updated });
+                                                    return updated;
+                                                });
                                             }
                                         }}
                                         className="p-1.5 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 rounded-lg transition-colors"
@@ -484,9 +489,10 @@ const Sprint = () => {
                                                     setKanbanTasks(prev => {
                                                         const newTasks = [...prev, ...generated];
                                                         const uniqueTasks = Array.from(new Map(newTasks.map(item => [item.id, item])).values());
+                                                        // Save immediately with the verified unique list
+                                                        handleSaveLocal({ kanban: uniqueTasks });
                                                         return uniqueTasks;
                                                     });
-                                                    handleSaveLocal();
                                                 } else {
                                                     console.warn("AI returned empty or invalid tasks");
                                                 }
