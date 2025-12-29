@@ -150,6 +150,31 @@ export const generateAIResponseV2 = async (prompt, type) => {
             ];
             resolve(epics);
 
+         } else if (type === 'roadmap_mvp') {
+            // Roadmap AI Calculation
+            const velocity = prompt.velocity || 20;
+            const totalPoints = prompt.totalPoints || 0;
+            const sprintsNeeded = Math.ceil(totalPoints / velocity);
+
+            // Simple date calc
+            const weeksNeeded = sprintsNeeded * 2;
+            const today = new Date();
+            const projectedDate = new Date(today.setDate(today.getDate() + (weeksNeeded * 7)));
+
+            const targetDateObj = new Date(prompt.targetDate);
+            const achievable = projectedDate <= targetDateObj;
+
+            const analysis = {
+               sprintsNeeded,
+               achievable,
+               projectedDate: projectedDate.toISOString().split('T')[0],
+               analysis: achievable
+                  ? `Ottimo! Con una velocity di ${velocity} pt/sprint, puoi completare i ${totalPoints} punti in ${sprintsNeeded} sprint, arrivando prima del ${prompt.targetDate}. Hai un margine di sicurezza.`
+                  : `Attenzione. Servono ${sprintsNeeded} sprint (${weeksNeeded} settimane) per completare il lavoro. La data target ${prompt.targetDate} è troppo vicina. Consigliamo di ridurre lo scope (rimuovere feature non essenziali) o aumentare il team.`
+            };
+
+            resolve(analysis);
+
          } else if (type === 'estimates') {
             // Stima Story Points per User Stories
             const estimates = {};

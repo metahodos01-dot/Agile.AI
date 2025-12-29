@@ -1,89 +1,80 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
-import { Sparkles, ArrowRight, Map, BookOpen, Calendar, Plus, Trash2, GripVertical } from 'lucide-react';
+import { generateAIResponseV2 } from '../services/aiService';
+import { Sparkles, ArrowRight, Map, Calendar, Calculator, CheckCircle, AlertTriangle, Target, Briefcase } from 'lucide-react';
 
 const Roadmap = () => {
     const { project, updateProject } = useProject();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
 
-    // Initialize releases with backward compatibility for string arrays
-    const [releases, setReleases] = useState(() => {
-        const existing = project.roadmap?.releases;
-        if (!existing) {
-            const today = new Date();
-            return [
-                { name: 'Pilota', date: new Date(today.setMonth(today.getMonth() + 1)).toISOString().split('T')[0] },
-                { name: 'Linea 1', date: new Date(today.setMonth(today.getMonth() + 2)).toISOString().split('T')[0] },
-                { name: 'Tutte le linee', date: new Date(today.setMonth(today.getMonth() + 3)).toISOString().split('T')[0] },
-                { name: 'Futuro', date: '' }
-            ];
+    // MVP State
+    const [mvpName, setMvpName] = useState(project.roadmap?.mvpName || 'MVP 1.0');
+    const [targetDate, setTargetDate] = useState(project.roadmap?.targetDate || '');
+    const [velocity, setVelocity] = useState(project.roadmap?.velocity || 20); // Story Points per sprint
+
+    // Selection state: Set of selected Epic IDs
+    const [selectedEpics, setSelectedEpics] = useState(new Set(project.roadmap?.selectedEpics || []));
+
+    // AI Analysis Result
+    const [analysis, setAnalysis] = useState(project.roadmap?.analysis || null);
+
+    // Calculators
+    const totalPoints = (project.backlog || []).reduce((acc, epic) => {
+        if (!selectedEpics.has(epic.id)) return acc;
+        // Sum points of stories in this Epic. 
+        // Need to check project.estimates which is { storyId: points }
+        const epicPoints = epic.stories.reduce((sum, story) => {
+            return sum + (project.estimates?.[story.id] || 1); // Default 1 point if missing
+        }, 0);
+        return acc + epicPoints;
+    }, 0);
+
+    const toggleEpic = (epicId) => {
+        const newSet = new Set(selectedEpics);
+        if (newSet.has(epicId)) newSet.delete(epicId);
+        else newSet.add(epicId);
+        setSelectedEpics(newSet);
+        // Reset analysis when scope changes
+        setAnalysis(null);
+    };
+
+    const handleCalculate = async () => {
+        if (!targetDate) {
+            alert("Seleziona una data di rilascio target.");
+            return;
         }
-        // Migrate legacy string array to objects
-        return existing.map(r => typeof r === 'string' ? { name: r, date: '' } : r);
-    });
-
-    const [assignments, setAssignments] = useState(project.roadmap?.assignments || {});
-
-    const handleAutoAssign = () => {
         setLoading(true);
-        setTimeout(() => {
-            const newAssignments = {};
-            project.backlog.forEach((epic, index) => {
-                if (index === 0) newAssignments[epic.id] = releases[0]?.name || 'MVP';
-                else if (index === 1) newAssignments[epic.id] = releases[1]?.name || 'Versione 1.0';
-                else newAssignments[epic.id] = releases[2]?.name || 'Versione 2.0';
-            });
-            setAssignments(newAssignments);
+
+        const prompt = {
+            mvpName,
+            targetDate,
+            velocity,
+            totalPoints,
+            selectedScope: project.backlog.filter(e => selectedEpics.has(e.id)).map(e => e.title)
+        };
+
+        try {
+            const result = await generateAIResponseV2(prompt, 'roadmap_mvp');
+            setAnalysis(result);
+        } catch (e) {
+            console.error(e);
+        } finally {
             setLoading(false);
-        }, 1200);
-    };
-
-    const assignEpic = (epicId, releaseName) => {
-        setAssignments({ ...assignments, [epicId]: releaseName });
-    };
-
-    const addRelease = () => {
-        const newReleaseName = `Release ${releases.length + 1}`;
-        setReleases([...releases, { name: newReleaseName, date: '' }]);
-    };
-
-    const updateRelease = (index, field, value) => {
-        const newReleases = [...releases];
-        const oldName = newReleases[index].name;
-
-        newReleases[index] = { ...newReleases[index], [field]: value };
-        setReleases(newReleases);
-
-        // If name changed, update assignments
-        if (field === 'name') {
-            const newAssignments = { ...assignments };
-            Object.keys(newAssignments).forEach(key => {
-                if (newAssignments[key] === oldName) {
-                    newAssignments[key] = value;
-                }
-            });
-            setAssignments(newAssignments);
         }
-    };
-
-    const removeRelease = (index) => {
-        const releaseName = releases[index].name;
-        setReleases(releases.filter((_, i) => i !== index));
-
-        // Clear assignments for removed release
-        const newAssignments = { ...assignments };
-        Object.keys(newAssignments).forEach(key => {
-            if (newAssignments[key] === releaseName) {
-                delete newAssignments[key];
-            }
-        });
-        setAssignments(newAssignments);
     };
 
     const handleNext = () => {
-        updateProject({ roadmap: { releases, assignments } });
+        updateProject({
+            roadmap: {
+                mvpName,
+                targetDate,
+                velocity,
+                selectedEpics: Array.from(selectedEpics),
+                analysis
+            }
+        });
         navigate('/sprint');
     };
 
@@ -108,143 +99,166 @@ const Roadmap = () => {
                         </div>
                         <span className="text-sm font-medium text-indigo-400">Fase 8 di 9</span>
                     </div>
-                    <h1 className="text-3xl font-bold text-white">Roadmap e release planning</h1>
-                    <p className="text-zinc-400 mt-2">Organizza le Epic in rilasci pianificati con una timeline definita.</p>
-                </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20">
-                    <Sparkles size={14} className="text-indigo-400" />
-                    <span className="text-indigo-400 text-xs font-medium">Assistito da AI</span>
+                    <h1 className="text-3xl font-bold text-white">Roadmap MVP & Release</h1>
+                    <p className="text-zinc-400 mt-2">Definisci l'MVP, seleziona le funzionalità e verifica la fattibilità con l'AI.</p>
                 </div>
             </div>
 
-            {/* Educational Section */}
-            <div className="glass-panel p-6 border-l-4 border-indigo-500">
-                <div className="flex items-start gap-4">
-                    <BookOpen size={24} className="text-indigo-400 flex-shrink-0 mt-1" />
-                    <div>
-                        <h3 className="text-lg font-semibold text-white mb-2">Release planning</h3>
-                        <p className="text-zinc-400 text-sm leading-relaxed mb-4">
-                            Il Release planning organizza le funzionalità (Epic) in rilasci successivi.
-                            Si parte dall'<strong>MVP</strong> (Minimum Viable Product) con le funzionalità essenziali,
-                            poi si pianificano versioni successive con feature aggiuntive.
-                        </p>
-                        <div className="bg-zinc-800/50 rounded-lg p-4">
-                            <p className="text-xs text-indigo-400 font-semibold uppercase tracking-wider mb-2">📌 Esempio pratico</p>
-                            <p className="text-zinc-300 text-sm">
-                                <strong>Alpha:</strong> Prototipo marciante (Telaio + Motore base) - Test in pista chiusa.<br />
-                                <strong>Beta:</strong> Integrazione software completo + carene definitive - Test su strada.<br />
-                                <strong>Launch Version:</strong> Omologazione stradale + Produzione di serie.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                <div className="lg:col-span-1 space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* LEFT COLUMN: Configuration */}
+                <div className="space-y-6">
+                    {/* MVP Definition Card */}
                     <div className="glass-panel p-6">
-                        <h3 className="text-lg font-semibold mb-4 text-center text-white">Pianificazione AI</h3>
-                        <p className="text-sm text-center text-zinc-400 mb-6">
-                            L'AI assegnerà automaticamente le Epic ai rilasci basandosi su priorità e dipendenze.
-                        </p>
-                        <button
-                            onClick={handleAutoAssign}
-                            disabled={loading}
-                            className="w-full btn-primary flex items-center justify-center gap-2"
-                        >
-                            {loading ? <span className="animate-pulse">Pianificazione...</span> : <><Sparkles size={16} /> Pianifica Automaticamente</>}
-                        </button>
-                    </div>
-
-                    {/* Release Manager */}
-                    <div className="glass-panel p-6">
-                        <h3 className="text-sm font-semibold mb-4 text-zinc-400 uppercase tracking-wide">Gestione release</h3>
-                        <div className="space-y-3">
-                            {releases.map((release, index) => (
-                                <div key={index} className="p-3 bg-zinc-800/30 rounded-lg group space-y-2">
-                                    <div className="flex items-center gap-2">
-                                        <GripVertical size={14} className="text-zinc-600" />
-                                        <input
-                                            value={release.name}
-                                            onChange={(e) => updateRelease(index, 'name', e.target.value)}
-                                            className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-zinc-300 p-0 font-medium"
-                                            placeholder="Nome release"
-                                        />
-                                        <button
-                                            onClick={() => removeRelease(index)}
-                                            className="opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-400 transition-all"
-                                            title="Rimuovi release"
-                                        >
-                                            <Trash2 size={14} />
-                                        </button>
-                                    </div>
-                                    <div className="flex items-center gap-2 pl-6">
-                                        <Calendar size={12} className="text-zinc-500" />
-                                        <input
-                                            type="date"
-                                            value={release.date}
-                                            onChange={(e) => updateRelease(index, 'date', e.target.value)}
-                                            className="bg-transparent border-none focus:ring-0 text-xs text-zinc-400 p-0 w-full"
-                                        />
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        <button
-                            onClick={addRelease}
-                            className="w-full mt-4 flex items-center justify-center gap-2 text-indigo-400 hover:text-indigo-300 text-sm py-2"
-                        >
-                            <Plus size={14} /> Aggiungi Release
-                        </button>
-                    </div>
-                </div>
-
-                <div className="lg:col-span-3">
-                    <div className="glass-panel p-6">
-                        <div className="grid gap-4 mb-6" style={{ gridTemplateColumns: `repeat(${Math.min(releases.length, 4)}, 1fr)` }}>
-                            {releases.slice(0, 4).map((release, i) => (
-                                <div key={i} className="text-center">
-                                    <div className="flex flex-col items-center justify-center gap-1 mb-2">
-                                        <span className="text-sm font-bold text-indigo-400">{release.name}</span>
-                                        {release.date && (
-                                            <span className="text-xs text-zinc-500 bg-zinc-800/50 px-2 py-0.5 rounded-full border border-white/5">
-                                                {new Date(release.date).toLocaleDateString('it-IT')}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div className="h-1 bg-indigo-500/30 rounded relative">
-                                        <div className="absolute -top-1 left-1/2 w-3 h-3 bg-indigo-500 rounded-full border-2 border-zinc-900 transform -translate-x-1/2"></div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
+                        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                            <Target size={20} className="text-indigo-400" /> Definizione MVP
+                        </h3>
                         <div className="space-y-4">
-                            {project.backlog.map(epic => (
-                                <div key={epic.id} className="flex items-center gap-4 p-4 bg-zinc-800/30 rounded-xl hover:bg-zinc-800/50 transition-colors">
-                                    <div className="flex-1">
-                                        <p className="font-medium text-white">{epic.title}</p>
-                                        <p className="text-xs text-zinc-500">{epic.stories.length} storie</p>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-xs text-zinc-500">Assegna a:</span>
-                                        <select
-                                            value={assignments[epic.id] || ''}
-                                            onChange={(e) => assignEpic(epic.id, e.target.value)}
-                                            className="bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2 text-sm min-w-[150px]"
-                                        >
-                                            <option value="">-- Seleziona --</option>
-                                            {releases.map((r, i) => <option key={i} value={r.name}>{r.name}</option>)}
-                                        </select>
-                                    </div>
+                            <div>
+                                <label className="block text-xs font-medium text-zinc-400 mb-1">Nome Versione</label>
+                                <input
+                                    value={mvpName}
+                                    onChange={(e) => setMvpName(e.target.value)}
+                                    className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                    placeholder="Es. MVP 1.0"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-zinc-400 mb-1">Data Rilascio Target</label>
+                                <input
+                                    type="date"
+                                    value={targetDate}
+                                    onChange={(e) => setTargetDate(e.target.value)}
+                                    className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-zinc-400 mb-1">Velocity Stimata (Punti/Sprint)</label>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="number"
+                                        value={velocity}
+                                        onChange={(e) => setVelocity(Number(e.target.value))}
+                                        className="w-24 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                    />
+                                    <span className="text-xs text-zinc-500">pt / 2 settimane</span>
                                 </div>
-                            ))}
+                            </div>
                         </div>
                     </div>
 
-                    <div className="flex justify-end pt-8">
+                    {/* AI Analysis Card */}
+                    <div className="glass-panel p-6 border-t-4 border-indigo-500 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-3 opacity-10">
+                            <Calculator size={64} />
+                        </div>
+                        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                            <Sparkles size={20} className="text-indigo-400" /> Analisi Fattibilità
+                        </h3>
+
+                        {!analysis ? (
+                            <div className="text-center py-6">
+                                <p className="text-zinc-400 text-sm mb-4">Seleziona le Epic e lancia l'analisi.</p>
+                                <button
+                                    onClick={handleCalculate}
+                                    disabled={loading || totalPoints === 0}
+                                    className="w-full btn-primary flex items-center justify-center gap-2"
+                                >
+                                    {loading ? 'Analisi in corso...' : 'Calcola Piano'}
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="space-y-4 animate-fadeIn">
+                                <div className={`p-4 rounded-lg flex items-start gap-3 ${analysis.achievable ? 'bg-green-500/10 border border-green-500/20' : 'bg-red-500/10 border border-red-500/20'}`}>
+                                    {analysis.achievable ? <CheckCircle className="text-green-400 mt-1" /> : <AlertTriangle className="text-red-400 mt-1" />}
+                                    <div>
+                                        <p className={`font-bold ${analysis.achievable ? 'text-green-400' : 'text-red-400'}`}>
+                                            {analysis.achievable ? 'Obiettivo Raggiungibile' : 'A Rischio'}
+                                        </p>
+                                        <p className="text-sm text-zinc-300 mt-1">
+                                            Data stimata fine lavori: <span className="font-mono font-bold text-white">{new Date(analysis.projectedDate).toLocaleDateString()}</span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="bg-zinc-800 p-3 rounded-lg text-center">
+                                        <p className="text-xs text-zinc-400">Sprint Necessari</p>
+                                        <p className="text-2xl font-bold text-white">{analysis.sprintsNeeded}</p>
+                                    </div>
+                                    <div className="bg-zinc-800 p-3 rounded-lg text-center">
+                                        <p className="text-xs text-zinc-400">Settimane totali</p>
+                                        <p className="text-2xl font-bold text-white">{analysis.sprintsNeeded * 2}</p>
+                                    </div>
+                                </div>
+
+                                <div className="p-3 bg-zinc-800/50 rounded-lg">
+                                    <p className="text-xs text-indigo-400 font-bold uppercase mb-1">AI Insight</p>
+                                    <p className="text-sm text-zinc-300 leading-relaxed">
+                                        {analysis.analysis}
+                                    </p>
+                                </div>
+
+                                <button
+                                    onClick={handleCalculate}
+                                    className="w-full py-2 text-xs text-zinc-500 hover:text-white transition-colors border border-dashed border-zinc-700 rounded-lg"
+                                >
+                                    Ricalcola
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* RIGHT COLUMN: Scope Selection */}
+                <div className="lg:col-span-2 space-y-6">
+                    <div className="glass-panel p-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 className="text-lg font-semibold text-white">Scope MVP</h3>
+                                <p className="text-sm text-zinc-400">Seleziona le Epic da includere nel rilascio.</p>
+                            </div>
+                            <div className="bg-zinc-800 px-4 py-2 rounded-lg border border-zinc-700">
+                                <span className="text-xs text-zinc-400 uppercase tracking-wider mr-2">Totale Punti</span>
+                                <span className="text-xl font-bold text-white">{totalPoints}</span>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3">
+                            {project.backlog.map(epic => {
+                                const isSelected = selectedEpics.has(epic.id);
+                                const epicPoints = epic.stories.reduce((sum, story) => sum + (project.estimates?.[story.id] || 1), 0);
+
+                                return (
+                                    <div
+                                        key={epic.id}
+                                        onClick={() => toggleEpic(epic.id)}
+                                        className={`p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between group ${isSelected
+                                                ? 'bg-indigo-500/10 border-indigo-500/50 hover:bg-indigo-500/20'
+                                                : 'bg-zinc-800/30 border-zinc-700 hover:border-zinc-500'
+                                            }`}
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className={`w-6 h-6 rounded-full border flex items-center justify-center transition-colors ${isSelected ? 'bg-indigo-500 border-indigo-500' : 'border-zinc-600 group-hover:border-zinc-400'
+                                                }`}>
+                                                {isSelected && <CheckCircle size={14} className="text-white" />}
+                                            </div>
+                                            <div>
+                                                <h4 className={`font-medium ${isSelected ? 'text-white' : 'text-zinc-300'}`}>{epic.title}</h4>
+                                                <p className="text-xs text-zinc-500">{epic.stories.length} User Stories incluse</p>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className={`font-bold ${isSelected ? 'text-indigo-400' : 'text-zinc-600'}`}>{epicPoints} pt</span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end pt-4">
                         <button onClick={handleNext} className="btn-primary">
-                            Salva e Continua <ArrowRight size={16} />
+                            Salva e Vai allo Sprint <ArrowRight size={16} />
                         </button>
                     </div>
                 </div>
@@ -254,4 +268,3 @@ const Roadmap = () => {
 };
 
 export default Roadmap;
-

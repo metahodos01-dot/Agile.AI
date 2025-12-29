@@ -422,25 +422,53 @@ const Sprint = () => {
                                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
                                     <Layers className="text-indigo-400" size={20} /> Backlog Operativo
                                 </h3>
-                                <button
-                                    onClick={async () => {
-                                        // Generate tasks from Stories
-                                        // We need to fetch all stories from project backlog
-                                        const allStories = (project.backlog || []).flatMap(e => e.stories);
-                                        const prompt = { stories: allStories };
-                                        const generated = await generateAIResponseV2(prompt, 'sprint_planning');
-                                        if (Array.isArray(generated)) {
-                                            // Add to operational backlog (which we need to add to state first)
-                                            // For now, let's assume we use 'kanbanTasks' but with 'backlog' status for operational
-                                            const newTasks = [...kanbanTasks, ...generated];
-                                            setKanbanTasks(newTasks);
-                                            handleSaveLocal(); // Trigger sync
-                                        }
-                                    }}
-                                    className="text-xs bg-indigo-500/20 text-indigo-400 px-3 py-1.5 rounded-lg border border-indigo-500/30 hover:bg-indigo-500/30 flex items-center gap-1"
-                                >
-                                    <Sparkles size={12} /> Genera Task
-                                </button>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => {
+                                            const title = prompt("Nuovo Task Operativo:");
+                                            if (title) {
+                                                setKanbanTasks(prev => [...prev, {
+                                                    id: Date.now(),
+                                                    title,
+                                                    status: 'backlog',
+                                                    assignee: 'Team',
+                                                    estimated: 0,
+                                                    remaining: 0
+                                                }]);
+                                                handleSaveLocal();
+                                            }
+                                        }}
+                                        className="p-1.5 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 rounded-lg transition-colors"
+                                        title="Aggiungi Manualmente"
+                                    >
+                                        <Plus size={16} />
+                                    </button>
+                                    <button
+                                        onClick={async () => {
+                                            // Generate tasks from Stories
+                                            // We need to fetch all stories from project backlog
+                                            const allStories = (project.backlog || []).flatMap(e => e.stories);
+                                            if (allStories.length === 0) {
+                                                alert("Nessuna storia trovata nel backlog. Crea prima le user stories.");
+                                                return;
+                                            }
+                                            const prompt = { stories: allStories };
+                                            const generated = await generateAIResponseV2(prompt, 'sprint_planning');
+                                            if (Array.isArray(generated)) {
+                                                setKanbanTasks(prev => {
+                                                    const newTasks = [...prev, ...generated];
+                                                    // Deduplicate by ID just in case
+                                                    const uniqueTasks = Array.from(new Map(newTasks.map(item => [item.id, item])).values());
+                                                    return uniqueTasks;
+                                                });
+                                                handleSaveLocal(); // Trigger sync
+                                            }
+                                        }}
+                                        className="text-xs bg-indigo-500/20 text-indigo-400 px-3 py-1.5 rounded-lg border border-indigo-500/30 hover:bg-indigo-500/30 flex items-center gap-1"
+                                    >
+                                        <Sparkles size={12} /> Genera Task AI
+                                    </button>
+                                </div>
                             </div>
 
                             <div className="flex-1 overflow-y-auto space-y-2 p-2 bg-zinc-900/50 rounded-xl border border-zinc-800">
