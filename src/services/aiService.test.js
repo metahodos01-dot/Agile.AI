@@ -27,8 +27,8 @@ describe('aiService', () => {
         const response = await generateAIResponseV2(prompt, 'objectives');
         expect(Array.isArray(response)).toBe(true);
         expect(response.length).toBe(3);
-        // Verify v1.2 tag exists (proof of fix)
-        expect(response[0]).toContain('[v1.2]');
+        // Verify tags exist (proof of dynamic generation)
+        expect(response[0]).toContain('🎯');
         // Verify context usage
         expect(response[0]).toContain('Startups'); // Target
         expect(response[1]).toContain('Chaos'); // Problem

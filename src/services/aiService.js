@@ -32,9 +32,9 @@ export const generateAIResponseV2 = async (prompt, type) => {
             // Return valid JSON array logic for the "fake" AI
             // In a real LLM, we'd parse the response. Here we construct it.
             const objectives = [
-               `🎯 [v1.2] Diventare la soluzione N.1 per ${target}, conquistando il mercato in 12 mesi.`,
-               `🚀 [v1.2] Eliminare il problema "${problem}" tagliando i costi del 30%.`,
-               `⭐ [v1.2] NPS > 60: Offrire un'esperienza utente senza precedenti con ${productName}.`
+               `🎯 Diventare la soluzione N.1 per ${prompt.targetAudience || 'il mercato'}, risolvendo ${prompt.problem || 'il problema principale'}.`,
+               `🚀 Eliminare "${prompt.problem || 'inefficienze'}" e ridurre i costi operativi del 20%.`,
+               `⭐ Raggiungere un NPS > 60 offrendo con ${prompt.projectName || 'il prodotto'} un'esperienza unica.`
             ];
 
             resolve(objectives);
