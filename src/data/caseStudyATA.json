@@ -1,0 +1,198 @@
+{
+    "name": "ATA - Agile Transformation",
+    "id": "demo-ata-case-study",
+    "createdAt": "2025-12-27T10:00:00.000Z",
+    "updatedAt": "2025-12-29T10:00:00.000Z",
+    "vision": "Creare un'organizzazione fluida e reattiva, dove ogni team è autonomo ma allineato agli obiettivi strategici, riducendo il time-to-market del 30% entro fine anno.",
+    "visionFields": {
+        "targetAudience": "Aziende tech mid-size in rapida crescita",
+        "coreProblem": "Silos comunicativi e lentezza decisionale",
+        "solution": "Framework Agile scalabile con focus su autonomia e trasparenza",
+        "uniqueValue": "Approccio pratico basato su dati reali e non solo teoria",
+        "currentSolution": "Gestione gerarchica tradizionale e riunioni fiume",
+        "differentiation": "Noi portiamo un coach dedicato e metriche in tempo reale"
+    },
+    "objectives": [
+        {
+            "id": 1703670000001,
+            "title": "Aumentare la velocità di rilascio",
+            "description": "Ridurre il tempo tra idea e produzione",
+            "kpis": [
+                {
+                    "id": 1,
+                    "title": "Lead Time",
+                    "target": "5 giorni",
+                    "current": "12 giorni",
+                    "unit": "giorni"
+                },
+                {
+                    "id": 2,
+                    "title": "Deploy Frequenza",
+                    "target": "2/settimana",
+                    "current": "0.5/settimana",
+                    "unit": "deploy/week"
+                }
+            ]
+        },
+        {
+            "id": 1703670000002,
+            "title": "Migliorare la qualità del codice",
+            "description": "Ridurre i bug in produzione",
+            "kpis": [
+                {
+                    "id": 3,
+                    "title": "Bug Critical",
+                    "target": "0",
+                    "current": "3",
+                    "unit": "bug"
+                },
+                {
+                    "id": 4,
+                    "title": "Code Coverage",
+                    "target": "80%",
+                    "current": "45%",
+                    "unit": "%"
+                }
+            ]
+        }
+    ],
+    "team": [
+        {
+            "id": 1,
+            "name": "Marco Rossi",
+            "role": "Product Owner",
+            "capacity": 30,
+            "avatar": "MR"
+        },
+        {
+            "id": 2,
+            "name": "Giulia Bianchi",
+            "role": "Scrum Master",
+            "capacity": 40,
+            "avatar": "GB"
+        },
+        {
+            "id": 3,
+            "name": "Luca Verdi",
+            "role": "Dev",
+            "capacity": 35,
+            "avatar": "LV"
+        },
+        {
+            "id": 4,
+            "name": "Sara Neri",
+            "role": "Designer",
+            "capacity": 20,
+            "avatar": "SN"
+        }
+    ],
+    "kpis": [
+        {
+            "id": "kpi-1",
+            "title": "Velocity Media",
+            "value": 24,
+            "target": 30,
+            "trend": "up",
+            "history": [
+                20,
+                22,
+                24
+            ]
+        },
+        {
+            "id": "kpi-2",
+            "title": "Sprint Completion",
+            "value": 85,
+            "target": 90,
+            "trend": "stable",
+            "history": [
+                80,
+                85,
+                85
+            ]
+        }
+    ],
+    "sprint": {
+        "title": "Sprint 5 - Optimization",
+        "goal": "Ottimizzare le performance del database e chiudere i bug critici della dashboard",
+        "status": "active",
+        "startDate": "2025-12-28",
+        "durationDays": 10,
+        "tasks": [
+            {
+                "id": "t1",
+                "title": "Analisi query lente",
+                "status": "doing",
+                "assignee": "Luca Verdi",
+                "estimate": 5,
+                "type": "task"
+            },
+            {
+                "id": "t2",
+                "title": "Refactoring Login",
+                "status": "todo",
+                "assignee": null,
+                "estimate": 3,
+                "type": "task"
+            },
+            {
+                "id": "t3",
+                "title": "Mockup nuova Home",
+                "status": "done",
+                "assignee": "Sara Neri",
+                "estimate": 8,
+                "type": "task"
+            }
+        ]
+    },
+    "sprints": [
+        {
+            "id": 1,
+            "title": "Sprint 5 - Optimization",
+            "goal": "Ottimizzare le performance del database",
+            "status": "active",
+            "startDate": "2025-12-28",
+            "durationDays": 10,
+            "tasks": []
+        }
+    ],
+    "backlog": [
+        {
+            "id": "us-1",
+            "title": "Come utente voglio resettare la password",
+            "priority": "High",
+            "status": "To Do",
+            "estimate": 5,
+            "type": "story",
+            "acceptanceCriteria": [
+                "Email di reset inviata",
+                "Link scade dopo 1h"
+            ]
+        },
+        {
+            "id": "us-2",
+            "title": "Come admin voglio vedere i log di accesso",
+            "priority": "Medium",
+            "status": "Backlog",
+            "estimate": 8,
+            "type": "story",
+            "acceptanceCriteria": [
+                "Tabella con timestamp e IP"
+            ]
+        }
+    ],
+    "roadmap": [
+        {
+            "id": "rel-1",
+            "name": "Q1 Release - Core",
+            "date": "2026-03-31",
+            "status": "planned"
+        },
+        {
+            "id": "rel-2",
+            "name": "Q2 Release - Advanced",
+            "date": "2026-06-30",
+            "status": "draft"
+        }
+    ]
+}

@@ -2,7 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../services/supabaseClient';
 import { User, Shield, Calendar, Search } from 'lucide-react';
 
+import caseStudyATA from '../data/caseStudyATA.json';
+
 const AdminDashboard = () => {
+    // ... existing state ...
+
+    const handleLoadCaseStudy = () => {
+        if (!confirm("Caricare il Caso Studio 'ATA'? Sostituirà il disordine attuale con l'eccellenza.")) return;
+
+        // Ensure format compatibility
+        const project = { ...caseStudyATA, id: 'demo-ata-' + Date.now() }; // New distinct ID
+
+        console.log("Admin: Loading Case Study ATA:", project);
+        localStorage.setItem('currentProject', JSON.stringify(project));
+        window.location.reload();
+    };
+
     const [users, setUsers] = useState([]);
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -140,10 +155,18 @@ const AdminDashboard = () => {
 
             {/* System Diagnostics */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-8">
-                <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                    <Shield className="text-emerald-500" />
-                    Diagnostica Sistema
-                </h2>
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                        <Shield className="text-emerald-500" />
+                        Diagnostica Sistema
+                    </h2>
+                    <button
+                        onClick={handleLoadCaseStudy}
+                        className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all transform hover:scale-105"
+                    >
+                        📂 Carica Caso Studio ATA
+                    </button>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="p-4 bg-zinc-800 rounded-xl">
                         <p className="text-zinc-400 text-sm mb-1">Stato Supabase</p>
