@@ -279,22 +279,35 @@ const Sprint = () => {
         return null;
     };
 
-    const handleStartSprint = () => {
+    const handleStartSprint = async () => {
         if (!confirm("Sei sicuro di voler avviare ufficialmente lo Sprint? Il conteggio dei giorni inizierà da oggi.")) return;
 
         const duration = capacity.members?.[0]?.days || 10;
         const now = new Date().toISOString();
 
-        handleSaveLocal({
+        // 1. Update Local Context using handleSaveLocal's logic but we need to ensure it's in the payload we save
+        const payload = {
             status: 'active',
             startDate: now,
             durationDays: duration
-        });
+        };
 
-        // Force refresh to ensure active status is reflected
-        setTimeout(() => {
+        handleSaveLocal(payload);
+
+        // 2. Persist to DB immediately
+        setIsSaving(true);
+        try {
+            // We need to wait for the context to update, but setState is sync in event handlers for React 18 usually? 
+            // Better to manually construct the project object for saving to be 100% sure
+            await saveProject();
+            // reload after successful save
             window.location.reload();
-        }, 500);
+        } catch (error) {
+            console.error("Failed to start sprint", error);
+            alert("Errore nell'avvio dello sprint. Riprova.");
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const getDaysRemaining = () => {
