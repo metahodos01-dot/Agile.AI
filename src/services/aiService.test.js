@@ -24,7 +24,7 @@ describe('aiService', () => {
             problem: 'Chaos'
         };
 
-        const response = await generateAIResponse(prompt, 'objectives');
+        const response = await generateAIResponseV2(prompt, 'objectives');
         expect(Array.isArray(response)).toBe(true);
         expect(response.length).toBe(3);
         // Verify v1.2 tag exists (proof of fix)
