@@ -2,7 +2,7 @@
 // Orientato a settori industriali: manifattura, produzione, logistica, automazione
 // In produzione, questo si collegherà a OpenAI/Gemini API
 
-export const generateAIResponse = async (prompt, type) => {
+export const generateAIResponseV2 = async (prompt, type) => {
    return new Promise((resolve) => {
       setTimeout(() => {
          if (type === 'vision') {
@@ -135,5 +135,5 @@ export const generateAIResponse = async (prompt, type) => {
 export const generateContextualSuggestion = (vision, type) => {
    // Questa funzione può essere estesa per analizzare la vision
    // e generare suggerimenti più specifici
-   return generateAIResponse({ projectName: vision }, type);
+   return generateAIResponseV2({ projectName: vision }, type);
 };

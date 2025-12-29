@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
+import { generateAIResponseV2 } from '../services/aiService';
 import { Sparkles, ArrowRight, Plus, Trash2, Target, BookOpen } from 'lucide-react';
 
 const Objectives = () => {
@@ -16,12 +17,23 @@ const Objectives = () => {
 
     const handleGenerate = async () => {
         setLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 1200));
-        setObjectives([
-            "Completare il prototipo funzionante entro Q4 per validare le prestazioni del powertrain.",
-            "Raggiungere un'autonomia certificata di 300km con una singola ricarica.",
-            "Ottenere un Net Promoter Score (NPS) > 50 dai beta tester."
-        ]);
+        // Construct prompt from saved project context
+        const prompt = {
+            projectName: project.name,
+            targetAudience: project.targetAudience,
+            problem: project.problem,
+            vision: project.vision
+        };
+
+        try {
+            const generatedObjectives = await generateAIResponseV2(prompt, 'objectives');
+            // Ensure we get an array (aiService now returns array for objectives)
+            if (Array.isArray(generatedObjectives)) {
+                setObjectives(generatedObjectives);
+            }
+        } catch (error) {
+            console.error("Error generating objectives:", error);
+        }
         setLoading(false);
     };
 

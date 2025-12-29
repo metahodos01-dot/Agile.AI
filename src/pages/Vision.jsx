@@ -1,7 +1,8 @@
+```javascript
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
-import { generateAIResponse } from '../services/aiService';
+import { generateAIResponseV2 } from '../services/aiService';
 import { Sparkles, ArrowRight, Lightbulb, BookOpen } from 'lucide-react';
 
 const Vision = () => {
@@ -9,27 +10,53 @@ const Vision = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
 
-    const [inputs, setInputs] = useState({
-        projectName: project.name || '',
-        targetAudience: '',
-        problem: '',
-        currentSolution: '',
-        differentiation: '',
+    // Initial state from project context or defaults
+    const [visionInput, setVisionInput] = useState({
+        targetAudience: project.targetAudience || '',
+        problem: project.problem || '',
+        currentSolution: project.currentSolution || '',
+        differentiation: project.differentiation || ''
     });
 
     const handleInputChange = (e) => {
-        setInputs({ ...inputs, [e.target.name]: e.target.value });
-        if (e.target.name === 'projectName') updateProject({ name: e.target.value });
+        const { name, value } = e.target;
+        if (name === 'projectName') {
+            updateProject({ name: value });
+        } else {
+            setVisionInput({ ...visionInput, [name]: value });
+        }
     };
 
     const handleGenerate = async () => {
         setLoading(true);
-        const vision = await generateAIResponse(inputs, 'vision');
-        updateProject({ vision });
+        // Prompt construction
+        const prompt = {
+            projectName: project.name,
+            ...visionInput
+        };
+
+        try {
+            const generatedVision = await generateAIResponseV2(prompt, 'vision');
+            // Update only the vision field in the project, keeping the inputs
+            updateProject({
+                vision: generatedVision,
+                // Also save the inputs so they persist
+                ...visionInput
+            });
+        } catch (error) {
+            console.error("Error generating vision:", error);
+        }
         setLoading(false);
     };
 
     const handleNext = () => {
+        // Ensure manual edits to inputs are also saved if they skipped generate
+        updateProject({
+            targetAudience: inputs.targetAudience,
+            problem: inputs.problem,
+            currentSolution: inputs.currentSolution,
+            differentiation: inputs.differentiation
+        });
         navigate('/objectives');
     };
 
