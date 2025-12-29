@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
+import { generateAIResponseV2 } from '../services/aiService';
 import { Sparkles, ArrowRight, Layers, FileText, Plus, ChevronDown, ChevronRight, Trash2, BookOpen, Target } from 'lucide-react';
 
 const Backlog = () => {
@@ -12,99 +13,31 @@ const Backlog = () => {
 
     const toggleEpic = (id) => setExpandedEpics(prev => ({ ...prev, [id]: !prev[id] }));
 
-    const handleGenerate = () => {
+    const handleGenerate = async () => {
         setLoading(true);
-        setTimeout(() => {
-            const newBacklog = [
-                {
-                    id: 1,
-                    title: "Monitoraggio produzione in tempo reale",
-                    stories: [
-                        {
-                            id: 101,
-                            title: "Come responsabile di linea, voglio visualizzare l'OEE in tempo reale per identificare immediatamente le perdite di efficienza.",
-                            keyResult: "Migliora visibilità → contribuisce al KR: 'Aumentare OEE all'85%'"
-                        },
-                        {
-                            id: 102,
-                            title: "Come operatore, voglio ricevere allarmi automatici quando una macchina si ferma per intervenire rapidamente.",
-                            keyResult: "Riduce tempi di reazione → contribuisce al KR: 'Ridurre fermi non pianificati del 30%'"
-                        },
-                        {
-                            id: 103,
-                            title: "Come direttore di stabilimento, voglio vedere una dashboard con i KPI di tutte le linee per prendere decisioni basate sui dati.",
-                            keyResult: "Supporta decision-making → contribuisce al KR: 'Migliorare efficienza complessiva'"
-                        }
-                    ]
-                },
-                {
-                    id: 2,
-                    title: "Controllo qualità integrato",
-                    stories: [
-                        {
-                            id: 201,
-                            title: "Come addetto qualità, voglio registrare i controlli su checklist digitali per eliminare la carta e ridurre errori.",
-                            keyResult: "Digitalizzazione → contribuisce al KR: 'Implementare controllo qualità in-line al 100%'"
-                        },
-                        {
-                            id: 202,
-                            title: "Come quality manager, voglio analizzare i trend di difettosità per identificare le cause radice.",
-                            keyResult: "Analisi preventiva → contribuisce al KR: 'Ridurre difetti a meno di 50 PPM'"
-                        },
-                        {
-                            id: 203,
-                            title: "Come operatore, voglio segnalare una non conformità con foto e descrizione per documentare il problema.",
-                            keyResult: "Tracciabilità → contribuisce al KR: 'Tracciabilità completa dei lotti'"
-                        }
-                    ]
-                },
-                {
-                    id: 3,
-                    title: "Gestione manutenzione",
-                    stories: [
-                        {
-                            id: 301,
-                            title: "Come manutentore, voglio vedere il calendario delle manutenzioni preventive per pianificare gli interventi.",
-                            keyResult: "Prevenzione guasti → contribuisce al KR: 'Ridurre fermi non pianificati del 30%'"
-                        },
-                        {
-                            id: 302,
-                            title: "Come responsabile manutenzione, voglio tracciare i ricambi utilizzati per ottimizzare il magazzino.",
-                            keyResult: "Ottimizzazione scorte → contribuisce al KR: 'Ridurre costi operativi del 10%'"
-                        },
-                        {
-                            id: 303,
-                            title: "Come tecnico, voglio consultare lo storico degli interventi su ogni macchina per diagnosticare problemi ricorrenti.",
-                            keyResult: "Knowledge base → contribuisce al KR: 'Aumentare MTBF a 200 ore'"
-                        }
-                    ]
-                },
-                {
-                    id: 4,
-                    title: "Tracciabilità e logistica interna",
-                    stories: [
-                        {
-                            id: 401,
-                            title: "Come addetto logistica, voglio scansionare i lotti in ingresso per registrarli automaticamente a sistema.",
-                            keyResult: "Automazione → contribuisce al KR: 'Tracciabilità completa dei lotti'"
-                        },
-                        {
-                            id: 402,
-                            title: "Come responsabile magazzino, voglio visualizzare le giacenze in tempo reale per evitare rotture di stock.",
-                            keyResult: "Visibilità scorte → contribuisce al KR: 'Ridurre scorte del 25%'"
-                        },
-                        {
-                            id: 403,
-                            title: "Come cliente, voglio tracciare la storia completa del prodotto dalla materia prima alla consegna.",
-                            keyResult: "Compliance → contribuisce al KR: 'Certificazione di settore entro 6 mesi'"
-                        }
-                    ]
-                }
-            ];
-            setBacklog(newBacklog);
-            setExpandedEpics({ 1: true, 2: true, 3: true, 4: true });
-            setLoading(false);
-        }, 1500);
+        const prompt = {
+            projectName: project.name,
+            problem: project.problem,
+            targetAudience: project.targetAudience,
+            differentiation: project.differentiation,
+            objectives: project.objectives
+        };
+
+        try {
+            const newBacklog = await generateAIResponseV2(prompt, 'backlog');
+            if (Array.isArray(newBacklog)) {
+                setBacklog(newBacklog);
+                // Expand all generated epics by default
+                const expandedState = {};
+                newBacklog.forEach(epic => {
+                    expandedState[epic.id] = true;
+                });
+                setExpandedEpics(expandedState);
+            }
+        } catch (error) {
+            console.error("Error generating backlog:", error);
+        }
+        setLoading(false);
     };
 
     const addEpic = () => {

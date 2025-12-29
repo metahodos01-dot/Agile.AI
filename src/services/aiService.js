@@ -92,37 +92,63 @@ export const generateAIResponseV2 = async (prompt, type) => {
 
          } else if (type === 'backlog') {
             // Backlog industriale - Epic legate alla produzione
-            resolve(`Epic principali per progetti industriali:
-
-🏭 **1. Digitalizzazione del processo produttivo**
-   • Mappatura flussi AS-IS
-   • Definizione processo TO-BE
-   • Integrazione sensori e IoT
-
-📊 **2. Dashboard di monitoraggio real-time**
-   • Visualizzazione KPI di linea
-   • Alert e notifiche automatiche
-   • Report giornalieri/settimanali
-
-🔧 **3. Gestione manutenzione**
-   • Pianificazione manutenzione preventiva
-   • Storico interventi e ricambi
-   • Analisi predittiva guasti
-
-📦 **4. Ottimizzazione logistica interna**
-   • Gestione flussi materiali
-   • Tracciabilità lotti
-   • Integrazione con magazzino
-
-✅ **5. Controllo qualità integrato**
-   • Checklist digitali
-   • Registrazione difetti
-   • Analisi cause radice
-
-📋 **6. Documentazione e compliance**
-   • Istruzioni operative digitali
-   • Gestione non conformità
-   • Audit trail completo`);
+            // Dynamic Backlog Generation
+            const epics = [
+               {
+                  id: 1,
+                  title: `Core: Risoluzione di ${prompt.problem || 'problema principale'}`,
+                  stories: [
+                     {
+                        id: 101,
+                        title: `Come ${prompt.targetAudience || 'utente'}, voglio una dashboard intuitiva per monitorare i KPI critici.`,
+                        keyResult: "Riduzione tempi di analisi del 30%"
+                     },
+                     {
+                        id: 102,
+                        title: `Come amministratore, voglio configurare i parametri chiave per adattarli al mio processo.`,
+                        keyResult: "Setup iniziale in < 1 ora"
+                     },
+                     {
+                        id: 103,
+                        title: `Come utente operativo, voglio ricevere notifiche automatiche su anomalie.`,
+                        keyResult: "Tempi di reazione ridotti del 50%"
+                     }
+                  ]
+               },
+               {
+                  id: 2,
+                  title: `Innovation: ${prompt.differentiation || 'Funzionalità distintive'}`,
+                  stories: [
+                     {
+                        id: 201,
+                        title: `Come ${prompt.targetAudience || 'utente'}, voglio utilizzare algoritmi predittivi per anticipare i problemi.`,
+                        keyResult: "Prevenzione errori del 25%"
+                     },
+                     {
+                        id: 202,
+                        title: `Come analista, voglio report automatici generati dall'AI.`,
+                        keyResult: "Risparmio 4 ore/settimana per report"
+                     }
+                  ]
+               },
+               {
+                  id: 3,
+                  title: `Scale & Security per ${prompt.projectName || 'il progetto'}`,
+                  stories: [
+                     {
+                        id: 301,
+                        title: `Come CTO, voglio garantire la sicurezza dei dati sensibili con crittografia end-to-end.`,
+                        keyResult: "Compliance GDPR 100%"
+                     },
+                     {
+                        id: 302,
+                        title: `Come utente, voglio accedere da mobile con le stesse funzionalità desktop.`,
+                        keyResult: "Adozione mobile > 40%"
+                     }
+                  ]
+               }
+            ];
+            resolve(epics);
 
          } else {
             resolve("Suggerimento generato in base al contesto industriale del tuo progetto.");
