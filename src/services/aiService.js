@@ -234,8 +234,9 @@ export const generateAIResponseV2 = async (prompt, type) => {
 
                let taskIdBase = Date.now();
 
-               // Limit generation to avoid overwhelming
-               const targetStories = stories.slice(0, 10);
+
+               // Limit removed as per user request
+               const targetStories = stories;
 
                targetStories.forEach((story, idx) => {
                   const safeTitle = story.title || "Untitled Story";

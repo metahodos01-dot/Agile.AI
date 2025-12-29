@@ -66,7 +66,7 @@ const BurnChart = ({ data, type }) => (
     </div>
 );
 
-const KanbanColumn = ({ title, status, tasks, onMove, onAdd, color }) => (
+const KanbanColumn = ({ title, status, tasks, onMove, onAdd, color, getStoryTitle }) => (
     <div className="flex flex-col h-full bg-zinc-900/30 rounded-xl border border-zinc-800/50">
         <div className={`p-4 border-b border-zinc-800/50 flex justify-between items-center ${color}`}>
             <h3 className="font-bold text-sm uppercase tracking-wider">{title}</h3>
@@ -75,8 +75,16 @@ const KanbanColumn = ({ title, status, tasks, onMove, onAdd, color }) => (
         <div className="flex-1 p-3 space-y-3 overflow-y-auto min-h-[200px]">
             {tasks.map(task => (
                 <div key={task.id} className="p-3 bg-zinc-800/80 rounded-lg border border-zinc-700/50 hover:border-indigo-500/50 transition-all group">
-                    <div className="flex justify-between items-start mb-2">
-                        <span className="text-sm font-medium text-zinc-200 line-clamp-2">{task.title}</span>
+                    <div className="flex flex-col items-start mb-2">
+                        {task.storyId && getStoryTitle && (
+                            <div className="text-[10px] uppercase font-bold text-indigo-400 mb-1 flex items-center gap-1 w-full">
+                                <BookOpen size={10} />
+                                <span className="truncate" title={getStoryTitle(task.storyId)}>
+                                    {getStoryTitle(task.storyId) || 'Story Sconosciuta'}
+                                </span>
+                            </div>
+                        )}
+                        <span className="text-sm font-medium text-zinc-200 line-clamp-4 hover:line-clamp-none transition-all">{task.title}</span>
                         <button onClick={() => onMove(task.id, 'delete')} className="opacity-0 group-hover:opacity-100 text-zinc-600 hover:text-red-400"><X size={14} /></button>
                     </div>
                     <div className="flex items-center justify-between mt-3">
@@ -218,6 +226,50 @@ const Sprint = () => {
         const s = seconds % 60;
         return `${m}:${s < 10 ? '0' : ''}${s}`;
     };
+
+    // --- Helper Functions ---
+    const getStoryTitle = (storyId) => {
+        if (!storyId) return null;
+        for (const epic of (project.backlog || [])) {
+            const found = epic.stories?.find(s => s.id === storyId);
+            if (found) return found.title;
+        }
+        return null;
+    };
+
+    const handleStartSprint = () => {
+        if (!confirm("Sei sicuro di voler avviare ufficialmente lo Sprint? Il conteggio dei giorni inizierà da oggi.")) return;
+
+        const duration = capacity.members?.[0]?.days || 10;
+        const now = new Date().toISOString();
+
+        handleSaveLocal({
+            status: 'active',
+            startDate: now,
+            durationDays: duration
+        });
+
+        // Force refresh to ensure active status is reflected
+        setTimeout(() => {
+            window.location.reload();
+        }, 500);
+    };
+
+    const getDaysRemaining = () => {
+        if (activeSprint.status !== 'active' || !activeSprint.startDate) return null;
+        const start = new Date(activeSprint.startDate);
+        const duration = activeSprint.durationDays || 10;
+        const end = new Date(start);
+        end.setDate(end.getDate() + duration);
+
+        const now = new Date();
+        const diffTime = end - now;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        // Clamp to 0 if negative
+        return diffDays > 0 ? diffDays : 0;
+    };
+
 
     // --- Handlers ---
 
@@ -396,11 +448,28 @@ const Sprint = () => {
                         <span className="text-sm font-medium text-green-400">Fase 9 di 9 - Sprint Dashboard</span>
                     </div>
                     <h1 className="text-3xl font-bold text-white">Sprint & Standup</h1>
-                    <p className="text-zinc-400 mt-2">Gestisci il lavoro quotidiano, traccia i progressi e collabora con il team.</p>
+                    <div className="flex items-center gap-4 mt-2">
+                        <p className="text-zinc-400">Gestisci il lavoro quotidiano, traccia i progressi e collabora con il team.</p>
+                        {activeSprint.status === 'active' && (
+                            <span className="text-xs font-bold px-2 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded-md">
+                                Mancano {getDaysRemaining()} giorni alla fine
+                            </span>
+                        )}
+                    </div>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20">
-                    <Database size={14} className="text-green-400" />
-                    <span className="text-green-400 text-xs font-medium">Auto-Sync Attivo</span>
+                <div className="flex flex-col items-end gap-2">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20">
+                        <Database size={14} className="text-green-400" />
+                        <span className="text-green-400 text-xs font-medium">Auto-Sync Attivo</span>
+                    </div>
+                    {activeSprint.status === 'planned' && (
+                        <button
+                            onClick={handleStartSprint}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg border border-indigo-500 shadow-lg shadow-indigo-500/20 transition-all"
+                        >
+                            <Play size={14} fill="currentColor" /> AVVIA SPRINT
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -555,7 +624,15 @@ const Sprint = () => {
                                 {kanbanTasks.filter(t => t.status === 'backlog').map(task => (
                                     <div key={task.id} className="p-3 bg-zinc-800 rounded-lg border border-zinc-700 flex justify-between items-center group">
                                         <div className="flex-1">
-                                            <p className="text-sm text-zinc-200 font-medium">{task.title}</p>
+                                            {task.storyId && (
+                                                <div className="text-[10px] uppercase font-bold text-indigo-400 mb-1 flex items-center gap-1">
+                                                    <BookOpen size={10} />
+                                                    <span className="truncate max-w-[200px]" title={getStoryTitle(task.storyId)}>
+                                                        {getStoryTitle(task.storyId) || 'Story Sconosciuta'}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            <p className="text-sm text-zinc-200 font-medium whitespace-pre-wrap">{task.title}</p>
                                             <div className="flex items-center gap-3 mt-1">
                                                 <p className="text-xs text-zinc-500">{task.assignee}</p>
                                                 {task.estimated > 0 && (
@@ -760,6 +837,7 @@ const Sprint = () => {
                                     onMove={activeSprint.status === 'completed' ? () => { } : moveTask}
                                     onAdd={activeSprint.status === 'completed' ? null : addTask}
                                     color="border-l-4 border-l-zinc-500 text-zinc-300"
+                                    getStoryTitle={getStoryTitle}
                                 />
                                 <KanbanColumn
                                     title="In Corso"
@@ -767,6 +845,7 @@ const Sprint = () => {
                                     tasks={kanbanTasks.filter(t => t.status === 'doing')}
                                     onMove={activeSprint.status === 'completed' ? () => { } : moveTask}
                                     color="border-l-4 border-l-blue-500 text-blue-400"
+                                    getStoryTitle={getStoryTitle}
                                 />
                                 <KanbanColumn
                                     title="Fatto"
@@ -774,6 +853,7 @@ const Sprint = () => {
                                     tasks={kanbanTasks.filter(t => t.status === 'done')}
                                     onMove={activeSprint.status === 'completed' ? () => { } : moveTask}
                                     color="border-l-4 border-l-green-500 text-green-400"
+                                    getStoryTitle={getStoryTitle}
                                 />
                             </div>
                         </div>
