@@ -486,20 +486,7 @@ const Sidebar = () => {
                         )}
                     </NavLink>
 
-                    {role === 'admin' && (
-                        <NavLink
-                            to="/admin"
-                            className={({ isActive }) =>
-                                `flex items-center gap-3 px-4 py-3 rounded-xl mb-1 transition-all duration-200 ${isActive
-                                    ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
-                                }`
-                            }
-                        >
-                            <Shield size={18} />
-                            <span className="font-medium">Admin Panel</span>
-                        </NavLink>
-                    )}
+
 
                     <div className="px-4 py-3 mt-2">
                         <p className="text-[11px] font-semibold text-zinc-600 uppercase tracking-wider">Fasi del progetto</p>
