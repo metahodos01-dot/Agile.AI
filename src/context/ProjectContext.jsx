@@ -20,7 +20,12 @@ const emptyProject = {
     sprint: {}, // Deprecated, kept for backward compatibility/migration
     sprints: [], // New multi-sprint array
     createdAt: null,
-    completedAt: null
+    completedAt: null,
+    // Context fields for AI
+    targetAudience: '',
+    problem: '',
+    currentSolution: '',
+    differentiation: ''
 };
 
 export const ProjectProvider = ({ children }) => {
@@ -201,14 +206,15 @@ export const ProjectProvider = ({ children }) => {
 
     // Create new project
     const createNewProject = async () => {
+        console.log("Context: Creating new project. Current:", project.name);
         // Save current if has name
         if (project.name) {
+            console.log("Context: Saving current project before creating new...");
             await saveProject();
         }
 
-        const newProject = {
-            ...emptyProject
-        };
+        const newProject = JSON.parse(JSON.stringify(emptyProject));
+        console.log("Context: Setting new project state:", newProject);
         setProject(newProject);
         localStorage.removeItem('currentProject');
     };

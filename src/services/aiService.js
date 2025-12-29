@@ -17,30 +17,28 @@ export const generateAIResponse = async (prompt, type) => {
 🚀 **Value Proposition & Elementi Differenzianti**
 
 ✨ **Innovazione Radicale**: Oltre le soluzioni tradizionali, portiamo ${differentiation} al centro del processo.
+✨ **Innovazione Radicale**: Oltre le soluzioni tradizionali, portiamo ${differentiated} al centro del processo.
 💎 **Impatto Misurabile**: Risoluzione concreta di ${problem} con ROI tangibile.
 🤝 **Focus sull'Utente**: Progettato specificamente per le esigenze di ${target}.
 🔗 **Integrazione Totale**: Si inserisce perfettamente nel workflow esistente.`);
 
          } else if (type === 'objectives') {
             // Obiettivi allineati alla vision
-            const productName = prompt.projectName || 'del progetto';
+            console.log("AI Service: Generating objectives with context:", prompt);
 
-            resolve(`Per realizzare la visione di ${productName}, abbiamo definito i seguenti OKR strategici:
+            const productName = prompt.projectName || 'Il Prodotto';
+            const target = prompt.targetAudience || 'il target';
+            const problem = prompt.problem || 'il problema principale';
 
-1. **Obiettivo**: Diventare leader di mercato per ${prompt.targetAudience || 'il target'}
-   - KR1: Acquisire i primi 50 clienti enterprise entro Q3
-   - KR2: Raggiungere un NPS (Net Promoter Score) > 50
-   - KR3: Essere menzionati in 3 report di settore come "Top Innovator"
+            // Return valid JSON array logic for the "fake" AI
+            // In a real LLM, we'd parse the response. Here we construct it.
+            const objectives = [
+               `🎯 Diventare la soluzione di riferimento per ${target}, acquisendo una quota di mercato significativa entro 12 mesi.`,
+               `🚀 Risolvere radicalmente il problema di "${problem}" riducendo i tempi/costi operativi del 30%.`,
+               `⭐ Raggiungere un punteggio di soddisfazione (NPS) > 60 grazie all'esperienza utente superiore di ${productName}.`
+            ];
 
-2. **Obiettivo**: Eccellenza tecnica e risoluzione di "${prompt.problem || 'problema'}"
-   - KR1: Ridurre i tempi di esecuzione del 40% rispetto allo standard attuale
-   - KR2: Garantire un uptime del 99.99%
-   - KR3: Rilasciare 3 nuove feature core basate su feedback utenti
-
-3. **Obiettivo**: Sostenibilità e Scalabilità
-   - KR1: Ottimizzare i costi infrastrutturali del 20%
-   - KR2: Automatizzare il 100% del processo di onboarding
-   - KR3: Creare una community di 1000 utenti attivi`);
+            resolve(objectives);
 
          } else if (type === 'kpi') {
             // KPI industriali
