@@ -193,7 +193,7 @@ const DeleteConfirmModal = ({ projectName, onConfirm, onCancel }) => (
 
 const Sidebar = () => {
     const { project, savedProjects, createNewProject, loadProject, deleteProject, updateProject, saveProject } = useProject();
-    const { user, role, signOut } = useAuth();
+    const { user, role, signOut, forceAdminRole } = useAuth();
     const navigate = useNavigate();
 
 
@@ -550,6 +550,21 @@ const Sidebar = () => {
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-white truncate mb-1">{user?.email?.split('@')[0] || 'User'}</p>
+
+                            {/* DEV: Admin Trigger */}
+                            {role !== 'admin' && (
+                                <button
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        forceAdminRole();
+                                    }}
+                                    className="mb-2 w-full flex items-center justify-center gap-2 px-2 py-1 text-[10px] font-bold text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 rounded border border-amber-500/20 uppercase tracking-wider"
+                                >
+                                    <Shield size={10} />
+                                    Dev: Set Admin
+                                </button>
+                            )}
+
                             <button
                                 onClick={async (e) => {
                                     e.preventDefault();

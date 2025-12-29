@@ -120,6 +120,11 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const forceAdminRole = () => {
+        console.log("DEV: Forcing Admin Role");
+        setRole('admin');
+    };
+
     const value = {
         signUp: (data) => supabase.auth.signUp(data),
         signIn,
@@ -127,6 +132,7 @@ export const AuthProvider = ({ children }) => {
         user,
         role,
         isAdmin: role === 'admin',
+        forceAdminRole,
         loading
     };
 
