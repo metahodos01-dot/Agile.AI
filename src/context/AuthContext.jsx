@@ -63,6 +63,14 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const fetchProfile = async (userId) => {
+        // DEV: Check local override first
+        if (localStorage.getItem('agile_dev_admin_override') === 'true') {
+            console.log("DEV: Loading Admin Role from LocalStorage");
+            setRole('admin');
+            setLoading(false);
+            return;
+        }
+
         try {
             const { data, error } = await supabase
                 .from('profiles')
@@ -86,6 +94,7 @@ export const AuthProvider = ({ children }) => {
             // Clear local state first for immediate UI update
             setUser(null);
             setRole(null);
+            localStorage.removeItem('agile_dev_admin_override');
 
             // Sign out from Supabase with global scope (clears all tabs/sessions)
             const { error } = await supabase.auth.signOut({ scope: 'global' });
@@ -123,6 +132,7 @@ export const AuthProvider = ({ children }) => {
     const forceAdminRole = () => {
         console.log("DEV: Forcing Admin Role");
         setRole('admin');
+        localStorage.setItem('agile_dev_admin_override', 'true');
     };
 
     const value = {

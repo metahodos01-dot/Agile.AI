@@ -103,22 +103,30 @@ const AdminDashboard = () => {
                     </div>
                     <div className="p-4 bg-zinc-800 rounded-xl">
                         <p className="text-zinc-400 text-sm mb-1">Test Scrittura</p>
-                        <button
-                            onClick={async () => {
-                                try {
-                                    const start = Date.now();
-                                    const { error } = await supabase.from('profiles').select('count').single();
-                                    const ms = Date.now() - start;
-                                    if (error) throw error;
-                                    alert(`Test OK! Latency: ${ms}ms`);
-                                } catch (e) {
-                                    alert(`Test Fallito: ${e.message}`);
-                                }
-                            }}
-                            className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs rounded-lg transition-colors"
-                        >
-                            Esegui Ping Test
-                        </button>
+                        <div className="flex flex-col gap-2">
+                            <button
+                                onClick={async () => {
+                                    setPingStatus('testing');
+                                    try {
+                                        const start = Date.now();
+                                        const { error } = await supabase.from('profiles').select('count').single();
+                                        const ms = Date.now() - start;
+                                        if (error) throw error;
+                                        setPingStatus(`OK (${ms}ms)`);
+                                    } catch (e) {
+                                        setPingStatus(`ERROR: ${e.message}`);
+                                    }
+                                }}
+                                className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs rounded-lg transition-colors w-full text-center"
+                            >
+                                {pingStatus === 'testing' ? 'Testing...' : 'Esegui Ping Test'}
+                            </button>
+                            {pingStatus && pingStatus !== 'testing' && (
+                                <p className={`text-xs p-2 rounded ${pingStatus.startsWith('ERROR') ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'}`}>
+                                    {pingStatus}
+                                </p>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
