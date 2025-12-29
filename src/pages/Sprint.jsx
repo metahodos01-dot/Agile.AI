@@ -135,6 +135,48 @@ const GaugeChart = ({ value, max, label, color, icon: Icon }) => {
     );
 };
 
+// Countdown Component
+const SprintCountdown = ({ endDate }) => {
+    const calculateTimeLeft = () => {
+        const difference = +new Date(endDate) - +new Date();
+        let timeLeft = {};
+
+        if (difference > 0) {
+            timeLeft = {
+                g: Math.floor(difference / (1000 * 60 * 60 * 24)),
+                h: Math.floor((difference / (1000 * 60 * 60)) % 24),
+                m: Math.floor((difference / 1000 / 60) % 60),
+                s: Math.floor((difference / 1000) % 60),
+            };
+        } else {
+            timeLeft = null; // Expired
+        }
+        return timeLeft;
+    };
+
+    const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setTimeLeft(calculateTimeLeft());
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [endDate]);
+
+    if (!timeLeft) {
+        return <span className="text-red-400 font-bold">Sprint Terminato</span>;
+    }
+
+    return (
+        <div className="flex items-center gap-1 font-mono text-sm">
+            <span className="bg-zinc-800 px-1 rounded">{timeLeft.g}g</span>:
+            <span className="bg-zinc-800 px-1 rounded">{timeLeft.h}h</span>:
+            <span className="bg-zinc-800 px-1 rounded">{timeLeft.m}m</span>:
+            <span className="bg-zinc-800 px-1 rounded">{timeLeft.s}s</span>
+        </div>
+    );
+};
+
 // --- Main Component ---
 const Sprint = () => {
     const { project, updateSprint, addSprint, saveProject } = useProject();
@@ -450,10 +492,12 @@ const Sprint = () => {
                     <h1 className="text-3xl font-bold text-white">Sprint & Standup</h1>
                     <div className="flex items-center gap-4 mt-2">
                         <p className="text-zinc-400">Gestisci il lavoro quotidiano, traccia i progressi e collabora con il team.</p>
-                        {activeSprint.status === 'active' && (
-                            <span className="text-xs font-bold px-2 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded-md">
-                                Mancano {getDaysRemaining()} giorni alla fine
-                            </span>
+                        {activeSprint.status === 'active' && activeSprint.startDate && (
+                            <div className="flex items-center gap-2 px-3 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded-md">
+                                <Clock size={14} className="animate-pulse" />
+                                <span className="text-xs font-bold uppercase mr-1">SCADENZA:</span>
+                                <SprintCountdown endDate={new Date(new Date(activeSprint.startDate).getTime() + (activeSprint.durationDays || 10) * 86400000)} />
+                            </div>
                         )}
                     </div>
                 </div>
