@@ -375,6 +375,7 @@ const Sprint = () => {
             }
         } catch (error) {
             console.error("Save failed", error);
+            alert("Errore durante il salvataggio del progetto. Controlla la connessione e riprova.");
         } finally {
             setIsSaving(false);
         }

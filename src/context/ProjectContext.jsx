@@ -180,7 +180,7 @@ export const ProjectProvider = ({ children }) => {
             };
 
             const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Timeout salvataggio: server non risponde')), 15000)
+                setTimeout(() => reject(new Error('Timeout salvataggio: server non risponde')), 8000)
             );
 
             const { data, error } = await Promise.race([dbOperation(), timeoutPromise]);
