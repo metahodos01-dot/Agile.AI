@@ -137,6 +137,7 @@ const Sprint = () => {
     const [activeSprintId, setActiveSprintId] = useState(1);
     const [saved, setSaved] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
 
     // Derived Active Sprint
     const activeSprint = project.sprints?.find(s => s.id === activeSprintId) ||
@@ -475,16 +476,21 @@ const Sprint = () => {
                                     </button>
                                     <button
                                         onClick={async () => {
-                                            // Generate tasks from Stories
-                                            // We need to fetch all stories from project backlog
-                                            const allStories = (project.backlog || []).flatMap(e => e.stories);
-                                            if (allStories.length === 0) {
-                                                alert("Nessuna storia trovata nel backlog. Crea prima le user stories.");
-                                                return;
-                                            }
-                                            const prompt = { stories: allStories };
+                                            if (isGenerating) return;
+                                            setIsGenerating(true);
                                             try {
+                                                // Generate tasks from Stories
+                                                // We need to fetch all stories from project backlog safely
+                                                const allStories = (project.backlog || []).flatMap(e => e.stories || []);
+
+                                                if (allStories.length === 0) {
+                                                    alert("Nessuna storia trovata nel backlog. Crea prima le user stories.");
+                                                    return;
+                                                }
+
+                                                const prompt = { stories: allStories };
                                                 const generated = await generateAIResponseV2(prompt, 'sprint_planning');
+
                                                 if (Array.isArray(generated) && generated.length > 0) {
                                                     setKanbanTasks(prev => {
                                                         const newTasks = [...prev, ...generated];
@@ -495,14 +501,23 @@ const Sprint = () => {
                                                     });
                                                 } else {
                                                     console.warn("AI returned empty or invalid tasks");
+                                                    alert("L'AI non ha generato task. Riprova.");
                                                 }
                                             } catch (err) {
                                                 console.error("AI Gen Failed", err);
+                                                alert("Errore durante la generazione AI: " + err.message);
+                                            } finally {
+                                                setIsGenerating(false);
                                             }
                                         }}
-                                        className="text-xs bg-indigo-500/20 text-indigo-400 px-3 py-1.5 rounded-lg border border-indigo-500/30 hover:bg-indigo-500/30 flex items-center gap-1"
+                                        disabled={isGenerating}
+                                        className={`text-xs px-3 py-1.5 rounded-lg border flex items-center gap-1 transition-all ${isGenerating
+                                                ? 'bg-indigo-500/10 border-indigo-500/10 text-indigo-400/50 cursor-wait'
+                                                : 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30 hover:bg-indigo-500/30'
+                                            }`}
                                     >
-                                        <Sparkles size={12} /> Genera Task AI
+                                        <Sparkles size={12} className={isGenerating ? "animate-spin" : ""} />
+                                        {isGenerating ? 'Generazione...' : 'Genera Task AI'}
                                     </button>
                                 </div>
                             </div>
