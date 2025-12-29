@@ -80,6 +80,37 @@ export const ProjectProvider = ({ children }) => {
         }
     };
 
+    // --- HELPERS ---
+    const validateProjectStructure = (proj) => {
+        if (!proj) return { ...emptyProject };
+        const validated = { ...emptyProject, ...proj };
+        if (!Array.isArray(validated.sprints)) validated.sprints = [];
+        if (!Array.isArray(validated.team)) validated.team = [];
+        if (!Array.isArray(validated.objectives)) validated.objectives = [];
+        if (!Array.isArray(validated.kpis)) validated.kpis = [];
+        if (!validated.sprint) validated.sprint = {};
+
+        // Migration logic
+        if (validated.sprints.length === 0 && validated.sprint && Object.keys(validated.sprint).length > 0) {
+            console.log("Migrating legacy sprint to sprints array...");
+            validated.sprints = [{ id: 1, title: 'Sprint 1', status: 'active', ...validated.sprint }];
+        }
+        return validated;
+    };
+
+    // --- EFFECTS ---
+
+    // Auto-Save to LocalStorage
+    useEffect(() => {
+        if (!project.name || !user) return;
+        const timeoutId = setTimeout(() => {
+            const backupKey = `agile_autosave_${project.id || 'temp'}`;
+            localStorage.setItem(backupKey, JSON.stringify(project));
+            localStorage.setItem('currentProject', JSON.stringify(project));
+        }, 2000);
+        return () => clearTimeout(timeoutId);
+    }, [project, user]);
+
     // Load projects when user changes
     useEffect(() => {
         if (user) fetchProjects();
@@ -137,89 +168,113 @@ export const ProjectProvider = ({ children }) => {
     };
 
 
-    // Save project to Supabase
+    // Save project to Supabase with Hardened Persistence
     const saveProject = async (dataToSave = null) => {
         const projectCurrent = dataToSave || project;
 
         if (!projectCurrent.name) return false;
-        if (!user) return false;
+        if (!user) {
+            console.error("[SaveProject] No user logged in.");
+            return false;
+        }
 
         setLoading(true);
+
+        // 0. LOCAL BACKUP (Safety Net)
         try {
-            // 1. Connection Check
-            // CONNECTION CHECK: Use limit(1) instead of single() to avoid "0 rows" errors if profile is missing
-            const { data: pingData, error: pingError } = await supabase.from('profiles').select('id').limit(1);
+            const backupKey = `agile_backup_${projectCurrent.id || 'temp'}`;
+            localStorage.setItem(backupKey, JSON.stringify(projectCurrent));
+            console.log(`[SaveProject] Local safety backup created: ${backupKey}`);
+        } catch (backupError) {
+            console.warn("[SaveProject] Failed to create local backup:", backupError);
+            // Continue anyway, this is non-blocking
+        }
 
-            if (pingError) {
-                console.error("[SaveProject] Connection/Auth Check Failed:", pingError);
-                throw new Error("Errore di connessione al database. Riprova.");
-            }
-            console.log("[SaveProject] Connection OK. Rows found:", pingData?.length || 0);
+        const MAX_RETRIES = 3;
+        let attempt = 0;
+        let success = false;
+        let lastError = null;
 
-            const projectData = { ...projectCurrent };
-            delete projectData.id;
-            delete projectData.name;
-            delete projectData.createdAt;
+        while (attempt < MAX_RETRIES && !success) {
+            attempt++;
+            try {
+                console.log(`[SaveProject] Attempt ${attempt}/${MAX_RETRIES}...`);
 
-            const payload = {
-                name: projectCurrent.name,
-                data: projectData,
-                user_id: user.id
-            };
+                // 1. Connection Check (Fast fail)
+                const { error: pingError } = await supabase.from('profiles').select('id').limit(1);
+                if (pingError) throw new Error(`Connection check failed: ${pingError.message}`);
 
-            // let data, error; // Removed to avoid conflict
+                // Prepare Payload
+                const projectData = { ...projectCurrent };
+                delete projectData.id;
+                delete projectData.name;
+                delete projectData.createdAt; // kept in 'created_at' column usually
 
-            // Check if it's a UUID (existing Supabase project) or a temp/new ID
-            const isUUID = projectCurrent.id && projectCurrent.id.length > 20;
-
-            console.log(`[SaveProject] Starting save. ID: ${projectCurrent.id}, isUUID: ${isUUID}, User: ${user.id}`);
-            console.log(`[SaveProject] Payload size: ${JSON.stringify(payload).length} characters`);
-
-            const dbOperation = async () => {
-                let d, e;
-                if (isUUID) {
-                    ({ data: d, error: e } = await supabase
-                        .from('projects')
-                        .update({ ...payload, updated_at: new Date().toISOString() })
-                        .eq('id', projectCurrent.id)
-                        .select());
-                } else {
-                    ({ data: d, error: e } = await supabase
-                        .from('projects')
-                        .insert(payload)
-                        .select());
-                }
-                return { data: d, error: e };
-            };
-
-            const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Timeout salvataggio: server non risponde')), 8000)
-            );
-
-            const { data, error } = await Promise.race([dbOperation(), timeoutPromise]);
-
-            if (error) throw error;
-
-            if (data && data[0]) {
-                const savedProject = {
-                    ...data[0].data,
-                    id: data[0].id,
-                    name: data[0].name,
-                    createdAt: data[0].created_at,
-                    updatedAt: data[0].updated_at
+                const payload = {
+                    name: projectCurrent.name,
+                    data: projectData,
+                    user_id: user.id
                 };
 
-                setProject(savedProject);
-                localStorage.setItem('currentProject', JSON.stringify(savedProject));
-                await fetchProjects(); // Refresh list
-                return true;
+                const isUUID = projectCurrent.id && projectCurrent.id.length > 20;
+
+                // 2. Database Operation with Timeout
+                const dbOperation = async () => {
+                    if (isUUID) {
+                        return await supabase
+                            .from('projects')
+                            .update({ ...payload, updated_at: new Date().toISOString() })
+                            .eq('id', projectCurrent.id)
+                            .select();
+                    } else {
+                        return await supabase
+                            .from('projects')
+                            .insert(payload)
+                            .select();
+                    }
+                };
+
+                const timeoutMs = 8000 + (attempt * 2000); // Backoff: 10s, 12s, 14s
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Timeout salvataggio')), timeoutMs)
+                );
+
+                const { data, error } = await Promise.race([dbOperation(), timeoutPromise]);
+
+                if (error) throw error;
+                if (!data || data.length === 0) throw new Error("No data returned from save operation");
+
+                // Success!
+                success = true;
+                console.log("[SaveProject] Save successful!");
+
+                // Update local ID if it was a new project
+                if (!isUUID && data[0].id) {
+                    const newId = data[0].id;
+                    updateProject({ id: newId });
+                }
+
+            } catch (err) {
+                lastError = err;
+                console.error(`[SaveProject] Attempt ${attempt} failed:`, err.message);
+
+                if (attempt < MAX_RETRIES) {
+                    // Wait before retry (exponential backoff: 500ms, 1000ms, 2000ms)
+                    const waitTime = 500 * Math.pow(2, attempt - 1);
+                    await new Promise(resolve => setTimeout(resolve, waitTime));
+                }
             }
-        } catch (error) {
-            console.error('Error saving project:', error);
-            return false;
-        } finally {
-            setLoading(false);
         }
+
+        setLoading(false);
+
+        if (!success) {
+            console.error("[SaveProject] All save attempts failed.");
+            alert(`Errore PROGETTO NON SALVATO dopo ${MAX_RETRIES} tentativi.\n\nIl tuo lavoro è al sicuro nella memoria locale, ma non è sul server.\n\nErrore: ${lastError?.message}`);
+            return false;
+        }
+
+        return true;
     };
 
     // Create new project
@@ -245,8 +300,9 @@ export const ProjectProvider = ({ children }) => {
 
         const projectToLoad = savedProjects.find(p => p.id === projectId);
         if (projectToLoad) {
-            setProject(projectToLoad);
-            localStorage.setItem('currentProject', JSON.stringify(projectToLoad));
+            const validated = validateProjectStructure(projectToLoad);
+            setProject(validated);
+            localStorage.setItem('currentProject', JSON.stringify(validated));
         }
     };
 
