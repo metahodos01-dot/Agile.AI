@@ -22,6 +22,8 @@ const steps = [
     { path: '/sprint', name: '9. Sprint', icon: Play },
 ];
 
+const adminStep = { path: '/admin', name: 'Admin Panel', icon: Shield };
+
 const MOTO_DEMO_PROJECT = {
     name: 'Moto Elettrica Future',
     vision: 'Creare la moto elettrica più avanzata e sostenibile del mondo, combinando prestazioni elevate con un design italiano iconico e zero emissioni.',
@@ -539,6 +541,23 @@ const Sidebar = () => {
                                 </NavLink>
                             );
                         })}
+
+                        {/* Admin Panel Link */}
+                        {role === 'admin' && (
+                            <NavLink
+                                to={adminStep.path}
+                                className={({ isActive }) =>
+                                    `flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 mt-2 group relative overflow-hidden ${isActive
+                                        ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+                                        : 'text-zinc-400 hover:text-purple-300 hover:bg-zinc-800/50'
+                                    }`
+                                }
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                <adminStep.icon size={17} className="flex-shrink-0 relative z-10" />
+                                <span className="font-medium text-sm truncate relative z-10">{adminStep.name}</span>
+                            </NavLink>
+                        )}
                     </div>
                 </nav>
 
