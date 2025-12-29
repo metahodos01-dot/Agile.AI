@@ -34,18 +34,7 @@ const AdminDashboard = () => {
         }
     };
 
-    const handlePingTest = async () => {
-        setPingStatus('testing');
-        const start = Date.now();
-        try {
-            const { error } = await supabase.from('profiles').select('id').limit(1);
-            if (error) throw error;
-            const ms = Date.now() - start;
-            setPingStatus(`OK (${ms}ms)`);
-        } catch (err) {
-            setPingStatus(`ERROR: ${err.message}`);
-        }
-    };
+
 
     const handlePingTest = async () => {
         setPingStatus('testing');
