@@ -47,6 +47,49 @@ const AdminDashboard = () => {
         }
     };
 
+    const handlePingTest = async () => {
+        setPingStatus('testing');
+        const start = Date.now();
+        try {
+            const { error } = await supabase.from('profiles').select('count').limit(1).single();
+            const ms = Date.now() - start;
+            if (error) throw error;
+            setPingStatus(`OK (${ms}ms)`);
+        } catch (e) {
+            setPingStatus(`ERROR: ${e.message}`);
+        }
+    };
+
+    const handleLoadProject = (rawProject) => {
+        if (!confirm(`Vuoi caricare il progetto "${rawProject.name}"? Sostituirà quello attuale.`)) return;
+
+        try {
+            // Map DB structure to App structure (Same logic as ProjectContext)
+            let sprints = rawProject.data?.sprints || [];
+            // Migration legacy check
+            if (sprints.length === 0 && rawProject.data?.sprint && Object.keys(rawProject.data.sprint).length > 0) {
+                sprints = [{ id: 1, title: 'Sprint 1', status: 'active', ...rawProject.data.sprint }];
+            }
+
+            const appProject = {
+                ...rawProject.data,
+                id: rawProject.id,
+                name: rawProject.name,
+                sprints: sprints,
+                createdAt: rawProject.created_at,
+                updatedAt: rawProject.updated_at
+            };
+
+            console.log("Admin: Force loading project:", appProject);
+            localStorage.setItem('currentProject', JSON.stringify(appProject));
+            // Force reload to pick up new state
+            window.location.reload();
+        } catch (err) {
+            console.error("Error loading project:", err);
+            alert("Errore nel caricamento del progetto: " + err.message);
+        }
+    };
+
     const filteredUsers = users.filter(user =>
         user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.role?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -224,6 +267,7 @@ const AdminDashboard = () => {
                                 <th className="px-6 py-4">Proprietario</th>
                                 <th className="px-6 py-4">Creato il</th>
                                 <th className="px-6 py-4">ID</th>
+                                <th className="px-6 py-4">Azioni</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-zinc-100 dark:divide-zinc-700">
@@ -241,11 +285,19 @@ const AdminDashboard = () => {
                                     <td className="px-6 py-4 text-zinc-400 text-xs font-mono">
                                         {project.id}
                                     </td>
+                                    <td className="px-6 py-4">
+                                        <button
+                                            onClick={() => handleLoadProject(project)}
+                                            className="px-3 py-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 text-xs rounded transition-colors"
+                                        >
+                                            Carica
+                                        </button>
+                                    </td>
                                 </tr>
                             ))}
                             {projects.length === 0 && (
                                 <tr>
-                                    <td colSpan="4" className="px-6 py-8 text-center text-zinc-500">
+                                    <td colSpan="5" className="px-6 py-8 text-center text-zinc-500">
                                         Nessun progetto trovato nel database.
                                     </td>
                                 </tr>
