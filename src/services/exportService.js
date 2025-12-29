@@ -799,7 +799,7 @@ export const publishToWeb = async (project) => {
         const filename = `${safeName}-${Date.now()}.html`;
         const filePath = `${filename}`;
 
-        const { data, error } = await supabase.storage
+        const { error } = await supabase.storage
             .from('public-exports')
             .upload(filePath, blob, {
                 cacheControl: '3600',

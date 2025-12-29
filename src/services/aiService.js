@@ -3,55 +3,48 @@
 // In produzione, questo si collegherà a OpenAI/Gemini API
 
 export const generateAIResponse = async (prompt, type) => {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            if (type === 'vision') {
-                // Vision orientata all'industria
-                const productName = prompt.projectName || 'Il prodotto';
-                const target = prompt.targetAudience || 'le aziende manifatturiere';
-                const problem = prompt.problem || 'l\'efficienza dei processi produttivi';
-                const currentSolution = prompt.currentSolution || 'processi manuali e strumenti non integrati';
-                const differentiation = prompt.differentiation || 'automazione intelligente e integrazione completa';
+   return new Promise((resolve) => {
+      setTimeout(() => {
+         if (type === 'vision') {
+            // Vision discorsiva + Value Proposition strutturata
+            const productName = prompt.projectName || 'Il prodotto';
+            const target = prompt.targetAudience || 'le aziende';
+            const problem = prompt.problem || 'le inefficienze attuali';
+            const differentiation = prompt.differentiation || 'tecnologia avanzata';
 
-                resolve(`PER ${target}, CHE hanno bisogno di risolvere ${problem}, ${productName} È una soluzione industriale CHE offre ${differentiation}. 
+            resolve(`${productName} si pone l'ambizioso obiettivo di trasformare il settore per ${target}, risolvendo in modo definitivo le criticità legate a ${problem}. Attraverso un approccio innovativo basato su ${differentiation}, non ci limitiamo a migliorare i processi esistenti, ma ridefiniamo lo standard di eccellenza operativa. La nostra visione è quella di un futuro in cui l'efficienza non va a scapito della qualità, creando un ecosistema integrato e sostenibile.
 
-A DIFFERENZA delle soluzioni attuali (${currentSolution}), IL NOSTRO PRODOTTO garantisce riduzione dei costi operativi, maggiore efficienza e controllo completo della catena del valore.
+🚀 **Value Proposition & Elementi Differenzianti**
 
-🎯 Proposta di valore chiave:
-• Riduzione tempi di ciclo e sprechi
-• Miglioramento della qualità e tracciabilità
-• Integrazione con i sistemi esistenti (ERP, MES, SCADA)
-• ROI misurabile entro 12 mesi`);
+✨ **Innovazione Radicale**: Oltre le soluzioni tradizionali, portiamo ${differentiation} al centro del processo.
+💎 **Impatto Misurabile**: Risoluzione concreta di ${problem} con ROI tangibile.
+🤝 **Focus sull'Utente**: Progettato specificamente per le esigenze di ${target}.
+🔗 **Integrazione Totale**: Si inserisce perfettamente nel workflow esistente.`);
 
-            } else if (type === 'objectives') {
-                // Obiettivi industriali legati alla vision
-                const productName = prompt.projectName || 'del progetto';
+         } else if (type === 'objectives') {
+            // Obiettivi allineati alla vision
+            const productName = prompt.projectName || 'del progetto';
 
-                resolve(`Basandomi sulla vision di ${productName}, ecco gli obiettivi strategici:
+            resolve(`Per realizzare la visione di ${productName}, abbiamo definito i seguenti OKR strategici:
 
-1. **Obiettivo**: Ottimizzare l'efficienza produttiva
-   - KR1: Ridurre i tempi di ciclo del 20%
-   - KR2: Diminuire gli scarti di produzione del 15%
-   - KR3: Aumentare l'OEE (Overall Equipment Effectiveness) all'85%
+1. **Obiettivo**: Diventare leader di mercato per ${prompt.targetAudience || 'il target'}
+   - KR1: Acquisire i primi 50 clienti enterprise entro Q3
+   - KR2: Raggiungere un NPS (Net Promoter Score) > 50
+   - KR3: Essere menzionati in 3 report di settore come "Top Innovator"
 
-2. **Obiettivo**: Migliorare la qualità del prodotto
-   - KR1: Ridurre i difetti a meno di 50 PPM
-   - KR2: Implementare controllo qualità in-line al 100%
-   - KR3: Ottenere certificazione di settore entro 6 mesi
+2. **Obiettivo**: Eccellenza tecnica e risoluzione di "${prompt.problem || 'problema'}"
+   - KR1: Ridurre i tempi di esecuzione del 40% rispetto allo standard attuale
+   - KR2: Garantire un uptime del 99.99%
+   - KR3: Rilasciare 3 nuove feature core basate su feedback utenti
 
-3. **Obiettivo**: Ridurre i costi operativi
-   - KR1: Tagliare i costi energetici del 10%
-   - KR2: Ottimizzare il magazzino riducendo le scorte del 25%
-   - KR3: Diminuire i fermi macchina non pianificati del 30%
+3. **Obiettivo**: Sostenibilità e Scalabilità
+   - KR1: Ottimizzare i costi infrastrutturali del 20%
+   - KR2: Automatizzare il 100% del processo di onboarding
+   - KR3: Creare una community di 1000 utenti attivi`);
 
-4. **Obiettivo**: Accelerare il time-to-market
-   - KR1: Ridurre il lead time di produzione del 25%
-   - KR2: Implementare cambio formato rapido (SMED) in 4 linee
-   - KR3: Digitalizzare il 100% della documentazione di processo`);
-
-            } else if (type === 'kpi') {
-                // KPI industriali
-                resolve(`KPI suggeriti per il settore industriale:
+         } else if (type === 'kpi') {
+            // KPI industriali
+            resolve(`KPI suggeriti per il settore industriale:
 
 📊 **Efficienza produttiva**
 • OEE (Overall Equipment Effectiveness)
@@ -77,9 +70,9 @@ A DIFFERENZA delle soluzioni attuali (${currentSolution}), IL NOSTRO PRODOTTO ga
 • Tempo medio di consegna
 • Precisione dell'inventario`);
 
-            } else if (type === 'team') {
-                // Team industriale
-                resolve(`Composizione del team consigliata per progetti industriali:
+         } else if (type === 'team') {
+            // Team industriale
+            resolve(`Composizione del team consigliata per progetti industriali:
 
 👔 **Leadership**
 • 1 Project manager / Responsabile di progetto
@@ -100,9 +93,9 @@ A DIFFERENZA delle soluzioni attuali (${currentSolution}), IL NOSTRO PRODOTTO ga
 
 💡 Suggerimento: coinvolgere operatori di linea come "super-user" per garantire adozione e feedback dal campo.`);
 
-            } else if (type === 'backlog') {
-                // Backlog industriale - Epic legate alla produzione
-                resolve(`Epic principali per progetti industriali:
+         } else if (type === 'backlog') {
+            // Backlog industriale - Epic legate alla produzione
+            resolve(`Epic principali per progetti industriali:
 
 🏭 **1. Digitalizzazione del processo produttivo**
    • Mappatura flussi AS-IS
@@ -134,16 +127,16 @@ A DIFFERENZA delle soluzioni attuali (${currentSolution}), IL NOSTRO PRODOTTO ga
    • Gestione non conformità
    • Audit trail completo`);
 
-            } else {
-                resolve("Suggerimento generato in base al contesto industriale del tuo progetto.");
-            }
-        }, 1500);
-    });
+         } else {
+            resolve("Suggerimento generato in base al contesto industriale del tuo progetto.");
+         }
+      }, 1500);
+   });
 };
 
 // Helper per generare suggerimenti contestuali basati sulla vision
 export const generateContextualSuggestion = (vision, type) => {
-    // Questa funzione può essere estesa per analizzare la vision
-    // e generare suggerimenti più specifici
-    return generateAIResponse({ projectName: vision }, type);
+   // Questa funzione può essere estesa per analizzare la vision
+   // e generare suggerimenti più specifici
+   return generateAIResponse({ projectName: vision }, type);
 };

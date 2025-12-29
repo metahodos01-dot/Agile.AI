@@ -196,24 +196,7 @@ const Sidebar = () => {
     const { user, role, signOut } = useAuth();
     const navigate = useNavigate();
 
-    // Handle Logout
-    const handleLogout = async (e) => {
-        if (e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-        console.log("Sidebar: handleLogout called");
-        try {
-            const result = await signOut();
-            console.log("Sidebar: signOut result:", result);
-            // Use hard redirect to ensure complete state reset
-            window.location.href = '/login';
-        } catch (error) {
-            console.error("Sidebar: Logout failed:", error);
-            // Still redirect even on error
-            window.location.href = '/login';
-        }
-    };
+
 
     // Modal states
     const [showSaveModal, setShowSaveModal] = useState(false);

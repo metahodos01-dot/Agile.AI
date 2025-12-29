@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
 import ExportButton from '../components/common/ExportButton';
 import {
@@ -142,7 +142,7 @@ const GaugeChart = ({ value, max, label, color, icon: Icon }) => {
 // Step 1: Logic
 const Sprint = () => {
     const { project, updateSprint, addSprint, saveProject } = useProject();
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
 
     // Tab State
     const [activeTab, setActiveTab] = useState('planning'); // Default to planning logic

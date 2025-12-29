@@ -29,35 +29,46 @@ Pianifica il lavoro da svolgere:
 
 ## 🏃 4. Esecuzione: Sprint Dashboard (Fase 9)
 
-Questa è la parte operativa quotidiana. La Dashboard dello Sprint è stata potenziata per gestire tutto in un unico posto.
+La Dashboard è il cuore operativo del tuo progetto ed è stata completamente rinnovata per supportare la gestione di **Sprint Multipli**.
+
+### � Gestione Multi-Sprint
+
+- **Navigazione**: Usa la barra in alto per spostarti tra i vari Sprint ("Sprint 1", "Sprint 2", ecc.).
+- **Nuovo Sprint**: Clicca su "+ Nuovo Sprint" per avviare un nuovo ciclo di lavoro.
+- **Archivio**: Gli sprint passati vengono automaticamente impostati in modalità "Sola Lettura" per preservare lo storico.
+
+### 📅 Pianificazione & Capacità (Novità!)
+
+Prima di iniziare il lavoro, usa la tab **"Pianificazione"** per:
+
+1. **Definire la Capacity**: Inserisci i membri del team, le ore disponibili e il "Focus Factor" (es. 80%). Il sistema calcolerà automaticamente le ore reali a disposizione.
+2. **Convalidare le Stime**: Il sistema confronta in tempo reale le ore stimate dei task con la capacità del team.
+   - 🟢 **Verde**: Il piano è sostenibile.
+   - ⚠️ **Giallo/Rosso**: Hai pianificato più lavoro di quello gestibile.
 
 ### 📌 Kanban Board
 
-Gestisci visivamente il flusso di lavoro:
+Gestisci il flusso quotidiano:
 
 - **3 Colonne**: Da Fare, In Corso, Fatto.
-- **Drag & Drop**: Sposta le card tra le colonne trascinandole.
-- **Gestione Task**: Aggiungi nuovi task o eliminali direttamente dalla board.
+- **Task con Stime**: Ogni task ora include la stima in ore per alimentare il Burndown Chart.
+- **Drag & Drop**: Sposta i task per aggiornare lo stato.
 
-### ⏱️ Daily Standup
+### ⏱️ Daily Standup & Retrospettiva
 
-Strumenti per la riunione quotidiana di 15 minuti:
+- **Daily**: Timer integrato e note per lo standup.
+- **Retrospettiva**: A fine sprint, compila le sezioni "Start", "Stop", "Continue" nella tab dedicata.
 
-- **Timer**: Usa il timer integrato per mantenere il time-boxing.
-- **Note Giornaliere**: Uno spazio libero per appuntare blocchi o decisioni prese durante il meeting.
-- **Calendario**: Aggiungi e visualizza eventi chiave (es. Demo, Review) per lo sprint corrente.
+### 📈 KPI & Burndown
 
-> **Nota**: Tutti i dati dello sprint (task, eventi, note) vengono salvati automaticamente nel cloud.
+Visualizza l'andamento del progetto con grafici aggiornati in tempo reale:
+
+- **Burndown Chart**: Traccia le ore rimanenti vs ore ideali giorno per giorno.
+- **Velocity**: Monitora la velocità del team sprint dopo sprint.
 
 ---
 
 ## 📊 5. Monitoraggio e Reportistica (Fase 10)
 
 - **Export**: Clicca su "Export Progetto" in basso a sinistra.
-- **Report Professionale**: Genera un documento (HTML o PDF via browser) che include:
-  - Stato attuale della Board Kanban (task raggruppati per stato).
-  - Eventi del calendario imminenti.
-  - Note dei Daily Standup.
-  - Analisi dei KPI e progressi.
-
-Questo report è ideale da condividere con gli stakeholder o da archiviare come documentazione di fine sprint.
+- **Report Completo**: Include ora i dettagli di tutti gli sprint, le metriche di capacità e i risultati delle retrospettive.
