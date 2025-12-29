@@ -336,7 +336,9 @@ const Sprint = () => {
         // Update context immediately with current state or overrides
         const payload = {
             id: activeSprintId,
-            status: activeSprint.status || 'planned',
+            status: overrides.status || activeSprint.status || 'planned',
+            startDate: overrides.startDate || activeSprint.startDate,
+            durationDays: overrides.durationDays || activeSprint.durationDays,
             kanban: overrides.kanban || kanbanTasks,
             calendar: overrides.calendar || calendarEvents,
             notes: overrides.notes || sprintNotes,
