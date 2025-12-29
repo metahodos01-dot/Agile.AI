@@ -157,28 +157,33 @@ export const ProjectProvider = ({ children }) => {
                 user_id: user.id
             };
 
-            let data, error;
+            // let data, error; // Removed to avoid conflict
 
             // Check if it's a UUID (existing Supabase project) or a temp/new ID
             const isUUID = projectCurrent.id && projectCurrent.id.length > 20;
 
-            if (isUUID) {
-                // Update
-                ({ data, error } = await supabase
-                    .from('projects')
-                    .update({
-                        ...payload,
-                        updated_at: new Date().toISOString()
-                    })
-                    .eq('id', projectCurrent.id)
-                    .select());
-            } else {
-                // Insert
-                ({ data, error } = await supabase
-                    .from('projects')
-                    .insert(payload)
-                    .select());
-            }
+            const dbOperation = async () => {
+                let d, e;
+                if (isUUID) {
+                    ({ data: d, error: e } = await supabase
+                        .from('projects')
+                        .update({ ...payload, updated_at: new Date().toISOString() })
+                        .eq('id', projectCurrent.id)
+                        .select());
+                } else {
+                    ({ data: d, error: e } = await supabase
+                        .from('projects')
+                        .insert(payload)
+                        .select());
+                }
+                return { data: d, error: e };
+            };
+
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Timeout salvataggio: server non risponde')), 15000)
+            );
+
+            const { data, error } = await Promise.race([dbOperation(), timeoutPromise]);
 
             if (error) throw error;
 

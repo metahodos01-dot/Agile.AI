@@ -285,26 +285,24 @@ const Sprint = () => {
         const duration = capacity.members?.[0]?.days || 10;
         const now = new Date().toISOString();
 
-        // 1. Update Local Context using handleSaveLocal's logic but we need to ensure it's in the payload we save
+        // 1. Optimistic Update - Update context immediately
         const payload = {
             status: 'active',
             startDate: now,
             durationDays: duration
         };
 
+        // This updates the global ProjectContext, which triggers a re-render of this component
         handleSaveLocal(payload);
 
-        // 2. Persist to DB immediately
+        // 2. Persist to DB in background
         setIsSaving(true);
         try {
-            // We need to wait for the context to update, but setState is sync in event handlers for React 18 usually? 
-            // Better to manually construct the project object for saving to be 100% sure
             await saveProject();
-            // reload after successful save
-            window.location.reload();
+            // setSaved(true); // Optional: show success checkmark
         } catch (error) {
-            console.error("Failed to start sprint", error);
-            alert("Errore nell'avvio dello sprint. Riprova.");
+            console.error("Failed to save sprint start", error);
+            alert("Attenzione: Lo sprint è attivo localmente, ma il salvataggio su server è fallito. Riprova a salvare manualmente.");
         } finally {
             setIsSaving(false);
         }
