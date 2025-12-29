@@ -58,13 +58,10 @@ const MoodMeter = ({ moods = {}, onVote }) => (
     </div>
 );
 
-const BurnChart = ({ data, type }) => (
-    <div className="h-64 flex flex-col items-center justify-center border border-dashed border-zinc-700 rounded-xl bg-zinc-800/20">
-        <BarChart3 size={32} className="text-zinc-600 mb-2" />
-        <p className="text-zinc-500 text-sm">Grafico {type === 'burndown' ? 'Burndown' : 'Burnup'} ({data?.length || 0} aggiornamenti)</p>
-        <p className="text-xs text-zinc-600 mt-1">Dati storici verranno visualizzati qui</p>
-    </div>
-);
+import BurndownChart from '../components/charts/BurndownChart';
+
+// Placeholder removed
+
 
 const KanbanColumn = ({ title, status, tasks, onMove, onAdd, color, getStoryTitle }) => (
     <div className="flex flex-col h-full bg-zinc-900/30 rounded-xl border border-zinc-800/50">
@@ -284,12 +281,22 @@ const Sprint = () => {
 
         const duration = capacity.members?.[0]?.days || 10;
         const now = new Date().toISOString();
+        const totalEstimated = kanbanTasks.filter(t => t.status !== 'backlog').reduce((sum, t) => sum + (Number(t.estimated) || 0), 0);
+
+        // Initialize Burndown Data with Day 0
+        const initialBurndown = [{
+            day: 0,
+            date: new Date(now).toLocaleDateString(),
+            ideal: totalEstimated,
+            real: totalEstimated
+        }];
 
         // 1. Optimistic Update - Update context immediately
         const payload = {
             status: 'active',
             startDate: now,
-            durationDays: duration
+            durationDays: duration,
+            kpis: { ...kpiData, burndownData: initialBurndown }
         };
 
         // This updates the global ProjectContext, which triggers a re-render of this component
@@ -307,6 +314,86 @@ const Sprint = () => {
             setIsSaving(false);
         }
     };
+
+    const handleCompleteSprint = async () => {
+        if (!confirm("Sei sicuro di voler terminare lo sprint? Assicurati di aver completato la Review e la Retrospettiva.")) return;
+        const payload = {
+            status: 'completed',
+            endDate: new Date().toISOString()
+        };
+        handleSaveLocal(payload);
+
+        setIsSaving(true);
+        try {
+            await saveProject();
+        } catch (error) {
+            alert("Errore salvataggio chiusura sprint.");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    // Calculate Ideal Burn rate
+    const totalEstimatedInitial = kpiData.burndownData?.[0]?.ideal || totalEstimatedHours; // Use snapshot or current
+    const sprintDuration = activeSprint.durationDays || 10;
+    const idealPerDay = totalEstimatedInitial / sprintDuration;
+
+    // Helper to update daily snapshot (Call this when needed, e.g. on page load if new day, or manual trigger)
+    const updateBurndownSnapshot = () => {
+        if (activeSprint.status !== 'active' || !activeSprint.startDate) return;
+
+        const start = new Date(activeSprint.startDate);
+        const now = new Date();
+        const diffTime = Math.abs(now - start);
+        const dayDiff = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        // Note: dayDiff might be 1 on the first day if we round up, let's normalize to 0-based index or 1-based day. 
+        // Standard: Day 0 = Start. Day 1 = After 24h.
+
+        // Simpler: Current Day based on calendar date difference
+        const dayIndex = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+        // Check if we already have an entry for this dayIndex
+        const existingData = kpiData.burndownData || [];
+        const hasToday = existingData.some(d => d.day === dayIndex);
+
+        if (!hasToday) {
+            // Calculate remaining (Real)
+            const currentRemaining = kanbanTasks.filter(t => t.status !== 'backlog').reduce((sum, t) => sum + (Number(t.remaining) || Number(t.estimated) || 0), 0);
+            // Logic: Subtract DONE tasks? Or sum Remaining field? 
+            // Implementing "Sum of Remaining work". If 'remaining' isn't tracked, use estimated for todo/doing and 0 for done.
+            // Refined Real Calc:
+            const realRemaining = kanbanTasks
+                .filter(t => t.status !== 'backlog')
+                .reduce((sum, t) => {
+                    if (t.status === 'done') return sum + 0;
+                    return sum + (Number(t.remaining) || Number(t.estimated) || 0); // Assuming remaining tracks work left.
+                }, 0);
+
+            const idealRemaining = Math.max(0, totalEstimatedInitial - (idealPerDay * dayIndex));
+
+            const newEntry = {
+                day: dayIndex,
+                date: new Date().toLocaleDateString(),
+                ideal: Number(idealRemaining.toFixed(1)),
+                real: Number(realRemaining.toFixed(1))
+            };
+
+            const newData = [...existingData, newEntry].sort((a, b) => a.day - b.day);
+
+            setKpiData(prev => ({ ...prev, burndownData: newData }));
+            // We should auto-save this update to context/db strictly speaking, but handleSaveLocal handles context update on unmount/save.
+            // Let's rely on manual Save or Auto-Save for now to persist this KPI update.
+            handleSaveLocal({ kpis: { ...kpiData, burndownData: newData } });
+        }
+    };
+
+    // Check for daily snapshot on load/mount if active
+    useEffect(() => {
+        if (activeSprint.status === 'active') {
+            updateBurndownSnapshot();
+        }
+    }, [activeSprint.id, activeSprint.status]); // Check on load
+
 
     const getDaysRemaining = () => {
         if (activeSprint.status !== 'active' || !activeSprint.startDate) return null;
@@ -528,6 +615,14 @@ const Sprint = () => {
                             className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg border border-indigo-500 shadow-lg shadow-indigo-500/20 transition-all"
                         >
                             <Play size={14} fill="currentColor" /> AVVIA SPRINT
+                        </button>
+                    )}
+                    {activeSprint.status === 'active' && (
+                        <button
+                            onClick={handleCompleteSprint}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-red-400 text-xs font-bold rounded-lg border border-red-500/30 transition-all"
+                        >
+                            <CheckCircle size={14} /> TERMINA SPRINT
                         </button>
                     )}
                 </div>
@@ -941,11 +1036,12 @@ const Sprint = () => {
                             <MoodMeter moods={kpiData.moods} onVote={handleMoodVote} />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="bg-zinc-800/30 p-6 rounded-2xl">
-                                <BurnChart data={kpiData.burndownData} type="burndown" totalPoints={40} />
-                            </div>
-                            <div className="bg-zinc-800/30 p-6 rounded-2xl">
-                                <BurnChart data={kpiData.burnupData} type="burnup" totalPoints={40} />
+                            <div className="bg-zinc-800/30 p-6 rounded-2xl col-span-2">
+                                <BurndownChart
+                                    data={kpiData.burndownData}
+                                    idealHours={totalEstimatedInitial}
+                                    totalDays={activeSprint.durationDays || 10}
+                                />
                             </div>
                         </div>
                     </div>

@@ -1,13 +1,37 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
-import { Sparkles, ArrowRight, Layout, CheckCircle2, Circle, BookOpen, Plus, Trash2, Edit3 } from 'lucide-react';
+import { Sparkles, ArrowRight, Layout, CheckCircle2, Circle, BookOpen, Plus, Trash2, Edit3, Upload, Camera, Wand2 } from 'lucide-react';
 
 const Obeya = () => {
     const { project, updateProject } = useProject();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [setupItems, setSetupItems] = useState(project.obeya?.items || []);
+
+    // Nano Banana AI State
+    const [aiImage, setAiImage] = useState(null);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [showAiResult, setShowAiResult] = useState(false);
+
+    const handlePhotoUpload = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Simulate upload and processing
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            setAiImage(event.target.result); // Preview of uploaded image
+            setIsGenerating(true);
+
+            // Simulate AI Processing "Nano Banana"
+            setTimeout(() => {
+                setIsGenerating(false);
+                setShowAiResult(true);
+            }, 3000);
+        };
+        reader.readAsDataURL(file);
+    };
 
     const handleGenerate = () => {
         setLoading(true);
@@ -126,6 +150,62 @@ const Obeya = () => {
                             <p className="text-right text-xs mt-2 text-zinc-400">{progress}% Completato</p>
                         </div>
                     )}
+
+                    {/* Nano Banana AI Designer */}
+                    <div className="glass-panel p-6 border-t-4 border-yellow-400 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-2 opacity-10 pointer-events-none">
+                            <Sparkles size={100} />
+                        </div>
+                        <div className="flex items-center gap-2 mb-4">
+                            <Wand2 className="text-yellow-400 animate-pulse" size={24} />
+                            <h3 className="text-lg font-bold text-white">Nano Banana AI</h3>
+                        </div>
+                        <p className="text-sm text-zinc-400 mb-6">
+                            Carica una foto della tua stanza. Nano Banana la trasformerà in una Obeya Room perfetta usando l'AI.
+                        </p>
+
+                        {!showAiResult ? (
+                            <div className="relative group cursor-pointer border-2 border-dashed border-zinc-700 hover:border-yellow-400 rounded-xl p-8 transition-all bg-zinc-800/30 hover:bg-zinc-800/60 text-center">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                    onChange={handlePhotoUpload}
+                                    disabled={isGenerating}
+                                />
+                                {isGenerating ? (
+                                    <div className="flex flex-col items-center animate-pulse">
+                                        <div className="w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mb-4"></div>
+                                        <p className="text-yellow-400 font-bold">Nano Banana sta pensando...</p>
+                                        <p className="text-xs text-zinc-500 mt-2">Analisi spazi e generazione...</p>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-center">
+                                        <Camera size={32} className="text-zinc-500 group-hover:text-yellow-400 mb-2 transition-colors" />
+                                        <p className="text-zinc-300 font-medium group-hover:text-white">Carica foto ambiente</p>
+                                        <p className="text-xs text-zinc-500 mt-1">JPG, PNG max 5MB</p>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                                <div className="relative rounded-xl overflow-hidden border border-yellow-400/30 shadow-2xl shadow-yellow-500/10 group">
+                                    <img src="/obeya-concept.png" alt="Generated Obeya" className="w-full h-auto transform group-hover:scale-105 transition-transform duration-700" />
+                                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4">
+                                        <p className="text-yellow-400 font-bold flex items-center gap-2">
+                                            <Sparkles size={14} /> Obeya Concept Generato
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => { setShowAiResult(false); setAiImage(null); }}
+                                    className="w-full py-2 text-xs text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors border border-zinc-700"
+                                >
+                                    Carica un'altra foto
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 <div className="lg:col-span-2">
