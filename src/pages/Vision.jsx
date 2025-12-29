@@ -52,10 +52,10 @@ const Vision = () => {
     const handleNext = () => {
         // Ensure manual edits to inputs are also saved if they skipped generate
         updateProject({
-            targetAudience: inputs.targetAudience,
-            problem: inputs.problem,
-            currentSolution: inputs.currentSolution,
-            differentiation: inputs.differentiation
+            targetAudience: visionInput.targetAudience,
+            problem: visionInput.problem,
+            currentSolution: visionInput.currentSolution,
+            differentiation: visionInput.differentiation
         });
         navigate('/objectives');
     };
@@ -115,7 +115,7 @@ const Vision = () => {
                         <input
                             type="text"
                             name="projectName"
-                            value={inputs.projectName}
+                            value={project.name || ''}
                             onChange={handleInputChange}
                             placeholder="es. TaskFlow Pro"
                         />
@@ -126,7 +126,7 @@ const Vision = () => {
                         <input
                             type="text"
                             name="targetAudience"
-                            value={inputs.targetAudience}
+                            value={visionInput.targetAudience}
                             onChange={handleInputChange}
                             placeholder="es. Team di sviluppo software"
                         />
@@ -136,7 +136,7 @@ const Vision = () => {
                         <label className="text-sm font-medium text-zinc-300">Problema da Risolvere</label>
                         <textarea
                             name="problem"
-                            value={inputs.problem}
+                            value={visionInput.problem}
                             onChange={handleInputChange}
                             className="h-28 resize-none"
                             placeholder="Descrivi il problema principale che il tuo prodotto risolve..."
@@ -147,7 +147,7 @@ const Vision = () => {
                         <label className="text-sm font-medium text-zinc-300">Come il Cliente Risolve Oggi il Problema</label>
                         <textarea
                             name="currentSolution"
-                            value={inputs.currentSolution}
+                            value={visionInput.currentSolution}
                             onChange={handleInputChange}
                             className="h-24 resize-none"
                             placeholder="es. Usano Excel, fogli cartacei, strumenti non integrati, processi manuali..."
@@ -158,7 +158,7 @@ const Vision = () => {
                         <label className="text-sm font-medium text-zinc-300">Come Ci Differenziamo dalle Soluzioni Esistenti</label>
                         <textarea
                             name="differentiation"
-                            value={inputs.differentiation}
+                            value={visionInput.differentiation}
                             onChange={handleInputChange}
                             className="h-24 resize-none"
                             placeholder="es. Interfaccia più semplice, integrazione AI, costo inferiore, funzionalità uniche..."
