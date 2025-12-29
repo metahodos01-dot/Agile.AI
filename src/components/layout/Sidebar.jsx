@@ -333,7 +333,7 @@ const Sidebar = () => {
                             className="w-12 h-12 object-contain"
                         />
                         <div>
-                            <h1 className="text-lg font-bold text-white leading-tight">PROGETTOAGILE.AI</h1>
+                            <h1 className="text-lg font-bold text-white leading-tight">PROGETTOAGILE.AI <span className="text-[10px] text-green-400 font-mono">v1.1</span></h1>
                             <img
                                 src="/signature-franz.png"
                                 alt="by Franz"
