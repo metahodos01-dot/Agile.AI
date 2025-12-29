@@ -231,7 +231,7 @@ const Sprint = () => {
         // Update context immediately with current state or overrides
         const payload = {
             id: activeSprintId,
-            status: activeSprint.status, // Preserve status
+            status: activeSprint.status || 'planned',
             kanban: overrides.kanban || kanbanTasks,
             calendar: overrides.calendar || calendarEvents,
             notes: overrides.notes || sprintNotes,
@@ -241,7 +241,19 @@ const Sprint = () => {
             continue: overrides.continue || retroItems.continue,
             capacity: overrides.capacity || capacity
         };
-        updateSprint(activeSprintId, payload);
+
+        // UPSERT LOGIC: Check if sprint exists in context
+        // If we are strictly on ID 1 (default) and it's missing, addSprint will handle it.
+        const exists = project.sprints?.some(s => s.id === activeSprintId);
+
+        if (exists) {
+            updateSprint(activeSprintId, payload);
+        } else {
+            // New Sprint or Default Sprint 1 initialization
+            // Note: addSprint assigns ID based on length + 1. 
+            // If activeSprintId is 1, and we have 0 sprints, it becomes 1.
+            addSprint(payload);
+        }
     };
 
     const handleSaveAndPersist = async () => {
