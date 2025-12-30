@@ -329,7 +329,7 @@ const Sidebar = () => {
                 />
             )}
 
-            <aside className="fixed left-0 top-0 w-72 h-screen flex flex-col bg-zinc-950/90 backdrop-blur-xl border-r border-white/5 z-[9999] shadow-2xl">
+            <aside className="fixed left-0 top-0 w-72 h-screen flex flex-col bg-slate-950/90 backdrop-blur-xl border-r border-white/5 z-[9999] shadow-2xl">
                 {/* Logo Section */}
                 <div className="p-6 border-b border-white/5 flex-shrink-0">
                     <div className="flex items-center gap-4">
@@ -339,7 +339,7 @@ const Sidebar = () => {
                             className="w-12 h-12 object-contain"
                         />
                         <div>
-                            <h1 className="text-lg font-bold text-white leading-tight">PROGETTOAGILE.AI <span className="text-[10px] text-green-400 font-mono">v2.0</span></h1>
+                            <h1 className="text-lg font-bold text-white leading-tight">PROGETTOAGILE.AI <span className="text-[10px] text-green-400 font-mono">v2.5</span></h1>
                             <img
                                 src="/signature-franz.png"
                                 alt="by Franz"
@@ -350,7 +350,7 @@ const Sidebar = () => {
                 </div>
 
                 {/* New Project Button */}
-                <div className="px-3 py-4 border-b border-zinc-800/50 flex-shrink-0 relative z-[10001]">
+                <div className="px-3 py-4 border-b border-slate-800/50 flex-shrink-0 relative z-[10001]">
                     <button
                         onClick={(e) => {
                             try {
@@ -362,7 +362,7 @@ const Sidebar = () => {
                                 alert("Errore: " + err.message);
                             }
                         }}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-colors cursor-pointer active:scale-95 shadow-lg shadow-indigo-900/20"
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-amber-600 hover:bg-amber-500 text-white font-medium rounded-xl transition-colors cursor-pointer active:scale-95 shadow-lg shadow-amber-900/20"
                     >
                         <Plus size={18} />
                         Nuovo Progetto
@@ -387,8 +387,8 @@ const Sidebar = () => {
 
                 {/* Saved Projects */}
                 {savedProjects.length > 0 && (
-                    <div className="px-3 py-4 border-b border-zinc-800/50 max-h-48 overflow-y-auto flex-shrink-0 z-50">
-                        <p className="text-[11px] font-semibold text-zinc-600 uppercase tracking-wider px-2 mb-2">
+                    <div className="px-3 py-4 border-b border-slate-800/50 max-h-48 overflow-y-auto flex-shrink-0 z-50">
+                        <p className="text-[11px] font-semibold text-slate-600 uppercase tracking-wider px-2 mb-2">
                             Progetti salvati ({savedProjects.length})
                         </p>
                         <div className="space-y-1">
@@ -396,8 +396,8 @@ const Sidebar = () => {
                                 <div
                                     key={p.id}
                                     className={`group flex items-center gap-2 px-3 py-2 rounded-lg transition-all cursor-pointer ${project.id === p.id
-                                        ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
-                                        : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
+                                        ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                                         }`}
                                     onClick={() => handleLoadProject(p.id)}
                                 >
@@ -417,8 +417,8 @@ const Sidebar = () => {
                 )}
 
                 {/* Current Project Info - Editable */}
-                <div className="px-4 py-3 bg-zinc-900/50 border-b border-zinc-800/50 relative z-[10001]">
-                    <p className="text-[10px] text-zinc-600 uppercase tracking-wider mb-1">Progetto attuale</p>
+                <div className="px-4 py-3 bg-slate-900/50 border-b border-slate-800/50 relative z-[10001]">
+                    <p className="text-[10px] text-slate-600 uppercase tracking-wider mb-1">Progetto attuale</p>
 
                     {editingName ? (
                         <div className="flex items-center gap-2 relative z-[10002]">
@@ -428,7 +428,7 @@ const Sidebar = () => {
                                 onChange={(e) => setTempName(e.target.value)}
                                 onKeyDown={handleNameKeyDown}
                                 onClick={(e) => e.stopPropagation()}
-                                className="flex-1 bg-zinc-800 border border-zinc-600 rounded-lg px-2 py-1 text-sm text-white focus:border-indigo-500 focus:outline-none cursor-text"
+                                className="flex-1 bg-slate-800 border border-slate-600 rounded-lg px-2 py-1 text-sm text-white focus:border-amber-500 focus:outline-none cursor-text"
                                 placeholder="Nome progetto..."
                                 autoFocus
                             />
@@ -441,10 +441,10 @@ const Sidebar = () => {
                             </button>
                             <button
                                 onClick={(e) => { e.stopPropagation(); cancelEditingName(); }}
-                                className="p-1 hover:bg-zinc-700 rounded transition-colors cursor-pointer"
+                                className="p-1 hover:bg-slate-700 rounded transition-colors cursor-pointer"
                                 title="Annulla"
                             >
-                                <X size={16} className="text-zinc-400" />
+                                <X size={16} className="text-slate-400" />
                             </button>
                         </div>
                     ) : (
@@ -453,10 +453,10 @@ const Sidebar = () => {
                                 {project.name || '(Senza nome)'}
                             </p>
                             <button
-                                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-zinc-700 rounded transition-all"
+                                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-700 rounded transition-all"
                                 title="Modifica nome"
                             >
-                                <Pencil size={14} className="text-zinc-400" />
+                                <Pencil size={14} className="text-slate-400" />
                             </button>
                         </div>
                     )}
@@ -469,8 +469,8 @@ const Sidebar = () => {
                         end
                         className={({ isActive }) =>
                             `flex items-center gap-3 px-4 py-3 rounded-xl mb-1 transition-all duration-200 ${isActive
-                                ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
-                                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
+                                ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                             }`
                         }
                     >
@@ -481,7 +481,7 @@ const Sidebar = () => {
                                 {isActive && (
                                     <motion.div
                                         layoutId="activeNav"
-                                        className="absolute inset-0 bg-indigo-500/10 border border-indigo-500/20 rounded-xl"
+                                        className="absolute inset-0 bg-amber-500/10 border border-amber-500/20 rounded-xl"
                                         initial={false}
                                         transition={{ type: "spring", stiffness: 500, damping: 30 }}
                                     />
@@ -493,7 +493,7 @@ const Sidebar = () => {
 
 
                     <div className="px-4 py-3 mt-2">
-                        <p className="text-[11px] font-semibold text-zinc-600 uppercase tracking-wider">Fasi del progetto</p>
+                        <p className="text-[11px] font-semibold text-slate-600 uppercase tracking-wider">Fasi del progetto</p>
                     </div>
 
                     <div className="space-y-0.5">
@@ -508,8 +508,8 @@ const Sidebar = () => {
                                         `flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 ${isActive
                                             ? isIntro
                                                 ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                                                : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
-                                            : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
+                                                : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                                         }`
                                     }
                                 >
@@ -522,7 +522,7 @@ const Sidebar = () => {
                                                     layoutId="activeNav"
                                                     className={`absolute inset-0 rounded-xl ${isIntro
                                                         ? 'bg-amber-500/10 border border-amber-500/20'
-                                                        : 'bg-indigo-500/10 border border-indigo-500/20'}`}
+                                                        : 'bg-amber-500/10 border border-amber-500/20'}`}
                                                     initial={false}
                                                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
                                                 />
@@ -540,7 +540,7 @@ const Sidebar = () => {
                                 className={({ isActive }) =>
                                     `flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 mt-2 group relative overflow-hidden ${isActive
                                         ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                                        : 'text-zinc-400 hover:text-purple-300 hover:bg-zinc-800/50'
+                                        : 'text-slate-400 hover:text-purple-300 hover:bg-slate-800/50'
                                     }`
                                 }
                             >
@@ -555,7 +555,7 @@ const Sidebar = () => {
                 {/* Footer */}
                 <div className="p-4 border-t border-white/5 bg-black/20 z-50">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-500/20 ring-2 ring-white/10">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-amber-500/20 ring-2 ring-white/10">
                             {user?.email?.charAt(0).toUpperCase() || 'U'}
                         </div>
                         <div className="flex-1 min-w-0">

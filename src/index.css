@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #6366f1;
-  --color-primary-glow: rgba(99, 102, 241, 0.5);
-  --color-bg-deep: #09090b;
+  --color-primary: #d97706;
+  --color-primary-glow: rgba(245, 158, 11, 0.5);
+  --color-bg-deep: #020617;
 }
 
 :root {
@@ -12,8 +12,8 @@
 
 /* Custom Selection Color */
 ::selection {
-  background: rgba(99, 102, 241, 0.3);
-  color: #e0e7ff;
+  background: rgba(245, 158, 11, 0.3);
+  color: #fef3c7;
 }
 
 /* Smooth Scrolling */
@@ -26,19 +26,19 @@ body {
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  @apply bg-zinc-950 text-zinc-100 overflow-x-hidden;
+  @apply bg-slate-950 text-slate-100 overflow-x-hidden;
 }
 
 /* Utilities */
 .glass-panel {
-  @apply bg-zinc-900/60 backdrop-blur-xl border border-white/5 rounded-2xl shadow-xl;
+  @apply bg-slate-900/60 backdrop-blur-xl border border-white/5 rounded-2xl shadow-xl;
 }
 
 .glass-card {
-  @apply bg-zinc-900/40 backdrop-blur-lg border border-white/5 rounded-xl transition-all duration-300;
+  @apply bg-slate-900/40 backdrop-blur-lg border border-white/5 rounded-xl transition-all duration-300;
 }
 
-/* Animated Mesh Background */
+/* Animated Mesh Background - TURBO VERSION */
 .mesh-gradient-bg {
   position: fixed;
   top: 0;
@@ -47,28 +47,23 @@ body {
   height: 100vh;
   z-index: 0;
   pointer-events: none;
-  background:
-    linear-gradient(to bottom, rgba(9, 9, 11, 0.85), rgba(9, 9, 11, 0.7)),
-    url('/obeya-concept.png');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-color: #09090b;
+  background-color: #020617;
+  /* Slate 950 */
 }
 
 /* Form Elements */
 input,
 textarea,
 select {
-  @apply w-full px-4 py-3 bg-zinc-900/50 border border-zinc-800 rounded-xl;
-  @apply text-white placeholder-zinc-500;
-  @apply focus:outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10;
+  @apply w-full px-4 py-3 bg-slate-900/50 border border-slate-800 rounded-xl;
+  @apply text-white placeholder-slate-500;
+  @apply focus:outline-none focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/10;
   @apply transition-all duration-200;
 }
 
-/* Text Gradient */
+/* Text Gradient - TURBO */
 .text-gradient {
-  @apply bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent;
 }
 
 /* Button Base */
@@ -80,7 +75,7 @@ select {
 }
 
 .btn-primary {
-  @apply bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/25 border border-indigo-400/20;
+  @apply bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-500/25 border border-amber-400/20;
 }
 
 .glass-button {
@@ -98,16 +93,16 @@ select {
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-zinc-800 rounded-full;
+  @apply bg-slate-800 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-zinc-700;
+  @apply bg-slate-700;
 }
 
 /* Selection */
 ::selection {
-  @apply bg-indigo-500/30 text-indigo-100;
+  @apply bg-amber-500/30 text-amber-100;
 }
 
 /* Animation */

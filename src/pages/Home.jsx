@@ -5,12 +5,12 @@ import { useProject } from '../context/ProjectContext';
 import ExportButton from '../components/common/ExportButton';
 
 const FeatureCard = ({ icon: Icon, title, description, color }) => (
-    <div className="group glass-panel p-6 hover:border-zinc-700 cursor-pointer">
+    <div className="group glass-panel p-6 hover:border-slate-700 cursor-pointer">
         <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
             <Icon size={22} className="text-white" />
         </div>
         <h3 className="text-lg font-semibold text-white mb-2">{title}</h3>
-        <p className="text-zinc-400 text-sm leading-relaxed">{description}</p>
+        <p className="text-slate-400 text-sm leading-relaxed">{description}</p>
     </div>
 );
 
@@ -36,9 +36,9 @@ const Home = () => {
                     {project.name && <ExportButton />}
                 </div>
 
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20">
-                    <Sparkles size={14} className="text-indigo-400" />
-                    <span className="text-indigo-400 text-sm font-medium">Gestione Agile con l'AI</span>
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20">
+                    <Sparkles size={14} className="text-amber-400" />
+                    <span className="text-amber-400 text-sm font-medium">Gestione Agile con l'AI</span>
                 </div>
 
                 <div className="max-w-3xl">
@@ -47,7 +47,7 @@ const Home = () => {
                         <br />
                         <span className="text-gradient">in una Squadra Agile</span>
                     </h1>
-                    <p className="text-xl text-zinc-400 leading-relaxed max-w-2xl">
+                    <p className="text-xl text-slate-400 leading-relaxed max-w-2xl">
                         Dall'idea alla realizzazione in 9 passi. PROGETTOAGILE.AI ti guida attraverso
                         l'intero processo Scrum con il supporto dell'Intelligenza Artificiale.
                     </p>
@@ -59,7 +59,7 @@ const Home = () => {
                         <ArrowRight size={18} />
                     </button>
                     <button className="glass-button px-6 py-4">
-                        <span className="text-zinc-300">Scopri di più</span>
+                        <span className="text-slate-300">Scopri di più</span>
                     </button>
                 </div>
             </section>
@@ -74,7 +74,7 @@ const Home = () => {
                 ].map((stat, i) => (
                     <div key={i} className="glass-panel p-5 text-center">
                         <p className="text-3xl font-bold text-gradient">{stat.value}</p>
-                        <p className="text-sm text-zinc-500 mt-1">{stat.label}</p>
+                        <p className="text-sm text-slate-500 mt-1">{stat.label}</p>
                     </div>
                 ))}
             </section>
@@ -83,7 +83,7 @@ const Home = () => {
             <section className="space-y-8">
                 <div>
                     <h2 className="text-2xl font-bold text-white mb-2">Tutto ciò di cui hai bisogno</h2>
-                    <p className="text-zinc-400">Dalla vision alla velocity, tutto in un unico posto.</p>
+                    <p className="text-slate-400">Dalla vision alla velocity, tutto in un unico posto.</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -91,13 +91,13 @@ const Home = () => {
                         icon={Sparkles}
                         title="Generazione AI"
                         description="Genera vision di prodotto, obiettivi e user story con un solo click."
-                        color="from-indigo-500 to-purple-600"
+                        color="from-amber-500 to-orange-600"
                     />
                     <FeatureCard
                         icon={Layers}
                         title="Gestione backlog"
                         description="Organizza epiche e storie con suggerimenti intelligenti di prioritizzazione."
-                        color="from-purple-500 to-pink-600"
+                        color="from-indigo-500 to-purple-600"
                     />
                     <FeatureCard
                         icon={Target}
@@ -127,13 +127,13 @@ const Home = () => {
             </section>
 
             {/* Footer */}
-            <section className="border-t border-zinc-800 pt-8">
+            <section className="border-t border-slate-800 pt-8">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <img src="/logo-metahodos.png" alt="MetaHodos" className="h-10 object-contain" />
                         <div>
-                            <p className="text-sm text-zinc-400">Powered by <span className="text-white font-medium">MetaHodos</span></p>
-                            <p className="text-xs text-zinc-600">Persone • Agilità • Risultati</p>
+                            <p className="text-sm text-slate-400">Powered by <span className="text-white font-medium">MetaHodos</span></p>
+                            <p className="text-xs text-slate-600">Persone • Agilità • Risultati</p>
                         </div>
                     </div>
                     <img
