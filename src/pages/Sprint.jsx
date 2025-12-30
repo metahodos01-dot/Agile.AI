@@ -541,27 +541,45 @@ const Sprint = () => {
             }, 0);
 
         setKpiData(prev => {
-            const existingData = [...(prev.burndownData || [])];
+            let existingData = [...(prev.burndownData || [])];
+            const duration = activeSprint.durationDays || 10;
 
-            // Safety: Ensure we have the basic structure if it was missing (e.g. legacy sprints)
-            // If empty, we can't do much without re-initializing, but let's try to patch.
-            if (existingData.length === 0) return prev;
+            // AUTO-REPAIR: If structure is missing or incomplete (not covering full duration), regenerate it.
+            // This fixes the issue for sprints started BEFORE this V2 logic was applied.
+            if (existingData.length < duration + 1) {
+                const repairedData = [];
+                const maxHours = totalEstimatedInitial;
+                const idealDrop = maxHours / duration;
 
-            // Update Real value for current day
-            if (existingData[dayIndex]) {
-                existingData[dayIndex] = {
-                    ...existingData[dayIndex],
+                for (let i = 0; i <= duration; i++) {
+                    // Try to find existing real data for this day
+                    const existingDay = existingData.find(d => d.day === i);
+                    repairedData.push({
+                        day: i,
+                        date: new Date(new Date(start).getTime() + i * 86400000).toLocaleDateString(),
+                        ideal: Number(Math.max(0, maxHours - (idealDrop * i)).toFixed(1)),
+                        real: existingDay ? existingDay.real : (i === 0 ? maxHours : null)
+                    });
+                }
+                existingData = repairedData;
+            }
+
+            // Update Real value for current day (dayIndex)
+            // Ensure we don't go out of bounds if sprint ran longer than planned
+            const targetIndex = Math.min(dayIndex, existingData.length - 1);
+
+            if (existingData[targetIndex]) {
+                existingData[targetIndex] = {
+                    ...existingData[targetIndex],
                     real: Number(realRemaining.toFixed(1))
                 };
             }
 
-            // Fill gaps: If we missed days (app closed), fill previous undefined days with the last known real value?
-            // Or leave them null? Usually Burndown connects points. null breaks the line in Recharts unless connectNulls is true.
-            // Better strategy: "Carry forward" the previous real value if null, up to today.
-            for (let i = 0; i < dayIndex; i++) {
+            // Fill gaps: Previous nulls should be filled with last known real value for continuity
+            for (let i = 0; i <= targetIndex; i++) {
                 if (existingData[i].real === null || existingData[i].real === undefined) {
-                    // Look back for last valid
-                    let lastValid = existingData[0].real; // Fallback start
+                    // Look back based on new repaired array
+                    let lastValid = existingData[0].real;
                     for (let j = i - 1; j >= 0; j--) {
                         if (existingData[j].real !== null) { lastValid = existingData[j].real; break; }
                     }

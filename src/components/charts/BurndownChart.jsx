@@ -41,7 +41,7 @@ const BurndownChart = ({ data, idealHours, totalDays }) => {
 
     return (
         <div className="h-[300px] w-full">
-            <h3 className="text-zinc-400 text-sm font-semibold uppercase tracking-wider mb-4 ml-2">Burndown Chart (Ore)</h3>
+            <h3 className="text-zinc-400 text-sm font-semibold uppercase tracking-wider mb-4 ml-2">BURNDOWN CHART 2.0 (ORE)</h3>
             <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart
                     data={data}
