@@ -42,32 +42,37 @@ const LandingPage = () => {
 
             {/* --- Hero Section --- */}
             <header className="relative w-full min-h-screen flex items-center justify-center overflow-hidden pt-32 pb-20">
-                {/* Background Overlay */}
+                {/* Background Overlay - REDUCED OPACITY VIA GRADIENT ADJUSTMENT */}
                 <div className="absolute inset-0 z-0">
                     <img
                         src="/turbine-bg.png"
                         alt="Abstract Tech Turbine"
-                        className="w-full h-full object-cover opacity-50 blur-sm scale-105 animate-pulse-slow"
+                        className="w-full h-full object-cover opacity-60 blur-[3px] scale-105 animate-pulse-slow"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-slate-900/80 to-slate-950"></div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-slate-950/80 via-slate-900/40 to-slate-950"></div>
                 </div>
 
                 <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
 
                     {/* The Promise Badge */}
-                    <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/40 text-amber-300 mb-10 animate-fade-in-up backdrop-blur-md shadow-[0_0_20px_rgba(245,158,11,0.2)]">
+                    <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/40 text-amber-300 mb-6 animate-fade-in-up backdrop-blur-md shadow-[0_0_20px_rgba(245,158,11,0.2)]">
                         <Zap size={20} className="fill-amber-500 text-amber-500" />
                         <span className="text-sm md:text-base font-black tracking-wide uppercase">
                             La Promessa: Il Doppio nella Metà del Tempo
                         </span>
                     </div>
 
+                    {/* NEW: Respect for Time Copy */}
+                    <p className="text-slate-200 text-xs md:text-sm font-bold tracking-[0.2em] uppercase mb-8 animate-fade-in-up delay-75 drop-shadow-md">
+                        Abbiamo grande rispetto del tuo tempo
+                    </p>
+
                     <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight mb-8 leading-tight animate-fade-in-up delay-100 drop-shadow-2xl">
                         Mettiamo il <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-red-500">TURBO</span> <br />
                         ai tuoi progetti
                     </h1>
 
-                    <p className="text-xl md:text-2xl text-slate-300 mb-12 max-w-4xl mx-auto leading-relaxed animate-fade-in-up delay-200 font-light">
+                    <p className="text-xl md:text-2xl text-slate-200 mb-12 max-w-4xl mx-auto leading-relaxed animate-fade-in-up delay-200 font-light drop-shadow-lg">
                         La prima piattaforma dove l'<strong className="text-white font-bold">Intelligenza Artificiale ragiona</strong> su ogni fase del tuo progetto, guidata da un percorso definito da <strong className="text-white font-bold">Coach Agile ed Esperti Scrum certificati</strong>.
                     </p>
 
@@ -98,12 +103,12 @@ const LandingPage = () => {
                             )}
                         </div>
 
-                        <button className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors px-6 py-4 rounded-xl border border-white/5 hover:bg-white/5">
+                        <button className="flex items-center gap-2 text-slate-300 hover:text-white transition-colors px-6 py-4 rounded-xl border border-white/10 hover:bg-white/10 backdrop-blur-sm">
                             <FileText size={18} /> Leggi il Caso Studio
                         </button>
                     </div>
 
-                    <div className="mt-8 flex justify-center gap-6 text-xs text-slate-500 animate-fade-in-up delay-500">
+                    <div className="mt-8 flex justify-center gap-6 text-xs text-slate-400 animate-fade-in-up delay-500 font-medium">
                         <span className="flex items-center gap-1"><Lock size={12} /> Privacy Dati Garantita al 100%</span>
                         <span className="flex items-center gap-1"><Download size={12} /> Esporta i risultati in qualsiasi momento</span>
                     </div>
@@ -112,7 +117,7 @@ const LandingPage = () => {
             </header>
 
             {/* --- The 9 Phases Section --- */}
-            <section className="py-24 bg-slate-950 relative border-t border-white/5">
+            <section className="py-24 bg-slate-950/90 relative border-t border-white/5 backdrop-blur-sm">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="text-center mb-20">
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 text-slate-300 text-sm font-bold mb-6">

@@ -7,19 +7,23 @@ const Layout = () => {
     const location = useLocation();
 
     return (
-        <div className="flex min-h-screen font-sans text-zinc-100 relative">
-            {/* Animated Mesh Background - Fixed & Behind everything */}
-            <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
-                <div className="mesh-gradient-bg absolute inset-0" />
-
-                {/* Floating Orbs */}
-                <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[100px] animate-pulse" />
-                <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[100px] animate-pulse delay-1000" />
+        <div className="flex min-h-screen font-sans text-white bg-slate-950 relative overflow-hidden selection:bg-amber-500 selection:text-slate-900">
+            {/* Unifying Theme: Background Overlay MATCHING Landing Page */}
+            <div className="fixed inset-0 z-[-1] pointer-events-none">
+                <img
+                    src="/turbine-bg.png"
+                    alt="App Background"
+                    className="w-full h-full object-cover opacity-20 blur-sm scale-110"
+                />
+                {/* Gradient consistent with Landing Page but darker for app legibility */}
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-slate-900/90 to-slate-950/95"></div>
             </div>
 
-            <Sidebar />
+            <div className="relative z-10 w-64 flex-shrink-0">
+                <Sidebar />
+            </div>
 
-            <main className="flex-1 ml-72 relative z-10">
+            <main className="relative z-10 flex-1 p-6 overflow-y-auto h-screen scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={location.pathname}
@@ -27,7 +31,7 @@ const Layout = () => {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.3 }}
-                        className="p-8 min-h-screen"
+                        className="max-w-7xl mx-auto space-y-6"
                     >
                         <Outlet />
                     </motion.div>
