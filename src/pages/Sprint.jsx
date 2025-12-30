@@ -570,9 +570,18 @@ const Sprint = () => {
                 existingData = repairedData;
             }
 
-            // Update Real value for current day (dayIndex)
-            // Ensure we don't go out of bounds if sprint ran longer than planned
-            const targetIndex = Math.min(dayIndex, existingData.length - 1);
+            // Update Real value for current day logic.
+            // We plot current status at "End of Current Day" (Index = dayIndex + 1) to preserve Day 0 anchor.
+            // Day 0 (Start) -> Day 1 (End of first 24h)
+            // Day 0 (Start) -> Day 1 (End of first 24h)
+            // Duration is already defined above
+            const targetIndex = Math.min(dayIndex + 1, duration); // Cap at max duration/index
+
+            // FORCE Day 0 to be Start Total (Anchor)
+            // This ensures the graph always starts at the theoretical max, solving the "not equal" issue.
+            if (existingData[0]) {
+                existingData[0] = { ...existingData[0], real: startTotal };
+            }
 
             if (existingData[targetIndex]) {
                 existingData[targetIndex] = {
@@ -582,13 +591,10 @@ const Sprint = () => {
             }
 
             // Fill gaps: Previous nulls should be filled with last known real value for continuity
-            for (let i = 0; i <= targetIndex; i++) {
+            // We start filling from 1 since 0 is fixed
+            for (let i = 1; i <= targetIndex; i++) {
                 if (existingData[i].real === null || existingData[i].real === undefined) {
-                    // Look back based on new repaired array
-                    let lastValid = existingData[0].real;
-                    for (let j = i - 1; j >= 0; j--) {
-                        if (existingData[j].real !== null) { lastValid = existingData[j].real; break; }
-                    }
+                    let lastValid = existingData[i - 1].real; // Use previous day
                     existingData[i].real = lastValid;
                 }
             }
