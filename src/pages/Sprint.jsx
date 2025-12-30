@@ -611,6 +611,17 @@ const Sprint = () => {
                 }
             }
 
+            // 3. STRICT MONOTONICITY ENFORCEMENT (Backwards Pass)
+            // Ensures the graph NEVER rises. Use "Backwards Polishing".
+            // If Day 4 is 35h, then Day 3 MUST be >= 35h. If Day 3 was 15h (dip), we raise it to 35h.
+            // This effectively "fills" any dips caused by bad history, creating a flat line instead of a rise.
+            for (let i = targetIndex - 1; i >= 0; i--) {
+                const nextDayVal = existingData[i + 1].real;
+                if (existingData[i].real < nextDayVal) {
+                    existingData[i].real = nextDayVal;
+                }
+            }
+
             const nextKpis = { ...prev, burndownData: existingData };
             nextKpis.alerts = generateInsights(nextKpis);
             return nextKpis;
