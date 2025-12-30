@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
 import { generateAIResponseV2 } from '../services/aiService';
 import { Sparkles, ArrowRight, Layers, FileText, Plus, ChevronDown, ChevronRight, Trash2, BookOpen, Target } from 'lucide-react';
+import PhaseNavigation from '../components/common/PhaseNavigation';
 
 const Backlog = () => {
     const { project, updateProject } = useProject();
@@ -237,14 +238,16 @@ const Backlog = () => {
                         </div>
                     ))}
 
-                    <div className="flex justify-end pt-8">
-                        <button onClick={handleNext} className="btn-primary">
-                            Salva e Continua <ArrowRight size={16} />
-                        </button>
-                    </div>
+                    {/* Phase Navigation */}
+                    <PhaseNavigation
+                        onSave={async () => {
+                            updateProject({ backlog });
+                            return true;
+                        }}
+                    />
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

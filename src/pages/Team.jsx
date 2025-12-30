@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
 import { Sparkles, ArrowRight, UserPlus, Users, X, BookOpen } from 'lucide-react';
+import PhaseNavigation from '../components/common/PhaseNavigation';
 
 const Team = () => {
     const { project, updateProject } = useProject();
@@ -150,14 +151,16 @@ const Team = () => {
                         </button>
                     </div>
 
-                    <div className="flex justify-end pt-4">
-                        <button onClick={handleNext} className="btn-primary">
-                            Salva e Continua <ArrowRight size={16} />
-                        </button>
-                    </div>
+                    {/* Phase Navigation */}
+                    <PhaseNavigation
+                        onSave={async () => {
+                            updateProject({ team });
+                            return true;
+                        }}
+                    />
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

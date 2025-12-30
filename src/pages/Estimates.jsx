@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
 import { Sparkles, ArrowRight, Clock, BookOpen } from 'lucide-react';
+import PhaseNavigation from '../components/common/PhaseNavigation';
 
 import { calculateTotalHours, calculateSprintsNeeded } from '../utils/estimations';
 import { generateAIResponseV2 } from '../services/aiService';
@@ -150,14 +151,16 @@ const Estimates = () => {
                         </div>
                     ))}
 
-                    <div className="flex justify-end pt-4">
-                        <button onClick={handleNext} className="btn-primary">
-                            Salva e Continua <ArrowRight size={16} />
-                        </button>
-                    </div>
+                    {/* Phase Navigation */}
+                    <PhaseNavigation
+                        onSave={async () => {
+                            updateProject({ estimates });
+                            return true;
+                        }}
+                    />
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

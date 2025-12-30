@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
 import { Sparkles, ArrowRight, Plus, Trash2, Sliders, BookOpen } from 'lucide-react';
+import PhaseNavigation from '../components/common/PhaseNavigation';
 
 const Kpis = () => {
     const { project, updateProject } = useProject();
@@ -161,12 +162,14 @@ const Kpis = () => {
                 ))}
             </div>
 
-            <div className="flex justify-end pt-4">
-                <button onClick={handleNext} className="btn-primary">
-                    Salva e Continua <ArrowRight size={16} />
-                </button>
-            </div>
-        </div>
+            {/* Phase Navigation */}
+            <PhaseNavigation
+                onSave={async () => {
+                    updateProject({ kpis });
+                    return true;
+                }}
+            />
+        </div >
     );
 };
 

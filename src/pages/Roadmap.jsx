@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
 import { generateAIResponseV2 } from '../services/aiService';
 import { Sparkles, ArrowRight, Map, Calendar, Calculator, CheckCircle, AlertTriangle, Target, Briefcase, Users, Clock } from 'lucide-react';
+import PhaseNavigation from '../components/common/PhaseNavigation';
 
 const Roadmap = () => {
     const { project, updateProject } = useProject();
@@ -280,8 +281,8 @@ const Roadmap = () => {
                                         key={epic.id}
                                         onClick={() => toggleEpic(epic.id)}
                                         className={`p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between group ${isSelected
-                                                ? 'bg-indigo-500/10 border-indigo-500/50 hover:bg-indigo-500/20'
-                                                : 'bg-zinc-800/30 border-zinc-700 hover:border-zinc-500'
+                                            ? 'bg-indigo-500/10 border-indigo-500/50 hover:bg-indigo-500/20'
+                                            : 'bg-zinc-800/30 border-zinc-700 hover:border-zinc-500'
                                             }`}
                                     >
                                         <div className="flex items-center gap-4">
@@ -303,14 +304,28 @@ const Roadmap = () => {
                         </div>
                     </div>
 
-                    <div className="flex justify-end pt-4">
-                        <button onClick={handleNext} className="btn-primary">
-                            Salva e Procedi <ArrowRight size={16} />
-                        </button>
-                    </div>
+
+
+                    {/* Phase Navigation */}
+                    <PhaseNavigation
+                        onSave={async () => {
+                            updateProject({
+                                roadmap: {
+                                    mvpName,
+                                    targetDate,
+                                    devCount,
+                                    hoursPerDay,
+                                    sprintDurationWeeks,
+                                    selectedEpics: Array.from(selectedEpics),
+                                    analysis
+                                }
+                            });
+                            return true;
+                        }}
+                    />
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

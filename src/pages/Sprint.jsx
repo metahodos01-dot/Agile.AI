@@ -9,6 +9,7 @@ import {
     Calendar, Zap, Database, Plus, X, Calculator, AlertTriangle, Lock, Sparkles, Clock, Layers, ArrowRight
 } from 'lucide-react';
 import BurndownChart from '../components/charts/BurndownChart';
+import PhaseNavigation from '../components/common/PhaseNavigation';
 
 // --- Helper Components ---
 
@@ -1127,26 +1128,24 @@ const Sprint = () => {
             </div>
 
             {/* Save Projects & Exports */}
-            <div className="flex justify-center gap-4 pt-4">
-                <button
-                    onClick={handleSaveAndPersist}
-                    disabled={!project.name || isSaving}
-                    className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-bold text-lg transition-all ${saved
-                        ? 'bg-green-600 text-white'
-                        : 'bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-500 hover:to-emerald-500 shadow-lg shadow-green-500/25'
-                        } ${isSaving ? 'opacity-75 cursor-wait' : ''}`}
-                >
-                    {saved ? (
-                        <div className="flex items-center gap-2"><CheckCircle size={24} /> <span>Dati Salvati!</span></div>
-                    ) : (
-                        <div className="flex items-center gap-2">
-                            {isSaving ? <Activity className="animate-spin" size={24} /> : <Save size={24} />}
-                            <span>{isSaving ? 'Salvataggio...' : 'Salva Sprint e KPI'}</span>
-                        </div>
-                    )}
-                </button>
+            <PhaseNavigation
+                onSave={async () => {
+                    await handleSaveAndPersist();
+                    return false; // Don't auto-navigate on "Save (stay)" button, wait, PhaseNavigation logic handles the "Save (stay)" button purely as trigger?
+                }}
+                // Wait, PhaseNavigation "Save (stay)" button calls onSave(); navigate is NOT called.
+                // "Save & Continue" button calls handleSaveAndContinue which calls onSave() then navigates.
+                // So if I return true, Save&Continue navigates. If I return false, it aborts?
+                // PhaseNavigation code: if (success === false) return;
+                // So I should return true for navigation to happen on "Save & Continue".
+                // But for "Save (stay)", the navigation logic is skipped inside PhaseNavigation?
+                // No, PhaseNavigation "Save (stay)" button just calls onClick={onSave}. It does NOT call handleSaveAndContinue.
+                // So onSave return value matters only for handleSaveAndContinue.
+                // Perfect.
+                isSaving={isSaving}
+            >
                 {project.name && <ExportButton project={project} />}
-            </div>
+            </PhaseNavigation>
             {/* Auto-save Indicator */}
             <div className="fixed bottom-4 right-4 flex items-center gap-2 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800 shadow-lg">
                 <div className={`w-2 h-2 rounded-full ${saved ? 'bg-green-500' : 'bg-zinc-600'}`} />

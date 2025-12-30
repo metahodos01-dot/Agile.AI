@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowRight, Save, CheckCircle } from 'lucide-react';
 import { getNextStep } from '../../utils/navigationSteps';
 
-const PhaseNavigation = ({ onSave, isSaving = false, customNextPath = null, className = '' }) => {
+const PhaseNavigation = ({ onSave, isSaving = false, customNextPath = null, className = '', children }) => {
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -38,6 +38,8 @@ const PhaseNavigation = ({ onSave, isSaving = false, customNextPath = null, clas
                 <Save size={18} />
                 {isSaving ? 'Salvataggio...' : 'Salva (senza uscire)'}
             </button>
+
+            {children}
 
             <button
                 onClick={handleSaveAndContinue}

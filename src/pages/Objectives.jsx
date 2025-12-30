@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
 import { generateAIResponseV2 } from '../services/aiService';
 import { Sparkles, ArrowRight, Plus, Trash2, Target, BookOpen } from 'lucide-react';
+import PhaseNavigation from '../components/common/PhaseNavigation';
 
 const Objectives = () => {
     const { project, updateProject } = useProject();
@@ -149,12 +150,15 @@ const Objectives = () => {
                         <Plus size={16} /> Aggiungi obiettivo
                     </button>
 
-                    <div className="flex justify-end pt-6">
-                        <button onClick={handleNext} className="btn-primary">
-                            Salva e Continua <ArrowRight size={16} />
-                        </button>
-                    </div>
                 </div>
+
+                {/* Phase Navigation */}
+                <PhaseNavigation
+                    onSave={async () => {
+                        updateProject({ objectives: objectives.filter(obj => obj.trim() !== '') });
+                        return true;
+                    }}
+                />
             </div>
         </div>
     );

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
 import { Sparkles, ArrowRight, Layout, CheckCircle2, Circle, BookOpen, Plus, Trash2, Edit3, Upload, Camera, Wand2 } from 'lucide-react';
+import PhaseNavigation from '../components/common/PhaseNavigation';
 
 const Obeya = () => {
     const { project, updateProject } = useProject();
@@ -263,14 +264,16 @@ const Obeya = () => {
                         )}
                     </div>
 
-                    <div className="flex justify-end pt-8">
-                        <button onClick={handleNext} className="btn-primary">
-                            Salva e Continua <ArrowRight size={16} />
-                        </button>
-                    </div>
+                    {/* Phase Navigation */}
+                    <PhaseNavigation
+                        onSave={async () => {
+                            updateProject({ obeya: { items: setupItems } });
+                            return true;
+                        }}
+                    />
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 
