@@ -109,89 +109,97 @@ const MOTO_DEMO_PROJECT = {
     }
 };
 
+import ReactDOM from 'react-dom';
+
 // Save Confirmation Modal Component
-const SaveConfirmModal = ({ projectName, onSave, onDiscard, onCancel }) => (
-    <div className="fixed inset-0 z-[99999] flex items-center justify-center">
-        {/* Backdrop */}
-        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onCancel} />
+const SaveConfirmModal = ({ projectName, onSave, onDiscard, onCancel }) => {
+    return ReactDOM.createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center font-sans">
+            {/* Backdrop */}
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onCancel} />
 
-        {/* Modal */}
-        <div className="relative bg-zinc-900 border border-zinc-700 rounded-2xl p-6 w-80 shadow-2xl animate-fade-in z-[100000]">
-            <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center">
-                    <AlertCircle size={20} className="text-amber-400" />
+            {/* Modal */}
+            <div className="relative bg-zinc-900 border border-zinc-700 rounded-2xl p-6 w-80 shadow-2xl animate-fade-in z-[100000]">
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center">
+                        <AlertCircle size={20} className="text-amber-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white">Progetto in corso</h3>
                 </div>
-                <h3 className="text-lg font-semibold text-white">Progetto in corso</h3>
-            </div>
 
-            <p className="text-zinc-400 text-sm mb-2">
-                Stai lavorando su:
-            </p>
-            <p className="text-white font-medium mb-6 px-3 py-2 bg-zinc-800 rounded-lg truncate">
-                {projectName}
-            </p>
+                <p className="text-zinc-400 text-sm mb-2">
+                    Stai lavorando su:
+                </p>
+                <p className="text-white font-medium mb-6 px-3 py-2 bg-zinc-800 rounded-lg truncate">
+                    {projectName}
+                </p>
 
-            <div className="space-y-3">
-                <button
-                    onClick={onSave}
-                    className="w-full py-2.5 px-4 bg-green-600 hover:bg-green-500 text-white font-medium rounded-xl transition-colors shadow-lg shadow-green-900/20"
-                >
-                    Salva e Crea Nuovo
-                </button>
-                <button
-                    onClick={onDiscard}
-                    className="w-full py-2.5 px-4 bg-red-500/10 hover:bg-red-500/20 text-red-300 font-medium rounded-xl transition-colors border border-red-500/20"
-                >
-                    Non Salvare (Elimina dati)
-                </button>
-                <button
-                    onClick={onCancel}
-                    className="w-full py-2.5 px-4 text-zinc-400 hover:text-white font-medium rounded-xl transition-colors"
-                >
-                    Annulla
-                </button>
+                <div className="space-y-3">
+                    <button
+                        onClick={onSave}
+                        className="w-full py-2.5 px-4 bg-green-600 hover:bg-green-500 text-white font-medium rounded-xl transition-colors shadow-lg shadow-green-900/20 cursor-pointer"
+                    >
+                        Salva e Crea Nuovo
+                    </button>
+                    <button
+                        onClick={onDiscard}
+                        className="w-full py-2.5 px-4 bg-red-500/10 hover:bg-red-500/20 text-red-300 font-medium rounded-xl transition-colors border border-red-500/20 cursor-pointer"
+                    >
+                        Non Salvare (Elimina dati)
+                    </button>
+                    <button
+                        onClick={onCancel}
+                        className="w-full py-2.5 px-4 text-zinc-400 hover:text-white font-medium rounded-xl transition-colors cursor-pointer"
+                    >
+                        Annulla
+                    </button>
+                </div>
             </div>
-        </div>
-    </div>
-);
+        </div>,
+        document.body
+    );
+};
 
 // Delete Confirmation Modal
-const DeleteConfirmModal = ({ projectName, onConfirm, onCancel }) => (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onCancel} />
+const DeleteConfirmModal = ({ projectName, onConfirm, onCancel }) => {
+    return ReactDOM.createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center font-sans">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onCancel} />
 
-        <div className="relative bg-zinc-900 border border-zinc-700 rounded-2xl p-6 w-80 shadow-2xl animate-fade-in">
-            <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
-                    <Trash2 size={20} className="text-red-400" />
+            <div className="relative bg-zinc-900 border border-zinc-700 rounded-2xl p-6 w-80 shadow-2xl animate-fade-in z-[100000]">
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
+                        <Trash2 size={20} className="text-red-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white">Eliminare progetto?</h3>
                 </div>
-                <h3 className="text-lg font-semibold text-white">Eliminare progetto?</h3>
-            </div>
 
-            <p className="text-zinc-400 text-sm mb-2">
-                Stai per eliminare:
-            </p>
-            <p className="text-white font-medium mb-6 px-3 py-2 bg-zinc-800 rounded-lg truncate">
-                {projectName}
-            </p>
+                <p className="text-zinc-400 text-sm mb-2">
+                    Stai per eliminare:
+                </p>
+                <p className="text-white font-medium mb-6 px-3 py-2 bg-zinc-800 rounded-lg truncate">
+                    {projectName}
+                </p>
 
-            <div className="flex gap-2">
-                <button
-                    onClick={onCancel}
-                    className="flex-1 py-2.5 px-4 bg-zinc-700 hover:bg-zinc-600 text-white font-medium rounded-xl transition-colors"
-                >
-                    Annulla
-                </button>
-                <button
-                    onClick={onConfirm}
-                    className="flex-1 py-2.5 px-4 bg-red-600 hover:bg-red-500 text-white font-medium rounded-xl transition-colors"
-                >
-                    Elimina
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={onCancel}
+                        className="flex-1 py-2.5 px-4 bg-zinc-700 hover:bg-zinc-600 text-white font-medium rounded-xl transition-colors cursor-pointer"
+                    >
+                        Annulla
+                    </button>
+                    <button
+                        onClick={onConfirm}
+                        className="flex-1 py-2.5 px-4 bg-red-600 hover:bg-red-500 text-white font-medium rounded-xl transition-colors cursor-pointer"
+                    >
+                        Elimina
+                    </button>
+                </div>
             </div>
-        </div>
-    </div>
-);
+        </div>,
+        document.body
+    );
+};
 
 const Sidebar = () => {
     const { project, savedProjects, createNewProject, loadProject, deleteProject, updateProject, saveProject } = useProject();
@@ -302,27 +310,23 @@ const Sidebar = () => {
             {/* Modals */}
             {/* Modals - Portal-like behavior with very high Z-index */}
             {showSaveModal && (
-                <div className="fixed inset-0 z-[99999] flex items-center justify-center">
-                    <SaveConfirmModal
-                        projectName={project.name}
-                        onSave={handleSaveAndCreate}
-                        onDiscard={handleDiscardAndCreate}
-                        onCancel={() => setShowSaveModal(false)}
-                    />
-                </div>
+                <SaveConfirmModal
+                    projectName={project.name}
+                    onSave={handleSaveAndCreate}
+                    onDiscard={handleDiscardAndCreate}
+                    onCancel={() => setShowSaveModal(false)}
+                />
             )}
 
             {showDeleteModal && projectToDelete && (
-                <div className="fixed inset-0 z-[99999] flex items-center justify-center">
-                    <DeleteConfirmModal
-                        projectName={projectToDelete.name}
-                        onConfirm={confirmDelete}
-                        onCancel={() => {
-                            setShowDeleteModal(false);
-                            setProjectToDelete(null);
-                        }}
-                    />
-                </div>
+                <DeleteConfirmModal
+                    projectName={projectToDelete.name}
+                    onConfirm={confirmDelete}
+                    onCancel={() => {
+                        setShowDeleteModal(false);
+                        setProjectToDelete(null);
+                    }}
+                />
             )}
 
             <aside className="fixed left-0 top-0 w-72 h-screen flex flex-col bg-zinc-950/90 backdrop-blur-xl border-r border-white/5 z-[9999] shadow-2xl">
