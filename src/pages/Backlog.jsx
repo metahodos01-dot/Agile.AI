@@ -211,12 +211,12 @@ const Backlog = () => {
                                                     <div className="flex items-start gap-2 mt-2 p-2 bg-emerald-500/5 rounded-lg border border-emerald-500/20">
                                                         <Target size={14} className="text-emerald-400 mt-0.5 flex-shrink-0" />
                                                         <div className="flex-1">
-                                                            <span className="text-xs text-emerald-400 font-medium uppercase tracking-wide">Collegamento KR</span>
+                                                            <span className="text-xs text-emerald-400 font-medium uppercase tracking-wide">Valore di Business / Key Result</span>
                                                             <input
                                                                 value={story.keyResult || ''}
                                                                 onChange={(e) => updateStoryKeyResult(epic.id, story.id, e.target.value)}
                                                                 className="bg-transparent border-none focus:ring-0 w-full text-xs text-zinc-400 mt-1 p-0"
-                                                                placeholder="Descrivi come questa story contribuisce ai Key Results..."
+                                                                placeholder="Es. Impatto atteso, ROI, o metrica chiave supportata..."
                                                             />
                                                         </div>
                                                     </div>

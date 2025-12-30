@@ -158,6 +158,22 @@ export const generateAIResponseV2 = async (prompt, type) => {
 
                console.log(`AI KPI Logic: Detected STRATEGIC INTENT '${primaryIntent}' for objective '${objectiveText}'`);
 
+               // VAGUE OBJECTIVE CHECK
+               if (primaryIntent === 'generic' && maxScore < 2 && objectiveText.length < 20) {
+                  kpis.push({
+                     name: '⚠️ Obiettivo Troppo Vago',
+                     target: 'N/A',
+                     rationale: 'Specifica meglio: vuoi efficienza costi o velocità sul mercato?'
+                  });
+                  kpis.push({
+                     name: 'Suggerimento: Definire Scope',
+                     target: 'SMART',
+                     rationale: 'Aggiungi numeri o date (es. "entro Q4", "ridurre del 20%").'
+                  });
+                  resolve(kpis);
+                  return;
+               }
+
                // 3. Generazione KPI con Razionale
                switch (primaryIntent) {
                   case 'leadership':
