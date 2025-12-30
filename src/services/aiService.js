@@ -40,31 +40,82 @@ export const generateAIResponseV2 = async (prompt, type) => {
                resolve(objectives);
 
             } else if (type === 'kpi') {
-               // KPI Generati contestualmente all'obiettivo
+               // KPI Generati contestualmente all'obiettivo - LOGICA AVANZATA
                const objectiveText = (prompt.objective || "").toLowerCase();
                const kpis = [];
 
-               // Logica simulata per rilevare il contesto
-               if (objectiveText.includes('software') || objectiveText.includes('app') || objectiveText.includes('agile') || objectiveText.includes('piattaforma') || objectiveText.includes('codice') || objectiveText.includes('utent') || objectiveText.includes('relasc')) {
-                  // Contesto Software / Agile / Product
-                  if (objectiveText.includes('rilasci') || objectiveText.includes('mvp') || objectiveText.includes('version')) {
-                     kpis.push({ name: 'Release Burnup', target: '100% scope' });
-                     kpis.push({ name: 'Time to Market', target: '< 3 mesi' });
-                  } else if (objectiveText.includes('utent') || objectiveText.includes('adozione')) {
-                     kpis.push({ name: 'MAU (Monthly Active Users)', target: '> 1000' });
-                     kpis.push({ name: 'NPS (Net Promoter Score)', target: '> 50' });
-                  } else if (objectiveText.includes('qualità') || objectiveText.includes('bug')) {
-                     kpis.push({ name: 'Bug Escape Rate', target: '< 5%' });
-                     kpis.push({ name: 'Code Coverage', target: '> 80%' });
-                  } else {
-                     // Generico Software
-                     kpis.push({ name: 'Deployment Frequency', target: 'Settimanale' });
-                     kpis.push({ name: 'Lead Time for Changes', target: '< 2 giorni' });
+               // 1. Estrazione Parametri Numerici (es. "aumentare del 20%")
+               const numberMatch = objectiveText.match(/(\d+)(%|k|m)?/);
+               const extractedTarget = numberMatch ? (objectiveText.includes('ridur') || objectiveText.includes('diminuir') ? `< ${numberMatch[0]}` : `> ${numberMatch[0]}`) : null;
+
+               // 2. Mappa Keywords -> KPI Categories
+               const keywords = {
+                  commerciale: ['vendit', 'fatturat', 'revenue', 'profitt', 'economic', 'commercial', 'money', 'euro', 'margin'],
+                  marketing: ['lead', 'campagn', 'traffico', 'visit', 'conversion', 'tasso', 'funnel', 'marketing', 'sito'],
+                  prodotto: ['utent', 'attiv', 'adozion', 'feature', 'funzionalit', 'prodotto', 'app', 'mobile', 'software'],
+                  tecnico: ['performance', 'velocit', 'caricamento', 'scalab', 'infrastruttur', 'cloud', 'devops', 'api', 'latenza', 'uptime'],
+                  qualita: ['bug', 'difett', 'error', 'qualit', 'test', 'affidabil', 'incident', 'stabil'],
+                  processo: ['team', 'agile', 'scrum', 'velocit', 'sprint', 'produttivit', 'efficienz', 'costi', 'process'],
+                  cliente: ['nps', 'soddisfa', 'ticket', 'support', 'assistenz', 'customer', 'feedback', 'retention', 'churn'],
+                  produzione: ['scarti', 'oee', 'fermi', 'macchina', 'manutenzion', 'magazzino', 'sicurezza']
+               };
+
+               let detectedContext = 'generico';
+
+               // Rilevamento contesto dominante
+               for (const [context, terms] of Object.entries(keywords)) {
+                  if (terms.some(term => objectiveText.includes(term))) {
+                     detectedContext = context;
+                     break; // Prendi il primo match forte
                   }
-               } else {
-                  // Contesto Industriale / Generico (Fallback su originali se sembra manufatturiero)
-                  kpis.push({ name: 'OEE (Overall Equipment Effectiveness)', target: '> 85%' });
-                  kpis.push({ name: 'Tasso di difettosità (PPM)', target: '< 50 PPM' });
+               }
+
+               // 3. Generazione KPI basata sul contesto
+               console.log(`AI KPI Logic: Detected context '${detectedContext}' for objective '${objectiveText}'`);
+
+               switch (detectedContext) {
+                  case 'commerciale':
+                     kpis.push({ name: 'MRR (Monthly Recurring Revenue)', target: extractedTarget || '> 50k €' });
+                     kpis.push({ name: 'CAC (Customer Acquisition Cost)', target: '< 150 €' });
+                     break;
+                  case 'marketing':
+                     kpis.push({ name: 'Conversion Rate', target: extractedTarget || '> 3.5%' });
+                     kpis.push({ name: 'Cost Per Lead (CPL)', target: '< 25 €' });
+                     break;
+                  case 'prodotto':
+                     kpis.push({ name: 'MAU (Monthly Active Users)', target: extractedTarget || '> 1000' });
+                     kpis.push({ name: 'Adoption Rate', target: '> 60%' });
+                     break;
+                  case 'tecnico':
+                     kpis.push({ name: 'Server Response Time', target: '< 200 ms' });
+                     kpis.push({ name: 'System Uptime', target: '> 99.9%' });
+                     break;
+                  case 'qualita':
+                     kpis.push({ name: 'Bug Escape Rate', target: extractedTarget || '< 2%' });
+                     kpis.push({ name: 'MTZ (Mean Time to Zero Bugs)', target: '< 48h' });
+                     break;
+                  case 'processo':
+                     kpis.push({ name: 'Cycle Time', target: extractedTarget || '< 5 giorni' });
+                     kpis.push({ name: 'Planned vs Actual', target: '> 90%' });
+                     break;
+                  case 'cliente':
+                     kpis.push({ name: 'NPS (Net Promoter Score)', target: extractedTarget || '> 50' });
+                     kpis.push({ name: 'Churn Rate', target: '< 5%' });
+                     break;
+                  case 'produzione':
+                     kpis.push({ name: 'OEE (Equipment Effectiveness)', target: extractedTarget || '> 85%' });
+                     kpis.push({ name: 'PPM (Parti difettose per milione)', target: '< 50' });
+                     break;
+                  default:
+                     // Fallback intelligente se non matchano keyword specifiche ma sembra software
+                     if (objectiveText.includes('software') || objectiveText.includes('app')) {
+                        kpis.push({ name: 'Release Frequency', target: 'Bi-settimanale' });
+                        kpis.push({ name: 'Change Failure Rate', target: '< 10%' });
+                     } else {
+                        // Fallback generico business
+                        kpis.push({ name: 'Completion Rate', target: '100%' });
+                        kpis.push({ name: 'ROI', target: '> 15%' });
+                     }
                }
 
                resolve(kpis);
