@@ -601,6 +601,20 @@ const Sprint = () => {
     }, [activeSprint.id, activeSprint.status, kanbanTasks]); // Added kanbanTasks dependency
 
 
+    // --- SIMULATION HANDLERS (Time Travel) ---
+    const handleSimulateDay = () => {
+        if (!activeSprint.startDate || activeSprint.status !== 'active') return;
+        const start = new Date(activeSprint.startDate);
+        start.setDate(start.getDate() - 1); // Move start back by 1 day = Advance time by 1 day
+        handleSaveLocal({ startDate: start.toISOString() });
+    };
+
+    const handleResetSimulation = () => {
+        if (!activeSprint.startDate || activeSprint.status !== 'active') return;
+        handleSaveLocal({ startDate: new Date().toISOString() });
+    };
+
+
     const getDaysRemaining = () => {
         if (activeSprint.status !== 'active' || !activeSprint.startDate) return null;
         const start = new Date(activeSprint.startDate);
@@ -878,6 +892,27 @@ const Sprint = () => {
                         <Database size={14} className="text-green-400" />
                         <span className="text-green-400 text-xs font-medium">Auto-Sync Attivo</span>
                     </div>
+
+                    {/* Simulation Controls (Demo Mode) */}
+                    {activeSprint.status === 'active' && (
+                        <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-700 rounded-lg p-1 ml-2">
+                            <button
+                                onClick={handleSimulateDay}
+                                className="px-2 py-1 text-[10px] font-mono text-zinc-400 hover:text-white hover:bg-zinc-800 rounded transition-colors"
+                                title="Simula passaggio di 1 giorno (+1d)"
+                            >
+                                +1D ⏩
+                            </button>
+                            <div className="w-px h-3 bg-zinc-800"></div>
+                            <button
+                                onClick={handleResetSimulation}
+                                className="px-2 py-1 text-[10px] font-mono text-zinc-400 hover:text-white hover:bg-zinc-800 rounded transition-colors"
+                                title="Reset Data Inizio a Oggi"
+                            >
+                                ↺
+                            </button>
+                        </div>
+                    )}
                     {activeSprint.status === 'planned' && (
                         <button
                             onClick={handleStartSprint}
