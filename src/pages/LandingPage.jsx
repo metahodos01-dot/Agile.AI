@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Plane, ShieldCheck, Clock, Users, CheckCircle, AlertTriangle } from 'lucide-react';
+import { ArrowRight, Zap, Target, Users, ShieldCheck, CheckCircle, Cpu, Activity, Brain } from 'lucide-react';
 
 const LandingPage = () => {
     const navigate = useNavigate();
@@ -9,57 +9,58 @@ const LandingPage = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Here we would typically send to Supabase or a mailing list
         console.log("Lead captured:", email);
         setSubmitted(true);
         setTimeout(() => {
-            navigate('/register'); // Or wherever appropriate
+            navigate('/register');
         }, 2000);
     };
 
     return (
-        <div className="min-h-screen bg-slate-900 text-white font-sans overflow-x-hidden selection:bg-amber-500 selection:text-slate-900">
+        <div className="min-h-screen bg-slate-950 text-white font-sans overflow-x-hidden selection:bg-amber-500 selection:text-slate-900">
             {/* --- Hero Section --- */}
             <header className="relative w-full h-screen flex items-center justify-center overflow-hidden">
                 {/* Background Overlay */}
                 <div className="absolute inset-0 z-0">
                     <img
-                        src="/obeya-concept.png"
-                        alt="Cockpit View"
-                        className="w-full h-full object-cover opacity-40 blur-sm scale-105"
+                        src="/turbine-bg.png"
+                        alt="Abstract Tech Turbine"
+                        className="w-full h-full object-cover opacity-60 blur-sm scale-105 animate-pulse-slow"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-b from-slate-900/80 via-slate-900/50 to-slate-900"></div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/60 to-slate-950"></div>
                 </div>
 
                 <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 mb-8 animate-fade-in-up backdrop-blur-md">
-                        <AlertTriangle size={16} />
-                        <span className="text-sm font-bold tracking-wider uppercase">Accesso Limitato: Solo 4 Posti Rimasti questo mese</span>
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 mb-8 animate-fade-in-up backdrop-blur-md">
+                        <Zap size={16} />
+                        <span className="text-sm font-bold tracking-wider uppercase">Motore AI Attivo: Posti Limitati</span>
                     </div>
 
                     <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight animate-fade-in-up delay-100">
-                        Pilota il tuo Business verso <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Prestazioni Eccellenti</span>
+                        Metti il <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">TURBO</span> <br />
+                        ai tuoi progetti
                     </h1>
 
-                    <p className="text-xl md:text-2xl text-slate-300 mb-10 max-w-3xl mx-auto leading-relaxed animate-fade-in-up delay-200">
-                        La prima piattaforma che applica i protocolli dell'aviazione militare (CRM) alla gestione aziendale.
-                        <span className="block mt-2 text-white font-semibold">Prendi i comandi. Evita lo stallo. Raggiungi la destinazione.</span>
+                    <p className="text-xl md:text-2xl text-slate-300 mb-10 max-w-4xl mx-auto leading-relaxed animate-fade-in-up delay-200">
+                        La prima piattaforma completamente <span className="text-white font-bold">AI driven</span> per pilotare il tuo progetto agile in azienda senza rischi inutili.
+                        <span className="block mt-4 text-blue-200 text-lg">
+                            Rendiamo l’eccellenza strategica semplice, umana e immediata.
+                        </span>
                     </p>
 
                     {/* --- Lead Magnet & Form --- */}
-                    <div className="max-w-md mx-auto bg-white/5 backdrop-blur-lg border border-white/10 p-2 rounded-2xl shadow-2xl animate-fade-in-up delay-300 hover:border-indigo-500/50 transition-colors">
+                    <div className="max-w-md mx-auto bg-slate-900/60 backdrop-blur-xl border border-white/10 p-2 rounded-2xl shadow-2xl animate-fade-in-up delay-300 hover:border-amber-500/50 transition-colors">
                         {!submitted ? (
                             <form onSubmit={handleSubmit} className="flex flex-col gap-3 p-4">
                                 <div className="text-left mb-2">
-                                    <h3 className="text-lg font-bold text-white">Richiedi la Prova di Volo Gratuita</h3>
-                                    <p className="text-sm text-slate-400">Accesso completo alla "Cabina di Pilotaggio" digitale per 7 giorni.</p>
+                                    <h3 className="text-lg font-bold text-white">Accendi i Motori</h3>
+                                    <p className="text-sm text-slate-400">Prova gratuita della suite completa per 7 giorni.</p>
                                 </div>
                                 <div className="relative">
                                     <input
                                         type="email"
                                         placeholder="inserisci la tua email professionale..."
-                                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
                                         required
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
@@ -67,13 +68,13 @@ const LandingPage = () => {
                                 </div>
                                 <button
                                     type="submit"
-                                    className="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold py-3 rounded-lg shadow-lg flex items-center justify-center gap-2 transform active:scale-95 transition-all group"
+                                    className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold py-3 rounded-lg shadow-lg flex items-center justify-center gap-2 transform active:scale-95 transition-all group"
                                 >
-                                    Decolla Ora
+                                    Inizia Ora
                                     <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                                 </button>
                                 <p className="text-xs text-center text-slate-500 mt-2 flex items-center justify-center gap-1">
-                                    <ShieldCheck size={12} /> Nessuna carta di credito richiesta.
+                                    <ShieldCheck size={12} /> Nessun rischio. Cancellazione immediata.
                                 </p>
                             </form>
                         ) : (
@@ -81,65 +82,79 @@ const LandingPage = () => {
                                 <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <CheckCircle size={32} className="text-green-400" />
                                 </div>
-                                <h3 className="text-xl font-bold text-white mb-2">Richiesta Ricevuta!</h3>
-                                <p className="text-slate-400">Un nostro Flight Instructor ti contatterà a breve.</p>
+                                <h3 className="text-xl font-bold text-white mb-2">Contatto Stabilito!</h3>
+                                <p className="text-slate-400">Ti stiamo preparando la cabina di pilotaggio.</p>
                             </div>
                         )}
                     </div>
                 </div>
             </header>
 
-            {/* --- Social Proof / Scarcity Banner --- */}
-            <div className="border-y border-white/5 bg-slate-900/50 backdrop-blur-sm">
-                <div className="max-w-7xl mx-auto px-6 py-8 flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
-                    <span className="text-xl font-bold flex items-center gap-2"><Plane className="text-indigo-400" /> AERO-TECH</span>
-                    <span className="text-xl font-bold flex items-center gap-2"><Users className="text-indigo-400" /> PILOT ACADEMY</span>
-                    <span className="text-xl font-bold flex items-center gap-2"><Clock className="text-indigo-400" /> TIMELESS WATCHES</span>
-                    <span className="text-xl font-bold flex items-center gap-2"><ShieldCheck className="text-indigo-400" /> SECURE SYSTEMS</span>
-                </div>
-            </div>
+            {/* --- Vision & Mission Section --- */}
+            <section className="py-24 bg-slate-950 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-1/2 h-full bg-amber-500/5 blur-3xl"></div>
+                <div className="max-w-7xl mx-auto px-6 relative z-10">
 
-            {/* --- Features Grid --- */}
-            <section className="py-24 bg-slate-950 relative">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-5xl font-bold mb-6">Strumentazione di Bordo Avanzata</h2>
-                        <p className="text-xl text-slate-400 max-w-2xl mx-auto">Non volare alla cieca. Agile.AI ti fornisce la telemetria completa per prendere decisioni strategiche in tempo reale.</p>
+                    <div className="grid md:grid-cols-2 gap-16 items-center mb-24">
+                        <div>
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-500 text-sm font-bold mb-6">
+                                <Target size={14} /> VISION
+                            </div>
+                            <h2 className="text-4xl md:text-5xl font-bold mb-8 leading-tight">
+                                Risultati straordinari, <br />
+                                <span className="text-indigo-400">senza ansia.</span>
+                            </h2>
+                            <p className="text-xl text-slate-400 leading-relaxed">
+                                Immagino un mondo dove la complessità tecnologica e organizzativa — che si tratti di <strong className="text-white">AI, Agile o strategia pura</strong> — non sia più un ostacolo, ma uno strumento fluido.
+                                <br /><br />
+                                Il mio obiettivo è rendere l’eccellenza strategica semplice, umana e immediata per chi ha la responsabilità di guidare il futuro.
+                            </p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <FeatureBox icon={Brain} title="AI Fluidity" desc="Tecnologia invisibile" />
+                            <FeatureBox icon={Users} title="Human Core" desc="Leadership empatica" />
+                            <FeatureBox icon={Zap} title="Speed" desc="Risultati immediati" />
+                            <FeatureBox icon={Activity} title="Agile" desc="Adattamento continuo" />
+                        </div>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-8">
-                        <FeatureCard
-                            icon={Clock}
-                            title="Roadmap di Volo"
-                            desc="Pianifica le tue rotte strategiche con precisione millimetrica. Prevedi turbolenze e gestisci il carburante (budget) in anticipo."
-                        />
-                        <FeatureCard
-                            icon={Users}
-                            title="Equipaggio Sincronizzato"
-                            desc="Elimina i silos. Il protocollo CRM assicura che ogni membro dell'equipaggio comunichi in modo chiaro e standardizzato."
-                        />
-                        <FeatureCard
-                            icon={ShieldCheck}
-                            title="Scatola Nera AI"
-                            desc="Analisi post-sprint automatizzata. L'IA identifica le cause radice dei problemi e suggerisce correzioni di rotta immediate."
-                        />
+                    <div className="p-10 rounded-3xl bg-gradient-to-br from-indigo-900/40 to-slate-900 border border-indigo-500/20 text-center md:text-left flex flex-col md:flex-row items-center gap-10">
+                        <div className="flex-1">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-sm font-bold mb-6">
+                                <Cpu size={14} /> MISSION
+                            </div>
+                            <h3 className="text-3xl font-bold mb-4">Trasformo la complessità in risultati pratici.</h3>
+                            <p className="text-lg text-slate-300 leading-relaxed mb-6">
+                                Sto al fianco dei leader, lavorando con loro e <em>come uno di loro</em>. Metto a disposizione una <strong>'toolbox' infinita</strong> di esperienze concrete — maturate sul campo tra Agile, AI e sfide strategiche.
+                            </p>
+                            <p className="text-lg text-white font-medium">
+                                "Il mio impegno è guidare il cambiamento abbattendo ogni barriera, agendo sempre da pari a pari."
+                            </p>
+                        </div>
+                        <div className="w-full md:w-1/3 flex justify-center">
+                            {/* Abstract 'Turbo' representation */}
+                            <div className="w-40 h-40 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full blur-2xl opacity-20 absolute"></div>
+                            <div className="relative bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-2xl">
+                                <div className="text-5xl">🛠️</div>
+                            </div>
+                        </div>
                     </div>
+
                 </div>
             </section>
 
             {/* --- CTA Footer --- */}
-            <footer className="py-20 bg-gradient-to-br from-indigo-900 to-slate-900 text-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-                <div className="relative z-10 max-w-3xl mx-auto px-6">
-                    <h2 className="text-4xl font-bold mb-6">Il gate sta per chiudere.</h2>
-                    <p className="text-xl text-indigo-200 mb-8">
-                        Accettiamo solo 10 nuovi equipaggi questo trimestre per garantire la massima qualità del supporto. Assicurati il tuo posto ora.
+            <footer className="py-20 bg-slate-900 text-center border-t border-slate-800">
+                <div className="max-w-3xl mx-auto px-6">
+                    <h2 className="text-4xl font-bold mb-6 text-white">Pronto a mettere il Turbo?</h2>
+                    <p className="text-xl text-slate-400 mb-8">
+                        Non lasciare che il futuro ti aspetti. Prendi il controllo ora.
                     </p>
                     <button
                         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                        className="bg-white text-indigo-900 px-8 py-4 rounded-full font-bold text-lg hover:bg-indigo-50 transition-colors shadow-2xl hover:shadow-indigo-500/20"
+                        className="bg-white text-slate-900 px-8 py-4 rounded-full font-bold text-lg hover:bg-amber-400 transition-colors shadow-2xl hover:shadow-amber-500/20"
                     >
-                        Inizia il Check-in Gratuito
+                        Inizia il Viaggio
                     </button>
                 </div>
             </footer>
@@ -147,13 +162,11 @@ const LandingPage = () => {
     );
 };
 
-const FeatureCard = ({ icon: Icon, title, desc }) => (
-    <div className="p-8 rounded-2xl bg-slate-900 border border-slate-800 hover:border-indigo-500/50 hover:bg-slate-800/50 transition-all group cursor-default">
-        <div className="w-14 h-14 bg-indigo-500/10 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-            <Icon size={32} className="text-indigo-400" />
-        </div>
-        <h3 className="text-xl font-bold text-white mb-4">{title}</h3>
-        <p className="text-slate-400 leading-relaxed">{desc}</p>
+const FeatureBox = ({ icon: Icon, title, desc }) => (
+    <div className="p-6 bg-slate-900/50 rounded-xl border border-slate-800 hover:border-indigo-500/30 transition-all text-center md:text-left">
+        <Icon className="text-indigo-400 mb-3 mx-auto md:mx-0" size={28} />
+        <h4 className="font-bold text-white mb-1">{title}</h4>
+        <p className="text-sm text-slate-500">{desc}</p>
     </div>
 );
 
