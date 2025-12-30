@@ -9,7 +9,8 @@ import {
     Clock,
     Calendar,
     Zap,
-    Lightbulb
+    Lightbulb,
+    BarChart3
 } from 'lucide-react';
 
 export const APP_STEPS = [
