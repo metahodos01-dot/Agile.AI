@@ -8,6 +8,7 @@ import {
     TrendingUp, TrendingDown, Smile, Meh, Frown, BarChart3, Activity, Users,
     Calendar, Zap, Database, Plus, X, Calculator, AlertTriangle, Lock, Sparkles, Clock, Layers, ArrowRight
 } from 'lucide-react';
+import BurndownChart from '../components/charts/BurndownChart';
 
 // --- Helper Components ---
 
@@ -58,7 +59,7 @@ const MoodMeter = ({ moods = {}, onVote }) => (
     </div>
 );
 
-import BurndownChart from '../components/charts/BurndownChart';
+
 
 // Placeholder removed
 

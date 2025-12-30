@@ -7,7 +7,7 @@ const Layout = () => {
     const location = useLocation();
 
     return (
-        <div className="flex min-h-screen font-sans text-zinc-100 bg-zinc-950 relative">
+        <div className="flex min-h-screen font-sans text-zinc-100 relative">
             {/* Animated Mesh Background - Fixed & Behind everything */}
             <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
                 <div className="mesh-gradient-bg absolute inset-0" />
