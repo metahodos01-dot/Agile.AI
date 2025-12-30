@@ -593,12 +593,21 @@ const Sprint = () => {
                 };
             }
 
-            // Fill gaps: Previous nulls should be filled with last known real value for continuity
-            // We start filling from 1 since 0 is fixed
+            // Fill gaps: Previous nulls should be filled with last known real value for continuity.
+            // REPAIR: Also fix historical anomalies where past values are LOWER than current reality (physically impossible without scope creep).
+            // Since we assume strict Burndown (monotonic decrease), if current reality is 40h, history cannot be 0h.
             for (let i = 1; i <= targetIndex; i++) {
+                // 1. Fill Nulls
                 if (existingData[i].real === null || existingData[i].real === undefined) {
                     let lastValid = existingData[i - 1].real; // Use previous day
                     existingData[i].real = lastValid;
+                }
+
+                // 2. Repair "Rising" Artifacts (Bad History)
+                // If a historical point [i] is LESS than Current [targetIndex], it was likely a bug (e.g. 0).
+                // We clamp it to at least be equal to Current Reality.
+                if (existingData[i].real < realRemaining) {
+                    existingData[i].real = Number(realRemaining.toFixed(1));
                 }
             }
 
