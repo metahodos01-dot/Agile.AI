@@ -40,88 +40,166 @@ export const generateAIResponseV2 = async (prompt, type) => {
                resolve(objectives);
 
             } else if (type === 'kpi') {
-               // KPI Generati contestualmente all'obiettivo - LOGICA IMPACT-DRIVEN
+               // KPI Generati contestualmente all'obiettivo - LOGICA IMPACT-DRIVEN V2 (con Razionale)
                const objectiveText = (prompt.objective || "").toLowerCase();
                const kpis = [];
 
-               // 1. Estrazione Intelligenza: Strategic Intent Detection
-               // Mappiamo l'obiettivo su 4 assi strategici: Leadership, Efficienza, Innovazione, Qualità
+               // 1. Estrazione Parametri Numerici
+               const numberMatch = objectiveText.match(/(\d+)(%|k|m)?/);
+               const extractedTarget = numberMatch ? (objectiveText.includes('ridur') || objectiveText.includes('diminuir') ? `< ${numberMatch[0]}` : `> ${numberMatch[0]}`) : null;
 
+               // 2. Mappa Keywords -> KPI Categories (Expanded)
                const intentKeywords = {
-                  leadership: ['n.1', 'leader', 'mercato', 'market', 'posizionamento', 'brand', 'riferimento', 'top', 'ceo', 'manager'],
-                  efficiency: ['costi', 'ridur', 'waste', 'sprechi', 'automazion', 'risparmi', 'efficienz', 'velocit', 'tempo', 'time', 'process'],
-                  innovation: ['ai', 'artificial', 'adoption', 'nuovo', 'innovazion', 'tecnolog', 'modern', 'digital', 'trasformazion'],
-                  growth: ['vendit', 'fatturat', 'aument', 'crescit', 'revenue', 'client', 'acquisizion', 'espansion']
+                  leadership: ['n.1', 'leader', 'mercato', 'market', 'posizionamento', 'brand', 'riferimento', 'top', 'ceo', 'manager', 'vision'],
+                  efficiency: ['costi', 'ridur', 'waste', 'sprechi', 'automazion', 'risparmi', 'efficienz', 'velocit', 'tempo', 'time', 'process', 'manutenzion', 'refactoring'],
+                  innovation: ['ai', 'artificial', 'adoption', 'nuovo', 'innovazion', 'tecnolog', 'modern', 'digital', 'trasformazion', 'intelligenz'],
+                  growth: ['vendit', 'fatturat', 'aument', 'crescit', 'revenue', 'client', 'acquisizion', 'espansion', 'business'],
+                  quality: ['bug', 'difett', 'error', 'qualit', 'test', 'affidabil', 'incident', 'stabil', 'sicurezz', 'compliance']
                };
 
                let primaryIntent = 'generic';
                let maxScore = 0;
 
+               // Punteggio pesato: parole esatte valgono di più
                for (const [intent, keywords] of Object.entries(intentKeywords)) {
-                  const score = keywords.reduce((acc, word) => acc + (objectiveText.includes(word) ? 1 : 0), 0);
+                  let score = 0;
+                  keywords.forEach(word => {
+                     if (objectiveText.includes(word)) score += 1;
+                  });
+
+                  // Boost specifici per disambiguare
+                  if (intent === 'efficiency' && (objectiveText.includes('automati') || objectiveText.includes('manuten'))) score += 2;
+
                   if (score > maxScore) {
                      maxScore = score;
                      primaryIntent = intent;
                   }
                }
 
+               // Fallback intelligente per "code maintenance" se non catturato sopra
+               if (objectiveText.includes('codice') || objectiveText.includes('software')) {
+                  if (primaryIntent === 'generic') primaryIntent = 'efficiency';
+               }
+
                console.log(`AI KPI Logic: Detected STRATEGIC INTENT '${primaryIntent}' for objective '${objectiveText}'`);
 
-               // 2. Generazione KPI "High-Level" basati sull'intento
+               // 3. Generazione KPI con Razionale
                switch (primaryIntent) {
                   case 'leadership':
-                     kpis.push({ name: 'NPS (Net Promoter Score)', target: '> 70' });
-                     kpis.push({ name: 'Market Share (Segmento)', target: 'Top 3' });
-                     kpis.push({ name: 'Brand Authority Index', target: '> 8/10' });
+                     kpis.push({
+                        name: 'NPS (Net Promoter Score)',
+                        target: '> 70',
+                        rationale: 'Misura quanto i CEO/Manager sono disposti a raccomandare la tua soluzione.'
+                     });
+                     kpis.push({
+                        name: 'Market Share (Segmento)',
+                        target: 'Top 3',
+                        rationale: 'Posizionamento rispetto ai competitor diretti che offrono servizi simili.'
+                     });
+                     kpis.push({
+                        name: 'Brand Authority Index',
+                        target: '> 8/10',
+                        rationale: 'Percezione del valore del brand da parte degli stakeholder chiave.'
+                     });
                      break;
 
                   case 'efficiency':
                      if (objectiveText.includes('cost')) {
-                        kpis.push({ name: 'OpEx Reduction', target: '- 20%' });
+                        kpis.push({
+                           name: 'OpEx Reduction',
+                           target: '- 20%',
+                           rationale: 'Indicatore chiave per il risparmio sui costi operativi totali.'
+                        });
                      }
-                     if (objectiveText.includes('automazion') || objectiveText.includes('ai')) {
-                        kpis.push({ name: 'Automation Hit Rate', target: '> 85%' });
+                     if (objectiveText.includes('automazion') || objectiveText.includes('ai') || objectiveText.includes('manuten')) {
+                        kpis.push({
+                           name: 'Automation Hit Rate',
+                           target: '> 85%',
+                           rationale: 'Percentuale di processi/task gestiti automaticamente senza intervento umano.'
+                        });
+                        kpis.push({
+                           name: 'Maintenance Effort Reduction',
+                           target: '- 40%',
+                           rationale: 'Riduzione ore uomo dedicate a task di manutenzione ripetitivi.'
+                        });
+                     } else {
+                        kpis.push({
+                           name: 'Cycle Time Reduction',
+                           target: '- 30%',
+                           rationale: 'Riduzione della durata media dei cicli grazie all\'eliminazione delle frizioni.'
+                        });
                      }
-                     // Cycle Time intelligente
-                     kpis.push({ name: 'Cycle Time Reduction', target: '- 30%' }); // Mai più numeri assoluti senza unità
-                     kpis.push({ name: 'Lead Time per Strategia', target: '- 25%' });
+                     kpis.push({
+                        name: 'Lead Time per Strategia',
+                        target: '- 25%',
+                        rationale: 'Tempo recuperato nell\'execution strategica post-ottimizzazione.'
+                     });
                      break;
 
                   case 'innovation':
-                     kpis.push({ name: 'AI Adoption Rate', target: '> 60%' });
-                     kpis.push({ name: 'Time to Value (TtV)', target: '< 15 giorni' });
-                     kpis.push({ name: 'Innovation Pipeline Velocity', target: '+ 40%' });
+                     kpis.push({
+                        name: 'AI Adoption Rate',
+                        target: '> 60%',
+                        rationale: 'Percentuale di processi strategici gestiti tramite modelli AI dai team.'
+                     });
+                     kpis.push({
+                        name: 'Time to Value (TtV)',
+                        target: '< 15 giorni',
+                        rationale: 'Tempo medio tra l\'inizio del progetto e il primo risultato tangibile.'
+                     });
                      break;
 
                   case 'growth':
-                     kpis.push({ name: 'MRR Growth QoQ', target: '> 15%' });
-                     kpis.push({ name: 'CAC Payback Period', target: '< 6 mesi' });
-                     kpis.push({ name: 'Customer Lifetime Value', target: '> 3x CAC' });
+                     kpis.push({
+                        name: 'MRR Growth QoQ',
+                        target: '> 15%',
+                        rationale: 'Crescita trimestrale dei ricavi ricorrenti, vitale per la scalabilità.'
+                     });
+                     kpis.push({
+                        name: 'CAC Payback Period',
+                        target: '< 6 mesi',
+                        rationale: 'Tempo necessario per rientrare del costo di acquisizione cliente.'
+                     });
+                     break;
+
+                  case 'quality':
+                     kpis.push({
+                        name: 'Bug Escape Rate',
+                        target: '< 2%',
+                        rationale: 'Percentuale di difetti che raggiungono il cliente finale (target eccellenza).'
+                     });
+                     kpis.push({
+                        name: 'Technical Debt Ratio',
+                        target: '< 5%',
+                        rationale: 'Mantenimento di un codice pulito per garantire evolutività futura.'
+                     });
                      break;
 
                   default:
-                     // Fallback "Strong" - se non capiamo l'intento, diamo comunque metriche di business solide
-                     kpis.push({ name: 'ROI (Return on Investment)', target: '> 120%' });
-                     kpis.push({ name: 'Employee Engagement Score', target: '> 8.5/10' });
-                     kpis.push({ name: 'Customer Satisfaction (CSAT)', target: '> 4.5/5' });
+                     // Fallback "Strong"
+                     kpis.push({
+                        name: 'ROI (Return on Investment)',
+                        target: '> 120%',
+                        rationale: 'Ritorno economico generato rispetto all\'investimento effettuato.'
+                     });
+                     kpis.push({
+                        name: 'Employee Engagement',
+                        target: '> 8.5/10',
+                        rationale: 'Livello di coinvolgimento del team, precursore della produttività.'
+                     });
                }
 
-               // 3. Arricchimento contestuale (Mix & Match)
-               // Se parla di AI esplicitamente anche se l'intento dominante è un altro
+               // 4. Arricchimento Mix & Match e Cleanup
                if ((objectiveText.includes('ai') || objectiveText.includes('intelligence')) && primaryIntent !== 'innovation') {
-                  kpis.push({ name: 'AI Adoption Rate', target: '> 50%' });
+                  kpis.push({
+                     name: 'AI Adoption Rate',
+                     target: '> 50%',
+                     rationale: 'Integrazione dell\'AI nei processi core.'
+                  });
                }
 
-               // Se parla di Manager/CEO esplicitamente
-               if (objectiveText.includes('manager') || objectiveText.includes('ceo')) {
-                  const hasNPS = kpis.some(k => k.name.includes('NPS'));
-                  if (!hasNPS) kpis.push({ name: 'NPS (Decision Makers)', target: '> 70' });
-               }
-
-               // 4. Cleanup duplicati
                const uniqueKpis = kpis.filter((v, i, a) => a.findIndex(t => (t.name === v.name)) === i);
-
-               resolve(uniqueKpis.slice(0, 4)); // Ritorniamo max 4 KPI per non affollare la UI
+               resolve(uniqueKpis.slice(0, 4));
 
             } else if (type === 'team') {
                // Team industriale

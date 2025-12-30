@@ -121,31 +121,41 @@ const Kpis = () => {
 
                         <div className="space-y-3">
                             <div className="grid grid-cols-12 gap-4 text-xs text-zinc-500 uppercase font-semibold px-2">
-                                <div className="col-span-6">Indicatore</div>
-                                <div className="col-span-5">Target</div>
+                                <div className="col-span-4">Indicatore (KPI)</div>
+                                <div className="col-span-3">Target</div>
+                                <div className="col-span-4">Razionale Strategico</div>
                                 <div className="col-span-1"></div>
                             </div>
 
                             {Array.isArray(kpis[index]) && kpis[index].map((kpi, kIndex) => (
-                                <div key={kIndex} className="grid grid-cols-12 gap-4 items-center bg-zinc-800/30 p-3 rounded-lg">
-                                    <div className="col-span-6">
+                                <div key={kIndex} className="grid grid-cols-12 gap-4 items-start bg-zinc-800/30 p-3 rounded-lg group hover:bg-zinc-800/50 transition-colors">
+                                    <div className="col-span-4">
                                         <input
                                             value={kpi.name}
                                             onChange={(e) => updateKpi(index, kIndex, 'name', e.target.value)}
-                                            placeholder="es. OEE linea 1"
-                                            className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm"
+                                            placeholder="es. NPS"
+                                            className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm font-medium text-white placeholder-zinc-600"
                                         />
                                     </div>
-                                    <div className="col-span-5">
+                                    <div className="col-span-3">
                                         <input
                                             value={kpi.target}
                                             onChange={(e) => updateKpi(index, kIndex, 'target', e.target.value)}
-                                            placeholder="es. > 85%"
-                                            className="w-full bg-zinc-900/50 rounded px-3 py-2 border border-zinc-700 text-sm"
+                                            placeholder="es. > 70"
+                                            className="w-full bg-zinc-900/50 rounded px-2 py-1.5 border border-zinc-700 text-sm focus:border-indigo-500 text-indigo-300"
                                         />
                                     </div>
-                                    <div className="col-span-1 flex justify-end">
-                                        <button onClick={() => removeKpi(index, kIndex)} className="text-zinc-500 hover:text-red-400">
+                                    <div className="col-span-4">
+                                        <textarea
+                                            value={kpi.rationale || ''}
+                                            onChange={(e) => updateKpi(index, kIndex, 'rationale', e.target.value)}
+                                            placeholder="Perché questo KPI è importante..."
+                                            rows={2}
+                                            className="w-full bg-transparent border-none focus:ring-0 p-0 text-xs text-zinc-400 leading-relaxed resize-none placeholder-zinc-700"
+                                        />
+                                    </div>
+                                    <div className="col-span-1 flex justify-end pt-1">
+                                        <button onClick={() => removeKpi(index, kIndex)} className="text-zinc-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <Trash2 size={14} />
                                         </button>
                                     </div>
