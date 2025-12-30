@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
 import { ArrowRight, RefreshCw, GitBranch, Users, Zap, MessageCircle, CheckCircle, XCircle, ArrowDown } from 'lucide-react';
+import PhaseNavigation from '../components/common/PhaseNavigation';
 
 const Mindset = () => {
     const { project, updateProject } = useProject();
@@ -645,22 +646,20 @@ const Mindset = () => {
                 </div>
             </div>
 
-            {/* Next Button */}
-            <div className="flex justify-center pt-4">
-                <button
-                    onClick={handleNext}
-                    disabled={!isComplete}
-                    className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-bold text-lg transition-all ${isComplete
-                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/25'
-                        : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
-                        }`}
-                >
-                    Inizia il Percorso <ArrowRight size={20} />
-                </button>
-            </div>
+            {/* Phase Navigation */}
+            <PhaseNavigation
+                onSave={async () => {
+                    updateProject({ mindsetFeedback: feedback });
+                    // Optional: trigger a real save to server
+                    // await saveProject();
+                    return true;
+                }}
+                isSaving={false}
+                className={!isComplete ? "opacity-50 pointer-events-none grayscale" : ""}
+            />
 
             {!isComplete && (
-                <p className="text-center text-zinc-500 text-sm">
+                <p className="text-center text-slate-500 text-sm mt-4">
                     Completa tutte le domande per continuare
                 </p>
             )}

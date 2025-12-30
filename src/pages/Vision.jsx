@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
 import { generateAIResponseV2 } from '../services/aiService';
 import { Sparkles, ArrowRight, Lightbulb, BookOpen } from 'lucide-react';
+import PhaseNavigation from '../components/common/PhaseNavigation';
 
 const Vision = () => {
     const { project, updateProject } = useProject();
@@ -195,17 +196,24 @@ const Vision = () => {
                         placeholder="La tua vision generata dall'AI apparirà qui. Puoi anche scriverla manualmente..."
                     />
 
-                    <div className="flex justify-end mt-4">
-                        <button
-                            onClick={handleNext}
-                            className="btn-primary"
-                        >
-                            Salva e Continua
-                            <ArrowRight size={16} />
-                        </button>
-                    </div>
                 </div>
             </div>
+
+            {/* Phase Navigation */}
+            <PhaseNavigation
+                onSave={async () => {
+                    updateProject({
+                        targetAudience: visionInput.targetAudience,
+                        problem: visionInput.problem,
+                        currentSolution: visionInput.currentSolution,
+                        differentiation: visionInput.differentiation,
+                        // Vision is already updated via textarea onChange, but ensure input fields are saved too
+                    });
+                    // Optional: trigger a real save to server
+                    // await saveProject();
+                    return true;
+                }}
+            />
         </div>
     );
 };
