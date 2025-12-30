@@ -23,24 +23,99 @@ export const generateAIResponseV2 = async (prompt, type) => {
    🔗 **Integrazione Totale**: Si inserisce perfettamente nel workflow esistente.`);
 
             } else if (type === 'objectives') {
-               // Obiettivi allineati alla vision
+               // Obiettivi allineati alla vision - LOGICA IMPACT-DRIVEN V2
                console.log("AI Service: Generating objectives with context:", prompt);
 
-               const productName = prompt.projectName || 'Il Prodotto';
-               const target = prompt.targetAudience || 'il target';
+               const visionText = (prompt.vision || "").toLowerCase() + " " + (prompt.problem || "").toLowerCase();
 
-               // Return valid JSON array logic for the "fake" AI
-               // In a real LLM, we'd parse the response. Here we construct it.
-               const objectives = [
-                  `🎯 Diventare la soluzione N.1 per ${prompt.targetAudience || 'il mercato'}, risolvendo ${prompt.problem || 'il problema principale'}.`,
-                  `🚀 Eliminare "${prompt.problem || 'inefficienze'}" e ridurre i costi operativi del 20%.`,
-                  `⭐ Raggiungere un NPS > 60 offrendo con ${prompt.projectName || 'il prodotto'} un'esperienza unica.`
-               ];
+               // 1. Strategic Intent Detection (Shared Logic)
+               const intentKeywords = {
+                  leadership: ['n.1', 'leader', 'mercato', 'market', 'posizionamento', 'brand', 'riferimento', 'top', 'ceo', 'manager', 'vision'],
+                  efficiency: ['costi', 'ridur', 'waste', 'sprechi', 'automazion', 'risparmi', 'efficienz', 'velocit', 'tempo', 'time', 'process', 'manutenzion', 'refactoring'],
+                  innovation: ['ai', 'artificial', 'adoption', 'nuovo', 'innovazion', 'tecnolog', 'modern', 'digital', 'trasformazion', 'intelligenz'],
+                  growth: ['vendit', 'fatturat', 'aument', 'crescit', 'revenue', 'client', 'acquisizion', 'espansion', 'business'],
+                  quality: ['bug', 'difett', 'error', 'qualit', 'test', 'affidabil', 'incident', 'stabil', 'sicurezz', 'compliance']
+               };
+
+               let primaryIntent = 'generic';
+               let maxScore = 0;
+
+               for (const [intent, keywords] of Object.entries(intentKeywords)) {
+                  let score = 0;
+                  keywords.forEach(word => {
+                     if (visionText.includes(word)) score += 1;
+                  });
+                  if (intent === 'efficiency' && (visionText.includes('automati') || visionText.includes('manuten'))) score += 2;
+                  if (score > maxScore) {
+                     maxScore = score;
+                     primaryIntent = intent;
+                  }
+               }
+               console.log(`AI Objectives Logic: Detected STRATEGIC INTENT '${primaryIntent}'`);
+
+               const objectives = [];
+
+               switch (primaryIntent) {
+                  case 'leadership':
+                     objectives.push({
+                        text: `Diventare la soluzione N.1 per ${prompt.targetAudience || 'il mercato'} entro il prossimo Q4.`,
+                        rationale: 'Necessario per consolidare la posizione dominante e attrarre investitori.'
+                     });
+                     objectives.push({
+                        text: `Raggiungere un NPS > 70 offrendo un'esperienza utente "best-in-class".`,
+                        rationale: 'La fedeltà del cliente è il principale motore di crescita organica a lungo termine.'
+                     });
+                     objectives.push({
+                        text: `Stabilire una partnership strategica con Top Player del settore.`,
+                        rationale: 'Accresce la Brand Authority e apre nuovi canali di distribuzione.'
+                     });
+                     break;
+                  case 'efficiency':
+                     objectives.push({
+                        text: `Ridurre i costi operativi (OpEx) del 20% tramite automazione intelligente.`,
+                        rationale: 'Ottimizzazione necessaria per migliorare i margini e liberare risorse per R&D.'
+                     });
+                     objectives.push({
+                        text: `Dimezzare il Cycle Time dei processi core da X a Y giorni.`,
+                        rationale: 'La velocità di esecuzione è il nostro vantaggio competitivo principale.'
+                     });
+                     objectives.push({
+                        text: `Automatizzare l'80% delle attività ripetitive di manutenzione.`,
+                        rationale: 'Eliminare il lavoro a basso valore aggiunto permette al team di innovare.'
+                     });
+                     break;
+                  case 'innovation':
+                     objectives.push({
+                        text: `Lanciare la nuova piattaforma AI-driven con adozione > 60% al Day 1.`,
+                        rationale: 'L\'innovazione tecnologica è la leva per distanziare la concorrenza.'
+                     });
+                     objectives.push({
+                        text: `Ridurre il Time-to-Value per i nuovi clienti a meno di 15 giorni.`,
+                        rationale: 'Accelerare il valore percepito riduce il churn iniziale.'
+                     });
+                     objectives.push({
+                        text: `Implementare funzionalità predittive per anticipare i bisogni dell'utente.`,
+                        rationale: 'Passare da un approccio reattivo a proattivo fidelizza il cliente.'
+                     });
+                     break;
+                  default:
+                     objectives.push({
+                        text: `Diventare leader di mercato risolvendo le criticità di ${prompt.targetAudience || 'utenti'}.`,
+                        rationale: 'Obiettivo di posizionamento standard per guidare la crescita.'
+                     });
+                     objectives.push({
+                        text: `Aumentare l'efficienza operativa riducendo gli sprechi del 20%.`,
+                        rationale: 'Miglioramento della bottom-line aziendale.'
+                     });
+                     objectives.push({
+                        text: `Validare il Product-Market Fit con 50 clienti paganti.`,
+                        rationale: 'Validazione essenziale prima di scalare gli investimenti.'
+                     });
+               }
 
                resolve(objectives);
 
             } else if (type === 'kpi') {
-               // KPI Generati contestualmente all'obiettivo - LOGICA IMPACT-DRIVEN V2 (con Razionale)
                const objectiveText = (prompt.objective || "").toLowerCase();
                const kpis = [];
 
@@ -225,63 +300,80 @@ export const generateAIResponseV2 = async (prompt, type) => {
    💡 Suggerimento: coinvolgere operatori di linea come "super-user" per garantire adozione e feedback dal campo.`);
 
             } else if (type === 'backlog') {
-               // Backlog industriale - Epic legate alla produzione
-               // Dynamic Backlog Generation
-               const epics = [
-                  {
+               // Backlog industriale - Epic legate alla produzione - LOGICA IMPACT-DRIVEN V2
+               // Recuperiamo l'intento strategico dalla vision (copiamo la logica usata sopra per coerenza)
+               const visionText = (prompt.vision || "").toLowerCase();
+               let context = 'generic';
+               if (visionText.includes('automat') || visionText.includes('cost')) context = 'efficiency';
+               else if (visionText.includes('innov') || visionText.includes('ai')) context = 'innovation';
+               else if (visionText.includes('leader') || visionText.includes('mercato')) context = 'leadership';
+
+               const epics = [];
+
+               if (context === 'efficiency') {
+                  epics.push({
                      id: 1,
-                     title: `Core: Risoluzione di ${prompt.problem || 'problema principale'}`,
+                     title: 'Epic: Automazione dei Processi Critici',
                      stories: [
-                        {
-                           id: 101,
-                           title: `Come ${prompt.targetAudience || 'utente'}, voglio una dashboard intuitiva per monitorare i KPI critici.`,
-                           keyResult: "Riduzione tempi di analisi del 30%"
-                        },
-                        {
-                           id: 102,
-                           title: `Come amministratore, voglio configurare i parametri chiave per adattarli al mio processo.`,
-                           keyResult: "Setup iniziale in < 1 ora"
-                        },
-                        {
-                           id: 103,
-                           title: `Come utente operativo, voglio ricevere notifiche automatiche su anomalie.`,
-                           keyResult: "Tempi di reazione ridotti del 50%"
-                        }
+                        { id: 101, title: 'Come COO, voglio automatizzare il data entry per ridurre gli errori manuali.', keyResult: 'Riduzione errori del 90%' },
+                        { id: 102, title: 'Come operatore, voglio trigger automatici per la manutenzione.', keyResult: 'OEE +5%' }
                      ]
-                  },
-                  {
+                  });
+                  epics.push({
                      id: 2,
-                     title: `Innovation: ${prompt.differentiation || 'Funzionalità distintive'}`,
+                     title: 'Epic: Ottimizzazione Workflow',
                      stories: [
-                        {
-                           id: 201,
-                           title: `Come ${prompt.targetAudience || 'utente'}, voglio utilizzare algoritmi predittivi per anticipare i problemi.`,
-                           keyResult: "Prevenzione errori del 25%"
-                        },
-                        {
-                           id: 202,
-                           title: `Come analista, voglio report automatici generati dall'AI.`,
-                           keyResult: "Risparmio 4 ore/settimana per report"
-                        }
+                        { id: 201, title: 'Come manager, voglio vedere le strozzature in tempo reale.', keyResult: 'Cycle time -20%' },
+                        { id: 202, title: 'Come team, voglio assegnazione task automatica basata sulla capacità.', keyResult: 'Carico lavoro bilanciato' }
                      ]
-                  },
-                  {
-                     id: 3,
-                     title: `Scale & Security per ${prompt.projectName || 'il progetto'}`,
+                  });
+               } else if (context === 'innovation') {
+                  epics.push({
+                     id: 1,
+                     title: 'Epic: Integrazione AI Core',
                      stories: [
-                        {
-                           id: 301,
-                           title: `Come CTO, voglio garantire la sicurezza dei dati sensibili con crittografia end-to-end.`,
-                           keyResult: "Compliance GDPR 100%"
-                        },
-                        {
-                           id: 302,
-                           title: `Come utente, voglio accedere da mobile con le stesse funzionalità desktop.`,
-                           keyResult: "Adozione mobile > 40%"
-                        }
+                        { id: 101, title: 'Come utente, voglio suggerimenti proattivi dall\'AI durante il lavoro.', keyResult: 'Adozione feature 60%' },
+                        { id: 102, title: 'Come data scientist, voglio accesso ai dati grezzi via API.', keyResult: 'Time-to-insight < 4h' }
                      ]
-                  }
-               ];
+                  });
+                  epics.push({
+                     id: 2,
+                     title: 'Epic: Nuova Esperienza Utente',
+                     stories: [
+                        { id: 201, title: 'Come cliente, voglio configurare il prodotto via linguaggio naturale.', keyResult: 'NPS +10 punti' },
+                        { id: 202, title: 'Come admin, voglio dashboard predittive.', keyResult: 'Decisioni 2x più veloci' }
+                     ]
+                  });
+               } else {
+                  // Fallback / Leadership
+                  epics.push({
+                     id: 1,
+                     title: 'Epic: Posizionamento Strategico',
+                     stories: [
+                        { id: 101, title: 'Come marketing, voglio analisi dei trend per anticipare il mercato.', keyResult: 'First mover advantage' },
+                        { id: 102, title: 'Come vendite, voglio demo personalizzate per settore.', keyResult: 'Conversion Rate +5%' }
+                     ]
+                  });
+                  epics.push({
+                     id: 2,
+                     title: 'Epic: Eccellenza Operativa',
+                     stories: [
+                        { id: 201, title: 'Come manager, voglio reportistica unificata.', keyResult: 'Single source of truth' },
+                        { id: 202, title: 'Come IT, voglio stack scalabile per supporto global.', keyResult: 'Uptime 99.99%' }
+                     ]
+                  });
+               }
+
+               // Aggiunge sempre una Epic di Sicurezza/Foundation
+               epics.push({
+                  id: 3,
+                  title: 'Epic: Fondamenta Tecniche & Sicurezza',
+                  stories: [
+                     { id: 301, title: 'Come CISO, voglio audit log completi di tutte le operazioni.', keyResult: 'Compliance 100%' },
+                     { id: 302, title: 'Come devops, voglio pipeline CI/CD interamente automatizzata.', keyResult: 'Deploy giornalieri' }
+                  ]
+               });
+
                resolve(epics);
 
             } else if (type === 'roadmap_mvp') {

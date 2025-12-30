@@ -13,8 +13,8 @@ const Objectives = () => {
 
     const [objectives, setObjectives] = useState(
         project.objectives.length > 0
-            ? project.objectives.map(obj => typeof obj === 'object' ? (obj.text || obj.title || '') : obj)
-            : ['', '', '']
+            ? project.objectives.map(obj => typeof obj === 'object' ? obj : { text: obj, rationale: '' })
+            : [{ text: '', rationale: '' }, { text: '', rationale: '' }, { text: '', rationale: '' }]
     );
 
     const handleGenerate = async () => {
@@ -110,35 +110,68 @@ const Objectives = () => {
                 </div>
 
                 {/* Objectives List */}
-                <div className="lg:col-span-2 space-y-3">
-                    {objectives.map((obj, index) => (
-                        <div key={index} className="glass-panel p-4 flex items-start gap-3 group">
-                            <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <span className="text-indigo-400 font-bold text-sm">{index + 1}</span>
+                <div className="lg:col-span-2 space-y-4">
+                    {objectives.map((obj, index) => {
+                        const objectiveText = typeof obj === 'object' ? obj.text : obj;
+                        const rationaleText = typeof obj === 'object' ? obj.rationale : '';
+
+                        return (
+                            <div key={index} className="glass-panel p-5 group transition-all hover:bg-zinc-800/40 relative">
+                                <div className="flex items-start gap-4">
+                                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center flex-shrink-0 mt-1">
+                                        <span className="text-indigo-400 font-bold text-sm">{index + 1}</span>
+                                    </div>
+                                    <div className="flex-1 space-y-3">
+                                        <div>
+                                            <label className="text-xs text-zinc-500 font-semibold uppercase tracking-wider mb-1 block">Obiettivo Strategico</label>
+                                            <textarea
+                                                value={objectiveText}
+                                                onChange={(e) => {
+                                                    const newObjs = [...objectives];
+                                                    newObjs[index] = { text: e.target.value, rationale: rationaleText };
+                                                    setObjectives(newObjs);
+                                                }}
+                                                className="w-full bg-transparent border-none p-0 focus:ring-0 resize-none text-zinc-200 text-lg font-medium leading-normal placeholder-zinc-700"
+                                                placeholder={`Es. Diventare leader di mercato...`}
+                                                rows={2}
+                                            />
+                                        </div>
+
+                                        <div className="pt-3 border-t border-zinc-700/50">
+                                            <label className="text-xs text-emerald-500/80 font-semibold uppercase tracking-wider mb-1 block flex items-center gap-1">
+                                                <Target size={12} /> Razionale di Business
+                                            </label>
+                                            <textarea
+                                                value={rationaleText}
+                                                onChange={(e) => {
+                                                    const newObjs = [...objectives];
+                                                    newObjs[index] = { text: objectiveText, rationale: e.target.value };
+                                                    setObjectives(newObjs);
+                                                }}
+                                                className="w-full bg-transparent border-none p-0 focus:ring-0 resize-none text-zinc-400 text-sm placeholder-zinc-700"
+                                                placeholder="Perché questo obiettivo è vitale? Es. Impatto diretto su revenue..."
+                                                rows={1}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        onClick={() => removeObjective(index)}
+                                        className="opacity-0 group-hover:opacity-100 text-zinc-600 hover:text-red-400 transition-all p-2 absolute top-4 right-4"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
                             </div>
-                            <textarea
-                                value={obj}
-                                onChange={(e) => handleObjectiveChange(index, e.target.value)}
-                                className="flex-1 bg-transparent border-none p-0 focus:ring-0 resize-none text-zinc-200"
-                                placeholder={`Obiettivo ${index + 1}`}
-                                rows={2}
-                            />
-                            <button
-                                onClick={() => removeObjective(index)}
-                                className="opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-400 transition-all p-2"
-                            >
-                                <Trash2 size={16} />
-                            </button>
-                        </div>
-                    ))}
+                        );
+                    })}
 
                     <button
-                        onClick={addObjective}
-                        className="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 transition-colors text-sm font-medium py-2"
+                        onClick={() => setObjectives([...objectives, { text: '', rationale: '' }])}
+                        className="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 transition-colors text-sm font-medium py-2 px-2"
                     >
                         <Plus size={16} /> Aggiungi obiettivo
                     </button>
-
                 </div>
 
                 {/* Phase Navigation */}

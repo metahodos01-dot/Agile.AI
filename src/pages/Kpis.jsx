@@ -40,7 +40,7 @@ const Kpis = () => {
     const addKpi = (objectiveIndex) => {
         const newKpis = { ...kpis };
         if (!newKpis[objectiveIndex]) newKpis[objectiveIndex] = [];
-        newKpis[objectiveIndex].push({ name: '', target: '' });
+        newKpis[objectiveIndex].push({ name: '', target: '', rationale: '' });
         setKpis(newKpis);
     };
 
