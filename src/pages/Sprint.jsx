@@ -459,7 +459,10 @@ const Sprint = () => {
 
         const duration = capacity.members?.[0]?.days || 10;
         const now = new Date().toISOString();
-        const totalEstimated = kanbanTasks.filter(t => t.status !== 'backlog').reduce((sum, t) => sum + (Number(t.estimated) || 0), 0);
+        // Initialize Total Estimated from tasks that are NOT DONE yet.
+        // This ensures the "Mountain to Climb" (Ideal Line) starts exactly at the work remaining.
+        // If we included 'done', the Ideal would start higher than Real, causing mismatch.
+        const totalEstimated = kanbanTasks.filter(t => ['todo', 'doing'].includes(t.status)).reduce((sum, t) => sum + (Number(t.estimated) || 0), 0);
 
         // Initialize Burndown Data with Day 0 to 10 (Ideal Line pre-filled)
         const initialBurndown = [];
@@ -534,17 +537,17 @@ const Sprint = () => {
         // Calculate Real Remaining based on User Requirement: "Start Total - Done Hours"
         // This ensures the line starts exactly at Day 0 Total and drops only when work is done.
 
-        // 1. Get Baseline (Day 0 Ideal or Total Estimated Sum if not found)
-        const startTotal = activeSprint.kpis?.burndownData?.[0]?.ideal ||
-            kanbanTasks.filter(t => t.status !== 'backlog').reduce((sum, t) => sum + (Number(t.estimated) || 0), 0);
-
-        // 2. Calculate Done Hours
-        const doneHours = kanbanTasks
-            .filter(t => t.status === 'done')
+        // Calculate Real Remaining based on User Requirement: "Start Total - Done Hours"
+        // To ensure consistency with the new "Top-Down" Ideal Line (which excludes pre-done tasks),
+        // we calculate Real Remaining simply as the sum of TODO + DOING tasks.
+        // This is mathematically equivalent to (Total_Excluding_PreDone - Done_During_Sprint).
+        // It ensures Real starts exactly at Ideal (Day 0) and drops as tasks move to Done.
+        const realRemaining = kanbanTasks
+            .filter(t => ['todo', 'doing'].includes(t.status))
             .reduce((sum, t) => sum + (Number(t.estimated) || 0), 0);
 
-        // 3. Calculate Real Remaining
-        const realRemaining = Math.max(0, startTotal - doneHours);
+        // Uses realRemaining as fallback if ideal is missing, ensuring synchronization.
+        const startTotal = activeSprint.kpis?.burndownData?.[0]?.ideal || realRemaining;
 
         setKpiData(prev => {
             let existingData = [...(prev.burndownData || [])];
