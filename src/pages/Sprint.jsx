@@ -504,66 +504,71 @@ const Sprint = () => {
     const sprintDuration = activeSprint.durationDays || 10;
     const idealPerDay = totalEstimatedInitial / sprintDuration;
 
-    // Helper to update daily snapshot (Call this when needed, e.g. on page load if new day, or manual trigger)
+    // Helper to update daily snapshot
     const updateBurndownSnapshot = () => {
         if (activeSprint.status !== 'active' || !activeSprint.startDate) return;
 
         const start = new Date(activeSprint.startDate);
         const now = new Date();
         const diffTime = Math.abs(now - start);
-        const dayDiff = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        // Note: dayDiff might be 1 on the first day if we round up, let's normalize to 0-based index or 1-based day. 
-        // Standard: Day 0 = Start. Day 1 = After 24h.
+        const dayIndex = Math.floor(diffTime / (1000 * 60 * 60 * 24)); // 0-based day index
 
-        // Simpler: Current Day based on calendar date difference
-        const dayIndex = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        // Calculate Real Remaining (Sum of estimated/remaining for NON-DONE tasks)
+        // This makes the "Real" line drop as soon as a task is Done.
+        const realRemaining = kanbanTasks
+            .filter(t => t.status !== 'backlog')
+            .reduce((sum, t) => {
+                if (t.status === 'done') return sum + 0;
+                return sum + (Number(t.remaining) || Number(t.estimated) || 0);
+            }, 0);
 
-        // Check if we already have an entry for this dayIndex
-        const existingData = kpiData.burndownData || [];
-        const hasToday = existingData.some(d => d.day === dayIndex);
+        const idealRemaining = Math.max(0, totalEstimatedInitial - (idealPerDay * dayIndex));
 
-        if (!hasToday) {
-            // Calculate remaining (Real)
-            const currentRemaining = kanbanTasks.filter(t => t.status !== 'backlog').reduce((sum, t) => sum + (Number(t.remaining) || Number(t.estimated) || 0), 0);
-            // Logic: Subtract DONE tasks? Or sum Remaining field? 
-            // Implementing "Sum of Remaining work". If 'remaining' isn't tracked, use estimated for todo/doing and 0 for done.
-            // Refined Real Calc:
-            const realRemaining = kanbanTasks
-                .filter(t => t.status !== 'backlog')
-                .reduce((sum, t) => {
-                    if (t.status === 'done') return sum + 0;
-                    return sum + (Number(t.remaining) || Number(t.estimated) || 0); // Assuming remaining tracks work left.
-                }, 0);
+        setKpiData(prev => {
+            const existingData = prev.burndownData || [];
+            // Check if we already have an entry for this dayIndex
+            const todayIndex = existingData.findIndex(d => d.day === dayIndex);
 
-            const idealRemaining = Math.max(0, totalEstimatedInitial - (idealPerDay * dayIndex));
+            let newData;
+            if (todayIndex >= 0) {
+                // UPDATE existing "Today" entry (Real-time feedback)
+                newData = [...existingData];
+                newData[todayIndex] = {
+                    ...newData[todayIndex],
+                    real: Number(realRemaining.toFixed(1))
+                    // Keep Ideal fixed as it was calculated at start of day/sprint
+                };
+            } else {
+                // CREATE new Day entry
+                const newEntry = {
+                    day: dayIndex,
+                    date: new Date().toLocaleDateString(),
+                    ideal: Number(idealRemaining.toFixed(1)),
+                    real: Number(realRemaining.toFixed(1))
+                };
+                newData = [...existingData, newEntry].sort((a, b) => a.day - b.day);
+            }
 
-            const newEntry = {
-                day: dayIndex,
-                date: new Date().toLocaleDateString(),
-                ideal: Number(idealRemaining.toFixed(1)),
-                real: Number(realRemaining.toFixed(1))
-            };
+            const nextKpis = { ...prev, burndownData: newData };
+            // Regenerate alerts based on new data (e.g. if Burndown flattens)
+            nextKpis.alerts = generateInsights(nextKpis);
+            return nextKpis;
+        });
 
-            const newData = [...existingData, newEntry].sort((a, b) => a.day - b.day);
-
-            setKpiData(prev => {
-                const nextKpis = { ...prev, burndownData: newData };
-                nextKpis.alerts = generateInsights(nextKpis);
-                return nextKpis;
-            });
-
-            // We should auto-save this update to context/db
-            const alerts = generateInsights({ ...kpiData, burndownData: newData });
-            handleSaveLocal({ kpis: { ...kpiData, burndownData: newData, alerts } });
-        }
+        // Use a timeout or debounce in real app to avoid excessive saves, but here we just ensure consistency
+        // handleSaveLocal call omitted here to strictly rely on the main useEffect, 
+        // OR we can rely on correct 'kpiData' state merging in handleSaveLocal.
+        // For immediate feedback persist:
+        // Note: calling handleSaveLocal here might conflict with the setKpiData state update if not careful.
+        // Better to let the centralized Save Logic handle it, or force a save with NEW data.
     };
 
-    // Check for daily snapshot on load/mount if active
+    // Trigger Burndown Update on Load AND when Tasks change (for Real-Line drop)
     useEffect(() => {
         if (activeSprint.status === 'active') {
             updateBurndownSnapshot();
         }
-    }, [activeSprint.id, activeSprint.status]); // Check on load
+    }, [activeSprint.id, activeSprint.status, kanbanTasks]); // Added kanbanTasks dependency
 
 
     const getDaysRemaining = () => {
