@@ -129,7 +129,8 @@ export const generateAIResponseV2 = async (prompt, type) => {
                   growth: ['fatturato', 'revenue', 'crescita', 'quote', 'market', 'share', 'vendit', 'acquisizion', 'client', 'mrr', 'arr'],
                   leadership: ['leader', 'n.1', 'top', 'posizionamento', 'brand', 'authority', 'riferimento', 'esperti'],
                   innovation: ['ai', 'intelligenz', 'nuovo', 'lancio', 'prodotto', 'tech', 'digital', 'trasformazion', 'modern'],
-                  quality: ['bug', 'difett', 'qualit', 'nps', 'soddisfazion', 'customer', 'feedback', 'user', 'ux']
+                  quality: ['bug', 'difett', 'qualit', 'nps', 'soddisfazion', 'customer', 'feedback', 'user', 'ux'],
+                  partnership: ['partner', 'channel', 'canale', 'indirett', 'distribuzion', 'ecosistem', 'integr', 'api', 'terze parti']
                };
 
                let primaryIntent = 'generic';
@@ -254,6 +255,19 @@ export const generateAIResponseV2 = async (prompt, type) => {
                         name: 'Cost of Poor Quality (COPQ)',
                         target: '< 5%',
                         rationale: 'I costi di rilavorazione e bug fixing erodono silenziosamente i margini.'
+                     });
+                     break;
+
+                  case 'partnership':
+                     kpis.push({
+                        name: 'N. di Integrazioni Tecniche Native con Top Player',
+                        target: '3',
+                        rationale: 'L\'interoperabilità riduce le barriere all\'entrata e aumenta il valore percepito per i clienti Enterprise.'
+                     });
+                     kpis.push({
+                        name: 'Indirect Revenue (Canale Partner)',
+                        target: '> 15%',
+                        rationale: 'Una partnership è strategica solo se genera un flusso di cassa misurabile e scalabile.'
                      });
                      break;
 

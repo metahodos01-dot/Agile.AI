@@ -546,8 +546,6 @@ const Sprint = () => {
 
             const newData = [...existingData, newEntry].sort((a, b) => a.day - b.day);
 
-            const newData = [...existingData, newEntry].sort((a, b) => a.day - b.day);
-
             setKpiData(prev => {
                 const nextKpis = { ...prev, burndownData: newData };
                 nextKpis.alerts = generateInsights(nextKpis);
