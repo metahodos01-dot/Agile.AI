@@ -5,6 +5,8 @@ import { useProject } from '../context/ProjectContext';
 import { generateAIResponseV2 } from '../services/aiService';
 import { Sparkles, ArrowRight, Lightbulb, BookOpen } from 'lucide-react';
 import PhaseNavigation from '../components/common/PhaseNavigation';
+import InstructionCard from '../components/common/InstructionCard';
+import HelpTooltip from '../components/common/HelpTooltip';
 
 const Vision = () => {
     const { project, updateProject } = useProject();
@@ -106,6 +108,15 @@ const Vision = () => {
             </div>
 
             {/* Main Grid */}
+            <InstructionCard
+                title="Definisci la Visione del Prodotto"
+                description="La Product Vision è la 'Stella Polare' del tuo progetto. Descrive il futuro che vuoi creare e perché è importante. Una buona visione ispira il team e guida le decisioni strategiche."
+                tips={[
+                    "Disegna il 'Chi' (Target) e il 'Cosa' (Problema) prima del 'Come' (Soluzione).",
+                    "Usa l'AI per generare bozze creative se hai il blocco dello scrittore.",
+                    "Sii conciso: una visione chiara si ricorda facilmente."
+                ]}
+            />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Input Panel */}
                 <div className="glass-panel p-6 space-y-5">
@@ -123,7 +134,10 @@ const Vision = () => {
                     </div>
 
                     <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-zinc-300">Target di riferimento</label>
+                        <label className="text-sm font-medium text-zinc-300 flex items-center">
+                            Target di riferimento
+                            <HelpTooltip text="A chi è rivolto il prodotto? Sii specifico (es. 'Manager di PMI' invece di 'Aziende')." />
+                        </label>
                         <input
                             type="text"
                             name="targetAudience"
@@ -134,7 +148,10 @@ const Vision = () => {
                     </div>
 
                     <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-zinc-300">Problema da Risolvere</label>
+                        <label className="text-sm font-medium text-zinc-300 flex items-center">
+                            Problema da Risolvere
+                            <HelpTooltip text="Quale dolore o bisogno stai risolvendo? Perché i clienti dovrebbero pagare per questo?" />
+                        </label>
                         <textarea
                             name="problem"
                             value={visionInput.problem}

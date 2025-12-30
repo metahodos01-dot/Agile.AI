@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
 import { ArrowRight, RefreshCw, GitBranch, Users, Zap, MessageCircle, CheckCircle, XCircle, ArrowDown } from 'lucide-react';
 import PhaseNavigation from '../components/common/PhaseNavigation';
+import InstructionCard from '../components/common/InstructionCard';
 
 const Mindset = () => {
     const { project, updateProject } = useProject();
@@ -40,6 +41,15 @@ const Mindset = () => {
             </div>
 
             {/* Comparison Section */}
+            <InstructionCard
+                title="Perché partire dal Mindset?"
+                description="L'Agile non è solo un processo, è un modo di pensare. Prima di definire cosa fare (il prodotto), dobbiamo definire come lavorare insieme. In questa sezione, esplorerai i pilastri di Scrum e configurerai l'approccio del tuo team."
+                tips={[
+                    "Leggi i valori del Manifesto Agile per allineare il team.",
+                    "Studia i ruoli di Scrum: Product Owner (Tu), Scrum Master (Processo), Team (Esecuzione).",
+                    "Usa i selettori in basso per confermare la tua adesione ai principi."
+                ]}
+            />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Waterfall */}
                 <div className="glass-panel p-6 border-l-4 border-red-500/50">

@@ -4,6 +4,7 @@ import { useProject } from '../context/ProjectContext';
 import { generateAIResponseV2 } from '../services/aiService';
 import { Sparkles, ArrowRight, Plus, Trash2, Target, BookOpen } from 'lucide-react';
 import PhaseNavigation from '../components/common/PhaseNavigation';
+import InstructionCard from '../components/common/InstructionCard';
 
 const Objectives = () => {
     const { project, updateProject } = useProject();
@@ -73,27 +74,15 @@ const Objectives = () => {
             </div>
 
             {/* Educational Section */}
-            <div className="glass-panel p-6 border-l-4 border-indigo-500">
-                <div className="flex items-start gap-4">
-                    <BookOpen size={24} className="text-indigo-400 flex-shrink-0 mt-1" />
-                    <div>
-                        <h3 className="text-lg font-semibold text-white mb-2">Cosa sono gli obiettivi agile?</h3>
-                        <p className="text-zinc-400 text-sm leading-relaxed mb-4">
-                            Gli obiettivi sono traguardi ambiziosi ma raggiungibili che il team vuole conseguire.
-                            Nel framework OKR (Objectives and Key Results), l'obiettivo è qualitativo e ispirante,
-                            mentre i Key Results (che definirai nella prossima fase) sono metriche quantitative.
-                        </p>
-                        <div className="bg-zinc-800/50 rounded-lg p-4">
-                            <p className="text-xs text-indigo-400 font-semibold uppercase tracking-wider mb-2">📌 Esempio pratico</p>
-                            <p className="text-zinc-300 text-sm">
-                                <strong>Obiettivo:</strong> "Diventare il brand di riferimento per la mobilità urbana sostenibile"<br />
-                                <span className="text-zinc-500">Questo obiettivo sarà poi misurato con KPI come:
-                                    Quota di mercato &gt; 15%, Autonomia &gt; 300km, Tempo di ricarica &lt; 20min.</span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <InstructionCard
+                title="Cosa sono gli Obiettivi Agile?"
+                description="Gli obiettivi (OKR) definiscono il 'Dove vogliamo andare'. Devono essere ambiziosi, qualitativi e limitati nel tempo. L'obiettivo è la direzione, i KPI (fase successiva) sono il tachimetro."
+                tips={[
+                    "Esempio: 'Diventare il brand #1 per la mobilità sostenibile' (non 'Vendere 1000 unità').",
+                    "Focalizzati sull'impatto, non sulla lista della spesa.",
+                    "Limitati a 3-5 obiettivi principali."
+                ]}
+            />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Context Panel */}
