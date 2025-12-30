@@ -24,89 +24,95 @@ const steps = [
 
 const adminStep = { path: '/app/admin', name: 'Admin Panel', icon: Shield };
 
-const MOTO_DEMO_PROJECT = {
-    name: 'Moto Elettrica Future',
-    vision: 'Creare la moto elettrica più avanzata e sostenibile del mondo, combinando prestazioni elevate con un design italiano iconico e zero emissioni.',
+const AGILE_AI_DEMO_PROJECT = {
+    name: 'Agile.AI (Questo Progetto)',
+    vision: 'Rivoluzionare il Project Management rendendo l\'Agile Coaching accessibile a tutti tramite un assistente AI proattivo che guida i team passo dopo passo, eliminando la complessità metodologica.',
+    visionFields: {
+        targetAudience: "Team di sviluppo, Startup, PMI",
+        problem: "I framework Agile sono complessi da adottare e i coach umani costosi.",
+        solution: "Un AI Agent che agisce come Scrum Master e PO virtuale.",
+        currentSolution: "Consulenti costosi o tool passivi (Jira/Trello) senza guida.",
+        differentiation: "Guida sequenziale attiva e generazione automatica dei contenuti."
+    },
     objectives: [
-        'Raggiungere 300km di autonomia (WLTP)',
-        'Ricarica 0-80% in 15 minuti',
-        'Design premiato al Red Dot Award'
+        { title: 'Lanciare MVP Funzionante', description: 'Rilasciare la versione 1.0 con le 9 fasi complete.' },
+        { title: 'Validare il Flusso Sequenziale', description: 'Garantire che gli utenti non si perdano durante il setup.' },
+        { title: 'Integrare Intelligenza Artificiale', description: 'Generare OKR, User Stories e Stime automaticamente.' }
     ],
     kpis: [
-        { id: 1, name: 'Autonomia', target: '300 km', current: '250', unit: 'km' },
-        { id: 2, name: 'Peso', target: '180 kg', current: '195', unit: 'kg' }
+        { id: 1, name: 'Active Users (MAU)', target: '100', current: '12', unit: 'users' },
+        { id: 2, name: 'Time to Setup', target: '< 10 min', current: '15 min', unit: 'min' },
+        { id: 3, name: 'AI Generation Rate', target: '80%', current: '65%', unit: '%' }
     ],
     team: [
-        { role: 'Product Owner', skills: 'Vision, Stakeholder Mgmt', count: 1 },
-        { role: 'Scrum Master', skills: 'Agile Coaching, Facilitazione', count: 1 },
-        { role: 'Team Engineering', skills: 'Mechanical & Electrical Eng', count: 3 },
-        { role: 'Battery Specialist', skills: 'Chemistry, Thermal Mgmt', count: 1 },
-        { role: 'UX/UI Designer', skills: 'Dashboard, App Interface', count: 1 }
+        { role: 'Product Owner', skills: 'Vision, Strategy, Roadmap', count: 1 },
+        { role: 'AI Architect', skills: 'System Prompts, React, Supabase', count: 1 },
+        { role: 'UX Designer', skills: 'Glassmorphism, Tailwind, Motion', count: 1 }
     ],
     obeya: {
         items: [
-            { category: "Layout Fisico", item: "Open space con 8 postazioni e area demo", checked: true },
-            { category: "Radiatori Informativi", item: "Vision e Roadmap stampate 2m x 1m", checked: true },
-            { category: "Attrezzature", item: "Kanban Board fisica con swimlanes", checked: true },
-            { category: "Monitoraggio", item: "Monitor 55'' per Dashboard Telemetria", checked: true },
-            { category: "Regole", item: "Daily Standup alle 09:30 tassativo", checked: true }
+            { category: "Virtuale", item: "Repository GitHub (Metahodos01)", checked: true },
+            { category: "Monitoraggio", item: "Vercel Analytics Dashboard", checked: true },
+            { category: "Testing", item: "Playwright E2E Tests", checked: false },
+            { category: "Strumenti", item: "Supabase Database & Auth", checked: true }
         ]
     },
     backlog: [
         {
             id: 1,
-            title: "Sistema Batteria & Powertrain",
+            title: "Core Framework",
             stories: [
-                { id: 101, title: "Come utente, voglio ricaricare l'80% in 15 minuti per ridurre le soste.", keyResult: "Contribuisce a: Ricarica rapida < 20 min", points: 13 },
-                { id: 102, title: "Come ingegnere, voglio monitorare la temperatura delle celle per sicurezza.", keyResult: "Contribuisce a: Zero incidenti termici", points: 8 },
-                { id: 103, title: "Come pilota, voglio mappature motore Eco/Sport per gestire l'autonomia.", keyResult: "Contribuisce a: Autonomia 300km", points: 5 }
+                { id: 101, title: "Come utente, voglio un flusso guidato per non perdermi.", keyResult: "Riduzione drop-off del 50%", points: 13 },
+                { id: 102, title: "Come PO, voglio che l'AI scriva le User Stories per me.", keyResult: "Tempo di scrittura -80%", points: 8 },
+                { id: 103, title: "Come Scrum Master, voglio un timer per il Daily Standup.", keyResult: "Meeting entro 15 min", points: 3 }
             ]
         },
         {
             id: 2,
-            title: "Esperienza Digitale & App",
+            title: "UI & Experience",
             stories: [
-                { id: 201, title: "Come pilota, voglio vedere l'autonomia residua sul dashboard.", keyResult: "Contribuisce a: UX Score > 4.5/5", points: 3 },
-                { id: 202, title: "Come utente, voglio localizzare la moto tramite app.", keyResult: "Contribuisce a: Sicurezza percepita", points: 5 },
-                { id: 203, title: "Come manutentore, voglio diagnosi remota via cloud.", keyResult: "Contribuisce a: Riduzione costi assistenza", points: 8 }
+                { id: 201, title: "Come utente, voglio un'interfaccia 'Glass' moderna.", keyResult: "NPS > 50", points: 5 },
+                { id: 202, title: "Come utente, voglio vedere il progresso del progetto nella Home.", keyResult: "Engagement +20%", points: 5 }
             ]
         }
     ],
     estimates: {
-        101: 13, 102: 8, 103: 5,
-        201: 3, 202: 5, 203: 8
+        101: 13, 102: 8, 103: 3,
+        201: 5, 202: 5
     },
     roadmap: {
-        releases: ['Prototipo Alpha', 'Beta Test', 'Lancio Commerciale', 'V2.0 OTA'],
-        assignments: {
-            1: 'Prototipo Alpha', // Batteria & Powertrain -> Alpha
-            2: 'Beta Test' // Esperienza Digitale -> Beta
-        }
+        mvpName: "Agile.AI v1.0 Launch",
+        targetDate: "2025-12-31",
+        devCount: 2,
+        hoursPerDay: 6,
+        sprintDurationWeeks: 2,
+        selectedEpics: [1, 2],
+        analysis: "Progetto fattibile entro Q1 2026."
     },
-    sprint: {
-        start: ["Test su strada ogni venerdì", "Pair programming su firmware BMS"],
-        stop: ["Meeting senza agenda", "Interruzioni durante focus time"],
-        continue: ["Daily standup puntuali", "Code review rigorosa"],
-        kpis: {
-            capacity: 85,
-            performance: 92,
-            velocity: 42,
-            moods: { great: 4, good: 2, neutral: 1, difficult: 0, critical: 0 },
-            burndownData: [
-                { day: 'Lun', actual: 42 }, { day: 'Mar', actual: 38 }, { day: 'Mer', actual: 25 },
-                { day: 'Gio', actual: 12 }, { day: 'Ven', actual: 0 }
-            ],
-            burnupData: [
-                { day: 'Lun', actual: 0 }, { day: 'Mar', actual: 5 }, { day: 'Mer', actual: 17 },
-                { day: 'Gio', actual: 30 }, { day: 'Ven', actual: 42 }
-            ],
-            historicalKpis: [
-                { sprint: 'Sprint 1', velocity: 30, capacity: 70, performance: 80 },
-                { sprint: 'Sprint 2', velocity: 35, capacity: 75, performance: 85 },
-                { sprint: 'Sprint 3', velocity: 42, capacity: 85, performance: 92 }
+    sprints: [
+        {
+            id: 1,
+            title: "Sprint 1 - Foundation",
+            goal: "Implementare la struttura base e il contesto React",
+            status: "completed",
+            startDate: "2025-12-01",
+            durationDays: 14,
+            tasks: []
+        },
+        {
+            id: 2,
+            title: "Sprint 2 - AI Integration",
+            goal: "Connettere le API OpenAI per generare contenuti",
+            status: "active",
+            startDate: "2025-12-15",
+            durationDays: 14,
+            tasks: [
+                { id: "t1", title: "Setup OpenAI Service", status: "done", estimate: 3 },
+                { id: "t2", title: "Prompt Engineering per Vision", status: "done", estimate: 5 },
+                { id: "t3", title: "UI Integrazione Chat", status: "doing", estimate: 8 }
             ]
         }
-    }
+    ]
 };
 
 import ReactDOM from 'react-dom';
@@ -152,6 +158,45 @@ const SaveConfirmModal = ({ projectName, onSave, onDiscard, onCancel }) => {
                         className="w-full py-2.5 px-4 text-zinc-400 hover:text-white font-medium rounded-xl transition-colors cursor-pointer"
                     >
                         Annulla
+                    </button>
+                </div>
+            </div>
+        </div>,
+        document.body
+    );
+};
+
+// Demo Confirmation Modal
+const DemoConfirmModal = ({ onConfirm, onCancel }) => {
+    return ReactDOM.createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center font-sans">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onCancel} />
+
+            <div className="relative bg-zinc-900 border border-zinc-700 rounded-2xl p-6 w-80 shadow-2xl animate-fade-in z-[100000]">
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center">
+                        <Zap size={20} className="text-indigo-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white">Caricare Demo?</h3>
+                </div>
+
+                <p className="text-zinc-400 text-sm mb-6 leading-relaxed">
+                    Questo creerà un nuovo progetto <strong>Agile.AI Case Study</strong> con dati precompilati.
+                    Il progetto attuale verrà salvato se ha un nome.
+                </p>
+
+                <div className="flex gap-2">
+                    <button
+                        onClick={onCancel}
+                        className="flex-1 py-2.5 px-4 bg-zinc-700 hover:bg-zinc-600 text-white font-medium rounded-xl transition-colors cursor-pointer"
+                    >
+                        Annulla
+                    </button>
+                    <button
+                        onClick={onConfirm}
+                        className="flex-1 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-colors cursor-pointer shadow-lg shadow-indigo-900/20"
+                    >
+                        Carica Demo
                     </button>
                 </div>
             </div>
@@ -211,6 +256,7 @@ const Sidebar = () => {
     // Modal states
     const [showSaveModal, setShowSaveModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showDemoModal, setShowDemoModal] = useState(false);
     const [projectToDelete, setProjectToDelete] = useState(null);
 
     // Edit name state
@@ -241,11 +287,12 @@ const Sidebar = () => {
         try {
             await createNewProject();
             // Update local state immediately for UI responsiveness
-            updateProject(MOTO_DEMO_PROJECT);
+            updateProject(AGILE_AI_DEMO_PROJECT);
             // Save to DB to persist and get an ID
-            await saveProject(MOTO_DEMO_PROJECT);
+            await saveProject(AGILE_AI_DEMO_PROJECT);
             // Navigate after save structure is ensured
             navigate('/mindset');
+            setShowDemoModal(false);
         } catch (e) {
             console.error("Demo Load Error:", e);
             alert("Errore nel caricamento della demo");
@@ -318,6 +365,13 @@ const Sidebar = () => {
                 />
             )}
 
+            {showDemoModal && (
+                <DemoConfirmModal
+                    onConfirm={handleLoadDemo}
+                    onCancel={() => setShowDemoModal(false)}
+                />
+            )}
+
             {showDeleteModal && projectToDelete && (
                 <DeleteConfirmModal
                     projectName={projectToDelete.name}
@@ -382,6 +436,18 @@ const Sidebar = () => {
                     >
                         <AlertCircle size={14} />
                         HARD RESET (Sblocca tutto)
+                    </button>
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (confirm("Caricare il progetto demo 'Agile.AI Case Study'?")) {
+                                handleLoadDemo();
+                            }
+                        }}
+                        className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-colors shadow-lg shadow-indigo-900/20 cursor-pointer active:scale-95"
+                    >
+                        <Zap size={14} />
+                        CARICA DEMO (Agile.AI)
                     </button>
                 </div>
 
