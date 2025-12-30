@@ -293,27 +293,107 @@ export const generateAIResponseV2 = async (prompt, type) => {
                resolve(uniqueKpis.slice(0, 4));
 
             } else if (type === 'team') {
-               // Team industriale
-               resolve(`Composizione del team consigliata per progetti industriali:
-   
-   👔 **Leadership**
-   • 1 Project manager / Responsabile di progetto
-   • 1 Product owner (esperto di processo)
-   
-   🔧 **Operazioni**
-   • 1-2 Ingegneri di processo
-   • 1-2 Tecnici di automazione
-   • 1 Responsabile qualità
-   
-   📊 **Supporto**
-   • 1 Analista dati / Business analyst
-   • 1 Specialista IT integrazione
-   • 1 Responsabile manutenzione
-   
-   🎓 **Formazione**
-   • 1 Change manager / Formatore interno
-   
-   💡 Suggerimento: coinvolgere operatori di linea come "super-user" per garantire adozione e feedback dal campo.`);
+               // Team Agile Strategico - LOGICA IMPACT-DRIVEN V2
+               // 1. Detect Intent (Leadership, Efficiency, Innovation, Growth)
+               const visionText = (prompt.vision || "").toLowerCase();
+               let context = 'generic';
+               // We can reuse the intent logic from KPIs/Objectives if we want, but simple keyword matching works here too for brevity
+               if (visionText.includes('automat') || visionText.includes('cost') || visionText.includes('efficien')) context = 'efficiency';
+               else if (visionText.includes('innov') || visionText.includes('ai') || visionText.includes('tech')) context = 'innovation';
+               else if (visionText.includes('leader') || visionText.includes('mercato')) context = 'leadership';
+
+               const team = [];
+
+               // Core Scrum Roles (Always present but tailored)
+               team.push({
+                  role: "Product Owner",
+                  skills: "Visione strategica, Stakeholder Management, Prioritizzazione",
+                  count: 1,
+                  rationale: "Garante del valore di business e dell'allineamento con gli obiettivi strategici."
+               });
+
+               team.push({
+                  role: "Scrum Master",
+                  skills: "Facilitazione, Rimozione Impedimenti, Coaching Agile",
+                  count: 1,
+                  rationale: "Essenziale per mantenere il ritmo del team e garantire il miglioramento continuo."
+               });
+
+               // Context-Specific Roles
+               if (context === 'innovation') {
+                  team.push({
+                     role: "AI/Data Engineer",
+                     skills: "Python, TensorFlow, Data Pipelines, LLM Integration",
+                     count: 2,
+                     rationale: "Competenze critiche per implementare le funzionalità di intelligenza artificiale core."
+                  });
+                  team.push({
+                     role: "UX/UI Designer (AI-Focus)",
+                     skills: "Conversational UI, Human-AI Interaction",
+                     count: 1,
+                     rationale: "Necessario per rendere le funzionalità AI accessibili e intuitive per l'utente finale."
+                  });
+                  team.push({
+                     role: "Full Stack Developer",
+                     skills: "React, Node.js, API Design",
+                     count: 2,
+                     rationale: "Implementazione robusta del frontend e backend per supportare l'innovazione."
+                  });
+               } else if (context === 'efficiency') {
+                  team.push({
+                     role: "Ingegnere di Processo / DevOps",
+                     skills: "CI/CD, Automation, Scripting, Cloud Infrastructure",
+                     count: 2,
+                     rationale: "Focus sull'automazione dei flussi per ridurre sprechi e tempi di ciclo."
+                  });
+                  team.push({
+                     role: "Quality Assurance Specialist",
+                     skills: "Test Automation, Performance Testing",
+                     count: 1,
+                     rationale: "Garantisce che l'efficienza non comprometta la stabilità del sistema."
+                  });
+                  team.push({
+                     role: "Backend Developer (Optimization)",
+                     skills: "System Architecture, Database Tuning",
+                     count: 2,
+                     rationale: "Ottimizzazione delle performance systemiche per gestire carichi elevati."
+                  });
+               } else if (context === 'leadership') {
+                  team.push({
+                     role: "Senior Product Designer",
+                     skills: "User Research, Prototyping, Brand Experience",
+                     count: 1,
+                     rationale: "Per creare un'esperienza 'best-in-class' che distanzia i competitor."
+                  });
+                  team.push({
+                     role: "Tech Lead / Architect",
+                     skills: "System Design, Scalability, Security",
+                     count: 1,
+                     rationale: "Assicura che l'architettura supporti la scalabilità necessaria per la leadership di mercato."
+                  });
+                  team.push({
+                     role: "Senior Developer",
+                     skills: "High Standards, Mentoring, Complex Solving",
+                     count: 3,
+                     rationale: "Team di alto profilo per garantire velocità e qualità di esecuzione superiori."
+                  });
+               } else {
+                  // Generic / Balanced
+                  team.push({
+                     role: "Full Stack Developer",
+                     skills: "Frontend & Backend, Database",
+                     count: 3,
+                     rationale: "Competenze versatili per coprire l'intero stack applicativo."
+                  });
+                  team.push({
+                     role: "UX Designer",
+                     skills: "Figma, User Testing",
+                     count: 1,
+                     rationale: "Focus sull'usabilità per garantire l'adozione."
+                  });
+               }
+
+               resolve(team);
 
             } else if (type === 'backlog') {
                // Backlog industriale - Epic legate alla produzione - LOGICA IMPACT-DRIVEN V2

@@ -177,7 +177,12 @@ const Objectives = () => {
                 {/* Phase Navigation */}
                 <PhaseNavigation
                     onSave={async () => {
-                        updateProject({ objectives: objectives.filter(obj => obj.trim() !== '') });
+                        updateProject({
+                            objectives: objectives.filter(obj => {
+                                const text = typeof obj === 'object' ? obj.text : obj;
+                                return text && text.trim() !== '';
+                            })
+                        });
                         return true;
                     }}
                 />

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
-import { Sparkles, ArrowRight, UserPlus, Users, X } from 'lucide-react';
+import { generateAIResponseV2 } from '../services/aiService';
+import { Sparkles, ArrowRight, UserPlus, Users, X, User, Target } from 'lucide-react';
 import PhaseNavigation from '../components/common/PhaseNavigation';
 import InstructionCard from '../components/common/InstructionCard';
 
@@ -11,32 +12,31 @@ const Team = () => {
     const [loading, setLoading] = useState(false);
     const [team, setTeam] = useState(project.team || []);
 
-    const handleSuggest = () => {
+    const handleSuggest = async () => {
         setLoading(true);
-        setTimeout(() => {
-            setTeam([
-                { role: "Product Owner", skills: "Conoscenza processi produttivi, stakeholder management", count: 1 },
-                { role: "Scrum Master", skills: "Facilitazione, coaching, rimozione impedimenti", count: 1 },
-                { role: "Ingegnere di processo", skills: "Lean manufacturing, analisi flussi, ottimizzazione", count: 2 },
-                { role: "Tecnico automazione", skills: "PLC, SCADA, integrazione sistemi", count: 2 },
-                { role: "Specialista qualità", skills: "SPC, controllo qualità, normative ISO", count: 1 }
-            ]);
-            setLoading(false);
-        }, 1200);
+        const prompt = {
+            vision: project.vision,
+            problem: project.problem,
+            industry: project.industry
+        };
+        try {
+            const suggestedTeam = await generateAIResponseV2(prompt, 'team');
+            if (Array.isArray(suggestedTeam)) {
+                setTeam(suggestedTeam);
+            }
+        } catch (error) {
+            console.error("Errore generazione team:", error);
+        }
+        setLoading(false);
     };
 
-    const addMember = () => setTeam([...team, { role: '', skills: '', count: 1 }]);
+    const addMember = () => setTeam([...team, { role: '', skills: '', count: 1, rationale: '' }]);
     const updateMember = (index, field, value) => {
         const newTeam = [...team];
         newTeam[index][field] = value;
         setTeam(newTeam);
     };
     const removeMember = (index) => setTeam(team.filter((_, i) => i !== index));
-
-    const handleNext = () => {
-        updateProject({ team });
-        navigate('/obeya');
-    };
 
     return (
         <div className="space-y-8">
@@ -49,8 +49,8 @@ const Team = () => {
                         </div>
                         <span className="text-sm font-medium text-indigo-400">Fase 4 di 9</span>
                     </div>
-                    <h1 className="text-3xl font-bold text-white">Composizione del team</h1>
-                    <p className="text-zinc-400 mt-2">Definisci i ruoli e le competenze del tuo team Scrum.</p>
+                    <h1 className="text-3xl font-bold text-white">Squadra Strategica</h1>
+                    <p className="text-zinc-400 mt-2">Definisci i ruoli chiave per supportare la tua visione.</p>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20">
                     <Sparkles size={14} className="text-indigo-400" />
@@ -64,8 +64,8 @@ const Team = () => {
                 description="Un team Agile deve avere tutte le competenze necessarie per portare a termine il lavoro senza dipendenze esterne."
                 tips={[
                     "Includi sempre un Product Owner (visione) e uno Scrum Master (processo).",
-                    "Assicurati che il Development Team sia 'T-Shaped': specialisti in un'area ma capaci di aiutare in altre.",
-                    "La dimensione ideale è 3-9 persone. Se siete di più, dividetevi in due team."
+                    "Specifica il 'Razionale': perché questo ruolo è critico per la strategia?",
+                    "Cerca competenze 'T-Shaped': specialisti in un'area ma capaci di aiutare in altre."
                 ]}
             />
 
@@ -79,66 +79,92 @@ const Team = () => {
                         </div>
                         <h3 className="text-lg font-semibold mb-2 text-center text-white">Struttura del team</h3>
                         <p className="text-sm text-center text-zinc-400 mb-6">
-                            Basandoci sul tuo progetto, ti suggeriamo una composizione cross-funzionale.
+                            L'AI analizza la tua vision e suggerisce i ruoli necessari (es. Data Scientist per progetti AI, Lean Coach per efficienza).
                         </p>
                         <button
                             onClick={handleSuggest}
                             disabled={loading}
                             className="w-full btn-primary flex items-center justify-center gap-2"
                         >
-                            {loading ? <span className="animate-pulse">Analisi...</span> : <><Sparkles size={16} /> Suggerisci Struttura</>}
+                            {loading ? <span className="animate-pulse">Analisi Vision...</span> : <><Sparkles size={16} /> Suggerisci Squadra</>}
                         </button>
                     </div>
                 </div>
 
                 <div className="lg:col-span-2 space-y-4">
-                    <div className="glass-panel p-6">
-                        <div className="space-y-4">
-                            {team.map((member, index) => (
-                                <div key={index} className="grid grid-cols-12 gap-4 items-center bg-zinc-800/50 p-4 rounded-xl">
-                                    <div className="col-span-4">
-                                        <label className="text-xs text-zinc-500 uppercase mb-1 block">Ruolo</label>
+                    <div className="space-y-4">
+                        {team.map((member, index) => (
+                            <div key={index} className="glass-panel p-5 relative group transition-all hover:bg-zinc-800/40">
+                                <div className="grid grid-cols-12 gap-4 items-start">
+
+                                    {/* Row 1: Role & Count */}
+                                    <div className="col-span-8">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <User size={14} className="text-indigo-400" />
+                                            <label className="text-xs text-zinc-500 font-semibold uppercase tracking-wider">Ruolo</label>
+                                        </div>
                                         <input
                                             value={member.role}
                                             onChange={(e) => updateMember(index, 'role', e.target.value)}
-                                            className="w-full bg-transparent border-b border-zinc-700 focus:border-indigo-500 py-1"
-                                            placeholder="es. Ingegnere di processo"
+                                            className="w-full bg-transparent border-none p-0 focus:ring-0 text-lg font-bold text-white placeholder-zinc-700"
+                                            placeholder="Es. Product Owner"
                                         />
                                     </div>
-                                    <div className="col-span-5">
-                                        <label className="text-xs text-zinc-500 uppercase mb-1 block">Competenze Richieste</label>
-                                        <input
-                                            value={member.skills}
-                                            onChange={(e) => updateMember(index, 'skills', e.target.value)}
-                                            className="w-full bg-transparent border-b border-zinc-700 focus:border-indigo-500 py-1"
-                                            placeholder="es. Lean, PLC, SCADA"
-                                        />
-                                    </div>
-                                    <div className="col-span-2">
-                                        <label className="text-xs text-zinc-500 uppercase mb-1 block">N°</label>
+                                    <div className="col-span-3">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="text-xs text-zinc-500 font-semibold uppercase tracking-wider">Quantità</span>
+                                        </div>
                                         <input
                                             type="number"
                                             min="1"
-                                            value={member.count}
+                                            value={member.count || 1}
                                             onChange={(e) => updateMember(index, 'count', parseInt(e.target.value))}
-                                            className="w-full bg-transparent border-b border-zinc-700 focus:border-indigo-500 py-1"
+                                            className="w-full bg-transparent border-none p-0 focus:ring-0 text-lg font-bold text-white placeholder-zinc-700"
                                         />
                                     </div>
-                                    <div className="col-span-1 pt-4 text-center">
-                                        <button onClick={() => removeMember(index)} className="text-zinc-500 hover:text-red-400">
-                                            <X size={16} />
+                                    <div className="col-span-1 text-right">
+                                        <button onClick={() => removeMember(index)} className="opacity-0 group-hover:opacity-100 text-zinc-600 hover:text-red-400 transition-all p-1">
+                                            <X size={18} />
                                         </button>
                                     </div>
+
+                                    {/* Row 2: Skills */}
+                                    <div className="col-span-12 border-t border-zinc-700/50 pt-3 mt-1">
+                                        <label className="text-xs text-zinc-500 font-semibold uppercase tracking-wider mb-1 block">Competenze Chiave (Hard & Soft Skills)</label>
+                                        <input
+                                            value={member.skills}
+                                            onChange={(e) => updateMember(index, 'skills', e.target.value)}
+                                            className="w-full bg-transparent border-none p-0 focus:ring-0 text-zinc-300 text-sm placeholder-zinc-600"
+                                            placeholder="Es. Analisi dati, Stakeholder management, Python..."
+                                        />
+                                    </div>
+
+                                    {/* Row 3: Strategic Rationale */}
+                                    <div className="col-span-12 border-t border-zinc-700/50 pt-3 mt-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <Target size={12} className="text-emerald-500/80" />
+                                            <label className="text-xs text-emerald-500/80 font-semibold uppercase tracking-wider">Razionale Strategico</label>
+                                        </div>
+                                        <textarea
+                                            value={member.rationale || ''}
+                                            onChange={(e) => updateMember(index, 'rationale', e.target.value)}
+                                            className="w-full bg-transparent border-none p-0 focus:ring-0 text-zinc-400 text-sm placeholder-zinc-700 resize-none"
+                                            placeholder="Perché questo ruolo è essenziale per il successo del progetto?"
+                                            rows={2}
+                                        />
+                                    </div>
+
                                 </div>
-                            ))}
-                        </div>
-                        <button
-                            onClick={addMember}
-                            className="mt-6 flex items-center gap-2 text-indigo-400 hover:text-indigo-300 transition-colors"
-                        >
-                            <UserPlus size={18} /> Aggiungi Ruolo
-                        </button>
+                            </div>
+                        ))}
                     </div>
+
+                    <button
+                        onClick={addMember}
+                        className="w-full py-3 border-2 border-dashed border-zinc-800 rounded-xl flex items-center justify-center gap-2 text-zinc-500 hover:text-indigo-400 hover:border-indigo-500/30 transition-all group"
+                    >
+                        <UserPlus size={18} className="group-hover:scale-110 transition-transform" /> Aggiungi Ruolo Strategico
+                    </button>
 
                     {/* Phase Navigation */}
                     <PhaseNavigation
