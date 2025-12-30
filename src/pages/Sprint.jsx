@@ -621,6 +621,56 @@ const Sprint = () => {
         }
     };
 
+    // --- REAL-TIME KPI CALCULATION ---
+    useEffect(() => {
+        if (activeSprint.status === 'planned') return; // Only calculate for active/completed sprints
+
+        const calculateMetrics = () => {
+            // 1. Capacity Usage = (Allocated / Available) * 100
+            // "Rapporto tra ore disponibili e quelle effettivamente lavorate (allocate)"
+            const totalAllocated = kanbanTasks.filter(t => t.status !== 'backlog').reduce((sum, t) => sum + (Number(t.estimated) || 0), 0);
+            const totalAvailable = capacity.total || 1; // Avoid div by zero
+            const capacityUsage = Math.round((totalAllocated / totalAvailable) * 100);
+
+            // 2. Performance = (Closed Task Hours / Real Team Work Hours) * 100
+            // "Rapporto tra le ore lavorate realmente del team e della somma delle ore dei task chiusi" -> Inverted for UX: Productivity Index
+            // Real Team Work calculation:
+            // If sprint started today -> 1 day of capacity.
+            // If sprint started 3 days ago -> 3 * DailyCapacity.
+            let realWorkedHours = 0;
+            if (activeSprint.startDate) {
+                const start = new Date(activeSprint.startDate);
+                const now = new Date();
+                const diffTime = Math.abs(now - start);
+                const daysPassed = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+                const dailyCapacity = (capacity.total || 0) / (activeSprint.durationDays || 10);
+                realWorkedHours = daysPassed * dailyCapacity;
+            }
+
+            const closedTaskHours = kanbanTasks
+                .filter(t => t.status === 'done')
+                .reduce((sum, t) => sum + (Number(t.estimated) || 0), 0);
+
+            // Performance Ratio (Efficiency)
+            // If closed 10h but team worked 20h -> 50% Efficiency.
+            const performance = realWorkedHours > 0 ? Math.round((closedTaskHours / realWorkedHours) * 100) : 0;
+
+            // 3. Velocity (Story Points/Hours per Day average)
+            // Calc based on completed tasks / days passed
+            const daysActive = getDaysRemaining() ? ((activeSprint.durationDays || 10) - getDaysRemaining() + 1) : 1;
+            const velocity = Math.round(closedTaskHours / daysActive);
+
+            setKpiData(prev => ({
+                ...prev,
+                capacity: capacityUsage,
+                performance: performance,
+                velocity: velocity
+            }));
+        };
+
+        calculateMetrics();
+    }, [kanbanTasks, capacity, activeSprint.status, activeSprint.startDate]); // Recalculate on any task change or capacity change
+
     const handleSaveAndPersist = async () => {
         handleSaveLocal(); // Ensure context is updated first
         setIsSaving(true);
