@@ -531,14 +531,20 @@ const Sprint = () => {
         const diffTime = Math.abs(now - start);
         const dayIndex = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-        // Calculate Real Remaining (Sum of estimated/remaining for NON-DONE tasks)
-        // Logic: if status is done, remaining is 0. Else use remaining field or estimated fallback.
-        const realRemaining = kanbanTasks
-            .filter(t => t.status !== 'backlog')
-            .reduce((sum, t) => {
-                if (t.status === 'done') return sum + 0;
-                return sum + (Number(t.remaining) || Number(t.estimated) || 0);
-            }, 0);
+        // Calculate Real Remaining based on User Requirement: "Start Total - Done Hours"
+        // This ensures the line starts exactly at Day 0 Total and drops only when work is done.
+
+        // 1. Get Baseline (Day 0 Ideal or Total Estimated Sum if not found)
+        const startTotal = activeSprint.kpis?.burndownData?.[0]?.ideal ||
+            kanbanTasks.filter(t => t.status !== 'backlog').reduce((sum, t) => sum + (Number(t.estimated) || 0), 0);
+
+        // 2. Calculate Done Hours
+        const doneHours = kanbanTasks
+            .filter(t => t.status === 'done')
+            .reduce((sum, t) => sum + (Number(t.estimated) || 0), 0);
+
+        // 3. Calculate Real Remaining
+        const realRemaining = Math.max(0, startTotal - doneHours);
 
         setKpiData(prev => {
             let existingData = [...(prev.burndownData || [])];
