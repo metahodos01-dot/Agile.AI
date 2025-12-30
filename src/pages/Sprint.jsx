@@ -386,19 +386,31 @@ const Sprint = () => {
     const generateInsights = (currentKpis) => {
         const alerts = [];
 
-        // 1. Burndown Stall Check
+        // 1. Burndown Stall Check (>= 3 Days flat)
         const bd = currentKpis.burndownData || [];
-        if (bd.length >= 2) {
-            const last = bd[bd.length - 1];
-            const prev = bd[bd.length - 2];
-            if (last.real === prev.real && last.ideal < prev.ideal && last.real > 0) {
-                alerts.push({
-                    id: 'stall',
-                    type: 'warning',
-                    title: 'Stallo Execution',
-                    desc: 'Burndown piatta da 24h. Blocco tecnico o stima errata?',
-                    suggestion: 'Analizzare ticket "Doing" bloccati.'
-                });
+        if (bd.length >= 3) {
+            // Find last N points with valid real data
+            const validRealPoints = bd.filter(d => d.real !== null && d.real !== undefined);
+            const len = validRealPoints.length;
+
+            if (len >= 4) { // Need at least 4 points to measure 3 intervals/days of stagnation? Or 3 days of SAME value?
+                // Logic: Check if last 3 days have same REAL value
+                const last = validRealPoints[len - 1].real;
+                const d1 = validRealPoints[len - 2].real;
+                const d2 = validRealPoints[len - 3].real;
+                const d3 = validRealPoints[len - 4].real;
+
+                // Warning if last 3 days (d1, d2, d3 compared to last) are same? 
+                // "days_since_last_task_completion >= 3" implies value hasn't changed for 3 days.
+                if (last === d1 && last === d2 && last === d3 && last > 0) {
+                    alerts.push({
+                        id: 'stall',
+                        type: 'warning',
+                        title: 'Stallo Execution (3+ Giorni)',
+                        desc: 'Nessun progresso registrato da 3 giorni.',
+                        suggestion: 'Analizzare ticket nel Retrospective.'
+                    });
+                }
             }
         }
 
@@ -449,13 +461,19 @@ const Sprint = () => {
         const now = new Date().toISOString();
         const totalEstimated = kanbanTasks.filter(t => t.status !== 'backlog').reduce((sum, t) => sum + (Number(t.estimated) || 0), 0);
 
-        // Initialize Burndown Data with Day 0
-        const initialBurndown = [{
-            day: 0,
-            date: new Date(now).toLocaleDateString(),
-            ideal: totalEstimated,
-            real: totalEstimated
-        }];
+        // Initialize Burndown Data with Day 0 to 10 (Ideal Line pre-filled)
+        const initialBurndown = [];
+        const sprintTotalDays = duration;
+        const idealDailyDrop = totalEstimated / sprintTotalDays;
+
+        for (let i = 0; i <= sprintTotalDays; i++) {
+            initialBurndown.push({
+                day: i,
+                date: new Date(new Date(now).getTime() + i * 86400000).toLocaleDateString(),
+                ideal: Number(Math.max(0, totalEstimated - (idealDailyDrop * i)).toFixed(1)),
+                real: i === 0 ? totalEstimated : null // Only Day 0 has real data initially
+            });
+        }
 
         // 1. Optimistic Update - Update context immediately
         const payload = {
@@ -511,10 +529,10 @@ const Sprint = () => {
         const start = new Date(activeSprint.startDate);
         const now = new Date();
         const diffTime = Math.abs(now - start);
-        const dayIndex = Math.floor(diffTime / (1000 * 60 * 60 * 24)); // 0-based day index
+        const dayIndex = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
         // Calculate Real Remaining (Sum of estimated/remaining for NON-DONE tasks)
-        // This makes the "Real" line drop as soon as a task is Done.
+        // Logic: if status is done, remaining is 0. Else use remaining field or estimated fallback.
         const realRemaining = kanbanTasks
             .filter(t => t.status !== 'backlog')
             .reduce((sum, t) => {
@@ -522,45 +540,39 @@ const Sprint = () => {
                 return sum + (Number(t.remaining) || Number(t.estimated) || 0);
             }, 0);
 
-        const idealRemaining = Math.max(0, totalEstimatedInitial - (idealPerDay * dayIndex));
-
         setKpiData(prev => {
-            const existingData = prev.burndownData || [];
-            // Check if we already have an entry for this dayIndex
-            const todayIndex = existingData.findIndex(d => d.day === dayIndex);
+            const existingData = [...(prev.burndownData || [])];
 
-            let newData;
-            if (todayIndex >= 0) {
-                // UPDATE existing "Today" entry (Real-time feedback)
-                newData = [...existingData];
-                newData[todayIndex] = {
-                    ...newData[todayIndex],
-                    real: Number(realRemaining.toFixed(1))
-                    // Keep Ideal fixed as it was calculated at start of day/sprint
-                };
-            } else {
-                // CREATE new Day entry
-                const newEntry = {
-                    day: dayIndex,
-                    date: new Date().toLocaleDateString(),
-                    ideal: Number(idealRemaining.toFixed(1)),
+            // Safety: Ensure we have the basic structure if it was missing (e.g. legacy sprints)
+            // If empty, we can't do much without re-initializing, but let's try to patch.
+            if (existingData.length === 0) return prev;
+
+            // Update Real value for current day
+            if (existingData[dayIndex]) {
+                existingData[dayIndex] = {
+                    ...existingData[dayIndex],
                     real: Number(realRemaining.toFixed(1))
                 };
-                newData = [...existingData, newEntry].sort((a, b) => a.day - b.day);
             }
 
-            const nextKpis = { ...prev, burndownData: newData };
-            // Regenerate alerts based on new data (e.g. if Burndown flattens)
+            // Fill gaps: If we missed days (app closed), fill previous undefined days with the last known real value?
+            // Or leave them null? Usually Burndown connects points. null breaks the line in Recharts unless connectNulls is true.
+            // Better strategy: "Carry forward" the previous real value if null, up to today.
+            for (let i = 0; i < dayIndex; i++) {
+                if (existingData[i].real === null || existingData[i].real === undefined) {
+                    // Look back for last valid
+                    let lastValid = existingData[0].real; // Fallback start
+                    for (let j = i - 1; j >= 0; j--) {
+                        if (existingData[j].real !== null) { lastValid = existingData[j].real; break; }
+                    }
+                    existingData[i].real = lastValid;
+                }
+            }
+
+            const nextKpis = { ...prev, burndownData: existingData };
             nextKpis.alerts = generateInsights(nextKpis);
             return nextKpis;
         });
-
-        // Use a timeout or debounce in real app to avoid excessive saves, but here we just ensure consistency
-        // handleSaveLocal call omitted here to strictly rely on the main useEffect, 
-        // OR we can rely on correct 'kpiData' state merging in handleSaveLocal.
-        // For immediate feedback persist:
-        // Note: calling handleSaveLocal here might conflict with the setKpiData state update if not careful.
-        // Better to let the centralized Save Logic handle it, or force a save with NEW data.
     };
 
     // Trigger Burndown Update on Load AND when Tasks change (for Real-Line drop)

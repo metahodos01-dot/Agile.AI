@@ -77,6 +77,7 @@ const BurndownChart = ({ data, idealHours, totalDays }) => {
                         fill="#6366f1"
                         fillOpacity={0.1}
                         stroke="none"
+                        legendType="none"
                     />
 
                     {/* Ideal Line (Dashed) */}
@@ -101,6 +102,7 @@ const BurndownChart = ({ data, idealHours, totalDays }) => {
                         dot={{ fill: '#18181b', stroke: '#6366f1', strokeWidth: 2, r: 4 }}
                         activeDot={{ r: 6, fill: '#818cf8' }}
                         animationDuration={1500}
+                        connectNulls
                     />
                 </ComposedChart>
             </ResponsiveContainer>
