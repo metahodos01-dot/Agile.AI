@@ -265,14 +265,16 @@ const LandingPage = () => {
                                 <X size={24} />
                             </button>
                             <div className="aspect-video w-full bg-black">
-                                <video
-                                    src="/VideoAgileAI.mov"
-                                    controls
-                                    autoPlay
-                                    className="w-full h-full object-contain"
-                                >
-                                    Il tuo browser non supporta il tag video.
-                                </video>
+                                <iframe
+                                    width="100%"
+                                    height="100%"
+                                    src="https://www.youtube.com/embed/9vzxeOsR5Rk?autoplay=1"
+                                    title="Agile.AI Video Case Study"
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                    className="w-full h-full"
+                                ></iframe>
                             </div>
                             <div className="p-6 bg-zinc-900">
                                 <h3 className="text-xl font-bold text-white mb-2">Agile.AI in Azione</h3>
