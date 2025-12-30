@@ -1272,26 +1272,99 @@ const Sprint = () => {
 
                 {activeTab === 'kpis' && (
                     <div className="space-y-8">
-                        {/* KPI Content Unchanged */}
+                        {/* KPI Content - YTD / Project Level */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <KpiCard title="Velocity (Story Points)" value={kpiData.velocity} change={6} icon={Zap} color="#22c55e" />
-                            <KpiCard title="Capacity Utilizzata" value={`${kpiData.capacity}%`} change={3} icon={Users} color="#6366f1" />
-                            <KpiCard title="Performance" value={`${kpiData.performance}%`} change={4} icon={Activity} color="#f59e0b" />
-                            <KpiCard title="Sprint Corrente" value="Sprint 3" change={0} icon={Calendar} color="#8b5cf6" />
+                            <KpiCard
+                                title="Velocity YTD (Avg)"
+                                value={Math.round([...(project.sprints || []), activeSprint].reduce((acc, s) => acc + (s.kpis?.velocity || 0), 0) / ([...(project.sprints || []), activeSprint].length || 1))}
+                                change={kpiData.velocity}
+                                icon={Zap}
+                                color="#22c55e"
+                            />
+                            <KpiCard
+                                title="Capacity Utilizzata (Avg)"
+                                value={`${Math.round([...(project.sprints || []), activeSprint].reduce((acc, s) => acc + (s.kpis?.capacity || 0), 0) / ([...(project.sprints || []), activeSprint].length || 1))}%`}
+                                change={kpiData.capacity}
+                                icon={Users}
+                                color="#6366f1"
+                            />
+                            <KpiCard
+                                title="Performance (Avg)"
+                                value={`${Math.round([...(project.sprints || []), activeSprint].reduce((acc, s) => acc + (s.kpis?.performance || 0), 0) / ([...(project.sprints || []), activeSprint].length || 1))}%`}
+                                change={kpiData.performance}
+                                icon={Activity}
+                                color="#f59e0b"
+                            />
+                            <KpiCard
+                                title="Sprint Completati"
+                                value={(project.sprints || []).filter(s => s.status === 'completed').length}
+                                change={0}
+                                icon={Calendar}
+                                color="#8b5cf6"
+                            />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="bg-zinc-800/30 p-6 rounded-2xl">
-                                <GaugeChart value={kpiData.capacity} max={100} label="Capacity del Team" color="#6366f1" icon={Users} />
+                                <GaugeChart
+                                    value={Math.round([...(project.sprints || []), activeSprint].reduce((acc, s) => acc + (s.kpis?.capacity || 0), 0) / ([...(project.sprints || []), activeSprint].length || 1))}
+                                    max={100}
+                                    label="Capacity Project Avg"
+                                    color="#6366f1"
+                                    icon={Users}
+                                />
                             </div>
                             <div className="bg-zinc-800/30 p-6 rounded-2xl">
-                                <GaugeChart value={kpiData.performance} max={100} label="Performance Sprint" color="#22c55e" icon={Activity} />
+                                <GaugeChart
+                                    value={Math.round([...(project.sprints || []), activeSprint].reduce((acc, s) => acc + (s.kpis?.performance || 0), 0) / ([...(project.sprints || []), activeSprint].length || 1))}
+                                    max={100}
+                                    label="Performance Project Avg"
+                                    color="#22c55e"
+                                    icon={Activity}
+                                />
                             </div>
                         </div>
-                        <div className="bg-zinc-800/30 p-6 rounded-2xl flex items-center justify-center">
-                            <div className="text-center">
-                                <Smile size={48} className="text-zinc-700 mx-auto mb-2" />
-                                <p className="text-zinc-500 text-sm">Team Mood spostato nel Daily Standup</p>
+                        <div className="bg-zinc-800/30 p-6 rounded-2xl flex flex-col items-center justify-center">
+                            <div className="text-center mb-4">
+                                <h3 className="text-zinc-400 text-sm font-semibold uppercase mb-2">Team Mood (YTD)</h3>
+                                <div className="flex items-center justify-center gap-4">
+                                    {(() => {
+                                        // Calculate Cumulative Mood
+                                        // Aggregate all mood grids from all sprints? 
+                                        // Assuming 'kpis.moods' stores counts {happy: 5, sad: 1}
+                                        // If not, we iterate.
+                                        const allSprints = [...(project.sprints || []), activeSprint];
+                                        let happy = 0, neutral = 0, sad = 0;
+                                        allSprints.forEach(s => {
+                                            const m = s.kpis?.moods || {};
+                                            happy += (m.happy || 0);
+                                            neutral += (m.neutral || 0);
+                                            sad += (m.sad || 0);
+                                        });
+                                        const total = happy + neutral + sad;
+                                        const happyPct = total ? Math.round((happy / total) * 100) : 0;
+
+                                        return (
+                                            <>
+                                                <div className="flex flex-col items-center">
+                                                    <Smile size={32} className="text-green-500 mb-1" />
+                                                    <span className="text-2xl font-bold text-white">{happyPct}%</span>
+                                                    <span className="text-xs text-zinc-500">Positivi</span>
+                                                </div>
+                                                <div className="h-10 w-px bg-zinc-700 mx-4" />
+                                                <div className="flex flex-col items-center">
+                                                    <Activity size={32} className="text-zinc-500 mb-1" />
+                                                    <span className="text-xl font-bold text-zinc-300">{total}</span>
+                                                    <span className="text-xs text-zinc-500">Voti Totali</span>
+                                                </div>
+                                            </>
+                                        );
+                                    })()}
+                                </div>
                             </div>
+                            <p className="text-zinc-600 text-xs text-center max-w-md">
+                                Media cumulativa del sentiment del team dall'inizio del progetto.
+                                <br />Vedi il dettaglio giornaliero nel tab <strong>Daily Standup</strong>.
+                            </p>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="bg-zinc-800/30 p-6 rounded-2xl col-span-2">
