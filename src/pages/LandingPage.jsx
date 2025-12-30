@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Zap, Target, Users, ShieldCheck, CheckCircle, Cpu, Activity, Brain, Layers, BarChart, Flag, FileText, Lock, Download, X, MessageSquare, Send } from 'lucide-react';
+import { ArrowRight, Zap, Target, Users, ShieldCheck, CheckCircle, Cpu, Activity, Brain, Layers, BarChart, Flag, FileText, Lock, Download, X, MessageSquare, Send, Play } from 'lucide-react';
 
 
 const LandingPage = () => {
@@ -41,8 +41,14 @@ const LandingPage = () => {
                     </div>
                 </div>
                 <div className="hidden md:flex gap-4">
-                    <button onClick={() => setShowVideo(true)} className="text-slate-400 hover:text-white font-medium transition-colors">Caso Studio</button>
-                    <button className="px-6 py-2 rounded-full border border-white/20 hover:bg-white/10 transition-colors">Accedi</button>
+                    <button
+                        onClick={() => setShowVideo(true)}
+                        className="group flex items-center gap-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold shadow-lg shadow-indigo-900/30 hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                    >
+                        <Play size={16} className="fill-current" />
+                        Guarda il Caso Studio
+                    </button>
+                    {/* Access button removed as requested */}
                 </div>
             </nav>
 
@@ -260,7 +266,7 @@ const LandingPage = () => {
                             </button>
                             <div className="aspect-video w-full bg-black">
                                 <video
-                                    src="/VideoDEMO.mov"
+                                    src="/VideoAgileAI.mov"
                                     controls
                                     autoPlay
                                     className="w-full h-full object-contain"
