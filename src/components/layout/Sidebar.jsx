@@ -4,7 +4,8 @@ import { motion } from 'framer-motion';
 import { useProject } from '../../context/ProjectContext';
 import {
     Map, Database, Clock, Play, Plus, Folder, FolderOpen, RefreshCw,
-    Trash2, Pencil, Check, X, AlertCircle, LogOut, Shield, Zap, ChevronDown, ChevronUp
+    Trash2, Pencil, Check, X, AlertCircle, LogOut, Shield, Zap, ChevronDown, ChevronUp,
+    Eye, Target, Sliders, Users, LayoutDashboard
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
