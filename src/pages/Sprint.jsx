@@ -267,6 +267,13 @@ const Sprint = () => {
         return `${m}:${s < 10 ? '0' : ''}${s}`;
     };
 
+    // --- Derived Planning Data (Moved Up for Initialization) ---
+    // Calculate estimated hours only for tasks IN THE SPRINT (todo/doing/done), not backlog
+    const sprintTasks = kanbanTasks.filter(t => t.status !== 'backlog');
+    const totalEstimatedHours = sprintTasks.reduce((acc, t) => acc + (Number(t.estimated) || 0), 0);
+    const totalCapacity = capacity.total || 0;
+    const isOverCapacity = totalEstimatedHours > totalCapacity;
+
     // --- Helper Functions ---
     const getStoryTitle = (storyId) => {
         if (!storyId) return null;
@@ -572,12 +579,7 @@ const Sprint = () => {
         }));
     };
 
-    // Derived Planning Data
-    // Calculate estimated hours only for tasks IN THE SPRINT (todo/doing/done), not backlog
-    const sprintTasks = kanbanTasks.filter(t => t.status !== 'backlog');
-    const totalEstimatedHours = sprintTasks.reduce((acc, t) => acc + (Number(t.estimated) || 0), 0);
-    const totalCapacity = capacity.total || 0;
-    const isOverCapacity = totalEstimatedHours > totalCapacity;
+
 
     if (!activeSprint) return null;
 
