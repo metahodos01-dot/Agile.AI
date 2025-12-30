@@ -1102,6 +1102,17 @@ const Sprint = () => {
                 {/* DAILY STANDUP TAB */}
                 {activeTab === 'daily' && (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+                        {/* Alerts Notification */}
+                        {(kpiData.alerts && kpiData.alerts.length > 0) && (
+                            <div className="lg:col-span-3 bg-indigo-500/10 border border-indigo-500/30 p-3 rounded-lg flex items-center gap-3 animate-pulse">
+                                <Sparkles size={16} className="text-indigo-400" />
+                                <span className="text-sm text-indigo-200 font-bold">
+                                    {kpiData.alerts.length} Insight Strategici disponibili.
+                                </span>
+                                <span className="text-xs text-indigo-400">Controllali nella Retrospettiva.</span>
+                            </div>
+                        )}
+
                         {/* Left Column: Timer & Calendar */}
                         <div className="space-y-6">
                             {/* Timer Card */}
@@ -1121,6 +1132,16 @@ const Sprint = () => {
                                         <RotateCcw size={24} />
                                     </button>
                                 </div>
+                            </div>
+
+                            {/* Mood Matrix (Daily Pulse) */}
+                            <div className="bg-zinc-800/30 p-5 rounded-xl border border-zinc-700/50">
+                                <MoodMatrix
+                                    moodGrid={kpiData.moodGrid}
+                                    members={capacity.members}
+                                    currentDay={getDaysRemaining() ? (activeSprint.durationDays - getDaysRemaining() + 1) : 1}
+                                    onVote={handleMoodVote}
+                                />
                             </div>
 
                             {/* Calendar Section */}
@@ -1216,13 +1237,11 @@ const Sprint = () => {
                                 <GaugeChart value={kpiData.performance} max={100} label="Performance Sprint" color="#22c55e" icon={Activity} />
                             </div>
                         </div>
-                        <div className="bg-zinc-800/30 p-6 rounded-2xl">
-                            <MoodMatrix
-                                moodGrid={kpiData.moodGrid}
-                                members={capacity.members}
-                                currentDay={getDaysRemaining() ? (activeSprint.durationDays - getDaysRemaining() + 1) : 1}
-                                onVote={handleMoodVote}
-                            />
+                        <div className="bg-zinc-800/30 p-6 rounded-2xl flex items-center justify-center">
+                            <div className="text-center">
+                                <Smile size={48} className="text-zinc-700 mx-auto mb-2" />
+                                <p className="text-zinc-500 text-sm">Team Mood spostato nel Daily Standup</p>
+                            </div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="bg-zinc-800/30 p-6 rounded-2xl col-span-2">
