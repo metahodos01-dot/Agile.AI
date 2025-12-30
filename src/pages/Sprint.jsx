@@ -36,29 +36,78 @@ const KpiCard = ({ title, value, change, icon: Icon, color }) => (
     </div>
 );
 
-const MoodMeter = ({ moods = {}, onVote }) => (
-    <div className="flex flex-col items-center">
-        <h3 className="text-zinc-400 text-sm font-semibold uppercase tracking-wider mb-4">Team Mood</h3>
-        <div className="flex gap-6">
-            {[
-                { icon: Smile, label: 'Positivo', color: 'text-green-400', key: 'happy' },
-                { icon: Meh, label: 'Neutro', color: 'text-yellow-400', key: 'neutral' },
-                { icon: Frown, label: 'Negativo', color: 'text-red-400', key: 'sad' }
-            ].map(({ icon: Icon, label, color, key }) => (
-                <button
-                    key={key}
-                    onClick={() => onVote(key)}
-                    className="flex flex-col items-center gap-2 group transition-transform hover:scale-110"
-                >
-                    <div className={`p-4 rounded-full bg-zinc-800/50 border border-zinc-700 group-hover:bg-zinc-800 ${color}`}>
-                        <Icon size={32} />
-                    </div>
-                    <span className="text-xs text-zinc-500 font-medium">{label} ({moods[key] || 0})</span>
-                </button>
-            ))}
+const MoodMatrix = ({ moodGrid = {}, members = [], onVote, currentDay = 1 }) => {
+    // Helper to get mood for a cell
+    const getMood = (memberIndex, day) => moodGrid[`${memberIndex}_${day}`];
+
+    // Cycle mood: null -> happy -> neutral -> sad -> null
+    const cycleMood = (memberIndex, day) => {
+        const current = getMood(memberIndex, day);
+        let next = 'happy';
+        if (current === 'happy') next = 'neutral';
+        else if (current === 'neutral') next = 'sad';
+        else if (current === 'sad') next = null;
+
+        onVote(memberIndex, day, next);
+    };
+
+    const icons = { happy: Smile, neutral: Meh, sad: Frown };
+    const colors = { happy: 'text-green-400', neutral: 'text-yellow-400', sad: 'text-red-400' };
+
+    return (
+        <div className="flex flex-col">
+            <h3 className="text-zinc-400 text-sm font-semibold uppercase tracking-wider mb-4 flex items-center gap-2">
+                <Smile size={16} /> Mood Matrix (10 Days)
+            </h3>
+            <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                    <thead>
+                        <tr>
+                            <th className="p-2 text-xs text-zinc-500 font-medium border-b border-zinc-700">Team Member</th>
+                            {[...Array(10)].map((_, i) => (
+                                <th key={i} className={`p-2 text-xs text-center border-b border-zinc-700 ${i + 1 === currentDay ? 'text-indigo-400 font-bold bg-indigo-500/10' : 'text-zinc-600'}`}>
+                                    G{i + 1}
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {members.map((member, mIdx) => (
+                            <tr key={mIdx} className="border-b border-zinc-800/50 hover:bg-zinc-800/20 transition-colors">
+                                <td className="p-2 text-xs text-zinc-300 font-medium truncate max-w-[100px]">{member.name || `Member ${mIdx + 1}`}</td>
+                                {[...Array(10)].map((_, dIdx) => {
+                                    const day = dIdx + 1;
+                                    const mood = getMood(mIdx, day);
+                                    const Icon = mood ? icons[mood] : Plus;
+
+                                    return (
+                                        <td key={dIdx} className="p-1 text-center">
+                                            <button
+                                                onClick={() => cycleMood(mIdx, day)}
+                                                className={`p-1.5 rounded-md transition-all ${mood
+                                                    ? 'bg-zinc-800 ' + colors[mood]
+                                                    : 'text-zinc-700 hover:text-zinc-500 hover:bg-zinc-800'}`}
+                                            >
+                                                <Icon size={14} className={!mood ? "opacity-20" : ""} />
+                                            </button>
+                                        </td>
+                                    );
+                                })}
+                            </tr>
+                        ))}
+                        {members.length === 0 && (
+                            <tr>
+                                <td colSpan="11" className="p-4 text-center text-xs text-zinc-500">
+                                    Definisci i membri del team nel tab Planning per abilitare la matrice.
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 
 
@@ -220,13 +269,70 @@ const Sprint = () => {
             setSprintNotes(activeSprint.notes || '');
             setKpiData(activeSprint.kpis || {
                 velocity: 0, capacity: 0, performance: 0,
-                moods: {}, burndownData: [], burnupData: []
+                moods: {}, moodGrid: {}, burndownData: [], burnupData: [],
+                alerts: []
             });
             setRetroItems({
                 start: activeSprint.start || ['', ''],
                 stop: activeSprint.stop || ['', ''],
                 continue: activeSprint.continue || ['', '']
             });
+
+            // --- INSIGHT ENGINE (Strategic Alert System) ---
+            const checkForAlerts = (currentKpis, currentTasks) => {
+                const alerts = [];
+
+                // 1. Burndown Stall Check
+                const bd = currentKpis.burndownData || [];
+                if (bd.length >= 2) {
+                    const last = bd[bd.length - 1];
+                    const prev = bd[bd.length - 2];
+                    if (last.real === prev.real && last.ideal < prev.ideal && last.real > 0) {
+                        alerts.push({
+                            id: 'stall',
+                            type: 'warning',
+                            title: 'Stallo Execution',
+                            desc: 'Burndown piatta da 24h. Blocco tecnico o stima errata?',
+                            suggestion: 'Analizzare ticket "Doing" bloccati.'
+                        });
+                    }
+                }
+
+                // 2. Mood Check (Low Morale)
+                const moods = Object.values(currentKpis.moodGrid || {});
+                const sadCount = moods.filter(m => m === 'sad').length;
+                if (moods.length > 0 && (sadCount / moods.length) > 0.3) {
+                    alerts.push({
+                        id: 'mood',
+                        type: 'danger',
+                        title: 'Calo Morale',
+                        desc: '> 30% di feedback negativi. Rischio burnout?',
+                        suggestion: 'Discutere carico di lavoro.'
+                    });
+                }
+
+                // 3. Velocity/Performance Risk
+                // Simple check: if day > 7 and performance < 50%
+                if (activeSprint.status === 'active' && activeSprint.startDate) {
+                    const start = new Date(activeSprint.startDate);
+                    const now = new Date();
+                    const dayDiff = Math.ceil((now - start) / (1000 * 60 * 60 * 24));
+                    if (dayDiff > 7 && (currentKpis.performance || 0) < 50) {
+                        alerts.push({
+                            id: 'risk',
+                            type: 'danger',
+                            title: 'Rischio Delivery',
+                            desc: 'Siamo al giorno ' + dayDiff + ' con performance < 50%.',
+                            suggestion: 'Rimuovere scope non essenziale (Descoping).'
+                        });
+                    }
+                }
+
+                return alerts;
+            };
+
+            // Run check immediately on load (without causing loop loops - only set if diff)
+            // Ideally we run this when data changes. For now we initialize default.
 
             // --- CAPACITY INIT ---
             // If sprint has saved capacity, use it.
@@ -276,6 +382,57 @@ const Sprint = () => {
     const isOverCapacity = totalEstimatedHours > totalCapacity;
 
     // --- Helper Functions ---
+
+    const generateInsights = (currentKpis) => {
+        const alerts = [];
+
+        // 1. Burndown Stall Check
+        const bd = currentKpis.burndownData || [];
+        if (bd.length >= 2) {
+            const last = bd[bd.length - 1];
+            const prev = bd[bd.length - 2];
+            if (last.real === prev.real && last.ideal < prev.ideal && last.real > 0) {
+                alerts.push({
+                    id: 'stall',
+                    type: 'warning',
+                    title: 'Stallo Execution',
+                    desc: 'Burndown piatta da 24h. Blocco tecnico o stima errata?',
+                    suggestion: 'Analizzare ticket "Doing" bloccati.'
+                });
+            }
+        }
+
+        // 2. Mood Check (Low Morale)
+        const moods = Object.values(currentKpis.moodGrid || {});
+        const sadCount = moods.filter(m => m === 'sad').length;
+        if (moods.length > 0 && (sadCount / moods.length) > 0.3) {
+            alerts.push({
+                id: 'mood',
+                type: 'danger',
+                title: 'Calo Morale',
+                desc: '> 30% di feedback negativi. Rischio burnout?',
+                suggestion: 'Discutere carico di lavoro.'
+            });
+        }
+
+        // 3. Velocity/Performance Risk
+        if (activeSprint.status === 'active' && activeSprint.startDate) {
+            const start = new Date(activeSprint.startDate);
+            const now = new Date();
+            const dayDiff = Math.ceil((now - start) / (1000 * 60 * 60 * 24));
+            if (dayDiff > 7 && (currentKpis.performance || 0) < 50) {
+                alerts.push({
+                    id: 'risk',
+                    type: 'danger',
+                    title: 'Rischio Delivery',
+                    desc: 'Siamo al giorno ' + dayDiff + ' con performance < 50%.',
+                    suggestion: 'Considerare Descoping.'
+                });
+            }
+        }
+        return alerts;
+    };
+
     const getStoryTitle = (storyId) => {
         if (!storyId) return null;
         for (const epic of (project.backlog || [])) {
@@ -389,10 +546,17 @@ const Sprint = () => {
 
             const newData = [...existingData, newEntry].sort((a, b) => a.day - b.day);
 
-            setKpiData(prev => ({ ...prev, burndownData: newData }));
-            // We should auto-save this update to context/db strictly speaking, but handleSaveLocal handles context update on unmount/save.
-            // Let's rely on manual Save or Auto-Save for now to persist this KPI update.
-            handleSaveLocal({ kpis: { ...kpiData, burndownData: newData } });
+            const newData = [...existingData, newEntry].sort((a, b) => a.day - b.day);
+
+            setKpiData(prev => {
+                const nextKpis = { ...prev, burndownData: newData };
+                nextKpis.alerts = generateInsights(nextKpis);
+                return nextKpis;
+            });
+
+            // We should auto-save this update to context/db
+            const alerts = generateInsights({ ...kpiData, burndownData: newData });
+            handleSaveLocal({ kpis: { ...kpiData, burndownData: newData, alerts } });
         }
     };
 
@@ -573,11 +737,29 @@ const Sprint = () => {
         setRetroItems(newItems);
     };
 
-    const handleMoodVote = (mood) => {
-        setKpiData(prev => ({
-            ...prev,
-            moods: { ...prev.moods, [mood]: (prev.moods[mood] || 0) + 1 }
-        }));
+    const handleMoodVote = (memberIndex, day, mood) => {
+        setKpiData(prev => {
+            const newGrid = { ...prev.moodGrid };
+            if (mood === null) delete newGrid[`${memberIndex}_${day}`];
+            else newGrid[`${memberIndex}_${day}`] = mood;
+
+            // Recalculate simple counts for compatibility or summary
+            const counts = Object.values(newGrid).reduce((acc, m) => {
+                acc[m] = (acc[m] || 0) + 1;
+                return acc;
+            }, {});
+
+            const newState = {
+                ...prev,
+                moodGrid: newGrid,
+                moods: counts
+            };
+
+            // Live Insight Generation
+            newState.alerts = generateInsights(newState);
+
+            return newState;
+        });
     };
 
 
@@ -1037,7 +1219,12 @@ const Sprint = () => {
                             </div>
                         </div>
                         <div className="bg-zinc-800/30 p-6 rounded-2xl">
-                            <MoodMeter moods={kpiData.moods} onVote={handleMoodVote} />
+                            <MoodMatrix
+                                moodGrid={kpiData.moodGrid}
+                                members={capacity.members}
+                                currentDay={getDaysRemaining() ? (activeSprint.durationDays - getDaysRemaining() + 1) : 1}
+                                onVote={handleMoodVote}
+                            />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="bg-zinc-800/30 p-6 rounded-2xl col-span-2">
@@ -1074,52 +1261,110 @@ const Sprint = () => {
                 )}
 
                 {activeTab === 'retro' && (
-                    <div className="space-y-6">
-                        {/* Retro Content Unchanged */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="bg-green-500/5 p-5 rounded-2xl border border-green-500/20">
-                                <h4 className="text-green-400 font-bold mb-4 flex items-center gap-2"><Play size={18} /> Iniziare a Fare</h4>
-                                <div className="space-y-2">
-                                    {retroItems.start.map((val, i) => (
-                                        <input
-                                            key={i}
-                                            value={val}
-                                            onChange={(e) => handleRetroChange('start', i, e.target.value)}
-                                            className="w-full bg-zinc-900/50 rounded-lg p-3 text-sm"
-                                            placeholder="..."
-                                            disabled={activeSprint.status === 'completed'}
-                                        />
-                                    ))}
-                                </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                        {/* LEFT SIDEBAR: Strategic Insights */}
+                        <div className="bg-zinc-800/30 p-4 rounded-2xl border border-zinc-700/50">
+                            <h3 className="text-sm font-bold text-indigo-400 mb-4 flex items-center gap-2">
+                                <Sparkles size={16} /> Strategic Insights
+                            </h3>
+                            <div className="space-y-3">
+                                {(!kpiData.alerts || kpiData.alerts.length === 0) && (
+                                    <p className="text-xs text-zinc-500 italic">Nessuna anomalia rilevata. Lo sprint è andato liscio!</p>
+                                )}
+                                {(kpiData.alerts || []).map((alert, idx) => (
+                                    <div key={idx} className={`p-3 rounded-lg border flex flex-col gap-2 ${alert.type === 'danger' ? 'bg-red-500/10 border-red-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}>
+                                        <div className="flex items-center gap-2">
+                                            <AlertTriangle size={14} className={alert.type === 'danger' ? 'text-red-400' : 'text-amber-400'} />
+                                            <span className={`text-xs font-bold ${alert.type === 'danger' ? 'text-red-400' : 'text-amber-400'}`}>{alert.title}</span>
+                                        </div>
+                                        <p className="text-[10px] text-zinc-300">{alert.desc}</p>
+                                        <div className="pt-2 border-t border-zinc-700/30 flex justify-between gap-1">
+                                            <button
+                                                onClick={() => setRetroItems(prev => ({ ...prev, stop: [...prev.stop, alert.suggestion] }))}
+                                                className="text-[9px] px-2 py-1 bg-red-500/20 text-red-300 rounded hover:bg-red-500/30 flex-1"
+                                            >
+                                                + Stop
+                                            </button>
+                                            <button
+                                                onClick={() => setRetroItems(prev => ({ ...prev, start: [...prev.start, alert.suggestion] }))}
+                                                className="text-[9px] px-2 py-1 bg-green-500/20 text-green-300 rounded hover:bg-green-500/30 flex-1"
+                                            >
+                                                + Start
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                            <div className="bg-red-500/5 p-5 rounded-2xl border border-red-500/20">
-                                <h4 className="text-red-400 font-bold mb-4 flex items-center gap-2"><Pause size={18} /> Smettere di Fare</h4>
-                                <div className="space-y-2">
-                                    {retroItems.stop.map((val, i) => (
-                                        <input
-                                            key={i}
-                                            value={val}
-                                            onChange={(e) => handleRetroChange('stop', i, e.target.value)}
-                                            className="w-full bg-zinc-900/50 rounded-lg p-3 text-sm"
-                                            placeholder="..."
-                                            disabled={activeSprint.status === 'completed'}
-                                        />
-                                    ))}
+                        </div>
+
+                        {/* RIGHT: Retro Content */}
+                        <div className="lg:col-span-3 space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="bg-green-500/5 p-5 rounded-2xl border border-green-500/20">
+                                    <h4 className="text-green-400 font-bold mb-4 flex items-center gap-2"><Play size={18} /> Iniziare a Fare</h4>
+                                    <div className="space-y-2">
+                                        {retroItems.start.map((val, i) => (
+                                            <div key={i} className="flex gap-2">
+                                                <input
+                                                    value={val}
+                                                    onChange={(e) => handleRetroChange('start', i, e.target.value)}
+                                                    className="w-full bg-zinc-900/50 rounded-lg p-3 text-sm"
+                                                    placeholder="..."
+                                                    disabled={activeSprint.status === 'completed'}
+                                                />
+                                                <button onClick={() => {
+                                                    const nav = [...retroItems.start];
+                                                    nav.splice(i, 1);
+                                                    setRetroItems({ ...retroItems, start: nav });
+                                                }} className="text-zinc-600 hover:text-red-400"><X size={14} /></button>
+                                            </div>
+                                        ))}
+                                        <button onClick={() => setRetroItems({ ...retroItems, start: [...retroItems.start, ''] })} className="text-xs text-green-500/50 hover:text-green-400">+ Aggiungi</button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="bg-blue-500/5 p-5 rounded-2xl border border-blue-500/20">
-                                <h4 className="text-blue-400 font-bold mb-4 flex items-center gap-2"><RotateCcw size={18} /> Continuare a Fare</h4>
-                                <div className="space-y-2">
-                                    {retroItems.continue.map((val, i) => (
-                                        <input
-                                            key={i}
-                                            value={val}
-                                            onChange={(e) => handleRetroChange('continue', i, e.target.value)}
-                                            className="w-full bg-zinc-900/50 rounded-lg p-3 text-sm"
-                                            placeholder="..."
-                                            disabled={activeSprint.status === 'completed'}
-                                        />
-                                    ))}
+                                <div className="bg-red-500/5 p-5 rounded-2xl border border-red-500/20">
+                                    <h4 className="text-red-400 font-bold mb-4 flex items-center gap-2"><Pause size={18} /> Smettere di Fare</h4>
+                                    <div className="space-y-2">
+                                        {retroItems.stop.map((val, i) => (
+                                            <div key={i} className="flex gap-2">
+                                                <input
+                                                    value={val}
+                                                    onChange={(e) => handleRetroChange('stop', i, e.target.value)}
+                                                    className="w-full bg-zinc-900/50 rounded-lg p-3 text-sm"
+                                                    placeholder="..."
+                                                    disabled={activeSprint.status === 'completed'}
+                                                />
+                                                <button onClick={() => {
+                                                    const nav = [...retroItems.stop];
+                                                    nav.splice(i, 1);
+                                                    setRetroItems({ ...retroItems, stop: nav });
+                                                }} className="text-zinc-600 hover:text-red-400"><X size={14} /></button>
+                                            </div>
+                                        ))}
+                                        <button onClick={() => setRetroItems({ ...retroItems, stop: [...retroItems.stop, ''] })} className="text-xs text-red-500/50 hover:text-red-400">+ Aggiungi</button>
+                                    </div>
+                                </div>
+                                <div className="bg-blue-500/5 p-5 rounded-2xl border border-blue-500/20">
+                                    <h4 className="text-blue-400 font-bold mb-4 flex items-center gap-2"><RotateCcw size={18} /> Continuare a Fare</h4>
+                                    <div className="space-y-2">
+                                        {retroItems.continue.map((val, i) => (
+                                            <div key={i} className="flex gap-2">
+                                                <input
+                                                    value={val}
+                                                    onChange={(e) => handleRetroChange('continue', i, e.target.value)}
+                                                    className="w-full bg-zinc-900/50 rounded-lg p-3 text-sm"
+                                                    placeholder="..."
+                                                    disabled={activeSprint.status === 'completed'}
+                                                />
+                                                <button onClick={() => {
+                                                    const nav = [...retroItems.continue];
+                                                    nav.splice(i, 1);
+                                                    setRetroItems({ ...retroItems, continue: nav });
+                                                }} className="text-zinc-600 hover:text-red-400"><X size={14} /></button>
+                                            </div>
+                                        ))}
+                                        <button onClick={() => setRetroItems({ ...retroItems, continue: [...retroItems.continue, ''] })} className="text-xs text-blue-500/50 hover:text-blue-400">+ Aggiungi</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
