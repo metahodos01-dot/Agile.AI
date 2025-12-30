@@ -119,31 +119,32 @@ export const generateAIResponseV2 = async (prompt, type) => {
                const objectiveText = (prompt.objective || "").toLowerCase();
                const kpis = [];
 
-               // 1. Estrazione Parametri Numerici
+               // 1. Estrazione Parametri Numerici (Target Detection)
                const numberMatch = objectiveText.match(/(\d+)(%|k|m)?/);
-               const extractedTarget = numberMatch ? (objectiveText.includes('ridur') || objectiveText.includes('diminuir') ? `< ${numberMatch[0]}` : `> ${numberMatch[0]}`) : null;
 
-               // 2. Mappa Keywords -> KPI Categories (Expanded)
+               // 2. Mappa Keywords -> Strategic Intent (Expanded & Weighted)
                const intentKeywords = {
-                  leadership: ['n.1', 'leader', 'mercato', 'market', 'posizionamento', 'brand', 'riferimento', 'top', 'ceo', 'manager', 'vision'],
-                  efficiency: ['costi', 'ridur', 'waste', 'sprechi', 'automazion', 'risparmi', 'efficienz', 'velocit', 'tempo', 'time', 'process', 'manutenzion', 'refactoring'],
-                  innovation: ['ai', 'artificial', 'adoption', 'nuovo', 'innovazion', 'tecnolog', 'modern', 'digital', 'trasformazion', 'intelligenz'],
-                  growth: ['vendit', 'fatturat', 'aument', 'crescit', 'revenue', 'client', 'acquisizion', 'espansion', 'business'],
-                  quality: ['bug', 'difett', 'error', 'qualit', 'test', 'affidabil', 'incident', 'stabil', 'sicurezz', 'compliance']
+                  efficiency_cost: ['costi', 'spesa', 'budget', 'opex', 'risparmio', 'margini', 'financial', 'ebitda', 'economico'],
+                  efficiency_speed: ['velocit', 'tempo', 'time', 'lead', 'cycle', 'delivery', 'rapido', 'consegna', 'agile', 'scrum'],
+                  growth: ['fatturato', 'revenue', 'crescita', 'quote', 'market', 'share', 'vendit', 'acquisizion', 'client', 'mrr', 'arr'],
+                  leadership: ['leader', 'n.1', 'top', 'posizionamento', 'brand', 'authority', 'riferimento', 'esperti'],
+                  innovation: ['ai', 'intelligenz', 'nuovo', 'lancio', 'prodotto', 'tech', 'digital', 'trasformazion', 'modern'],
+                  quality: ['bug', 'difett', 'qualit', 'nps', 'soddisfazion', 'customer', 'feedback', 'user', 'ux']
                };
 
                let primaryIntent = 'generic';
                let maxScore = 0;
 
-               // Punteggio pesato: parole esatte valgono di più
+               // Punteggio più sofisticato
                for (const [intent, keywords] of Object.entries(intentKeywords)) {
                   let score = 0;
                   keywords.forEach(word => {
-                     if (objectiveText.includes(word)) score += 1;
+                     if (objectiveText.includes(word)) score += 2; // Exact match weight
                   });
 
-                  // Boost specifici per disambiguare
-                  if (intent === 'efficiency' && (objectiveText.includes('automati') || objectiveText.includes('manuten'))) score += 2;
+                  // Intent Disambiguation
+                  if (objectiveText.includes('più') && intent === 'growth') score += 1;
+                  if (objectiveText.includes('meno') && intent.startsWith('efficiency')) score += 1;
 
                   if (score > maxScore) {
                      maxScore = score;
@@ -151,141 +152,132 @@ export const generateAIResponseV2 = async (prompt, type) => {
                   }
                }
 
-               // Fallback intelligente per "code maintenance" se non catturato sopra
-               if (objectiveText.includes('codice') || objectiveText.includes('software')) {
-                  if (primaryIntent === 'generic') primaryIntent = 'efficiency';
+               // Fallback intelligente per "generico" se contiene parole chiave deboli
+               if (primaryIntent === 'generic') {
+                  if (objectiveText.includes('miglior')) primaryIntent = 'quality';
+                  else if (objectiveText.includes('ottimizz')) primaryIntent = 'efficiency_speed';
                }
 
-               console.log(`AI KPI Logic: Detected STRATEGIC INTENT '${primaryIntent}' for objective '${objectiveText}'`);
+               console.log(`AI KPI Logic: Detected STRATEGIC INTENT '${primaryIntent}'`);
 
-               // VAGUE OBJECTIVE CHECK
-               if (primaryIntent === 'generic' && maxScore < 2 && objectiveText.length < 20) {
+               // VAGUE OBJECTIVE CHECK (Strategic Gatekeeper)
+               if (primaryIntent === 'generic' && objectiveText.length < 15) {
                   kpis.push({
-                     name: '⚠️ Obiettivo Troppo Vago',
+                     name: '⚠️ Obiettivo Non Strategico',
                      target: 'N/A',
-                     rationale: 'Specifica meglio: vuoi efficienza costi o velocità sul mercato?'
+                     rationale: 'Il Board non approverebbe: manca impatto misurabile.'
                   });
                   kpis.push({
-                     name: 'Suggerimento: Definire Scope',
-                     target: 'SMART',
-                     rationale: 'Aggiungi numeri o date (es. "entro Q4", "ridurre del 20%").'
+                     name: 'Suggerimento: Definire la "Valuta"',
+                     target: '€ / % / Giorni',
+                     rationale: 'Stai parlando di soldi, tempo o qualità? Specificalo.'
                   });
                   resolve(kpis);
                   return;
                }
 
-               // 3. Generazione KPI con Razionale
+               // 3. Generazione KPI "C-Level" (Strategic Bridge)
                switch (primaryIntent) {
                   case 'leadership':
                      kpis.push({
-                        name: 'NPS (Net Promoter Score)',
-                        target: '> 70',
-                        rationale: 'Misura quanto i CEO/Manager sono disposti a raccomandare la tua soluzione.'
-                     });
-                     kpis.push({
-                        name: 'Market Share (Segmento)',
+                        name: 'Market Share (Segmento Core)',
                         target: 'Top 3',
-                        rationale: 'Posizionamento rispetto ai competitor diretti che offrono servizi simili.'
+                        rationale: 'Indispensabile per attrarre talenti e capitali a condizioni favorevoli.'
                      });
                      kpis.push({
                         name: 'Brand Authority Index',
-                        target: '> 8/10',
-                        rationale: 'Percezione del valore del brand da parte degli stakeholder chiave.'
+                        target: '> 85/100',
+                        rationale: 'Diventare il "Thought Leader" riduce il CAC del 40% nel lungo periodo.'
                      });
                      break;
 
-                  case 'efficiency':
-                     if (objectiveText.includes('cost')) {
-                        kpis.push({
-                           name: 'OpEx Reduction',
-                           target: '- 20%',
-                           rationale: 'Indicatore chiave per il risparmio sui costi operativi totali.'
-                        });
-                     }
-                     if (objectiveText.includes('automazion') || objectiveText.includes('ai') || objectiveText.includes('manuten')) {
-                        kpis.push({
-                           name: 'Automation Hit Rate',
-                           target: '> 85%',
-                           rationale: 'Percentuale di processi/task gestiti automaticamente senza intervento umano.'
-                        });
-                        kpis.push({
-                           name: 'Maintenance Effort Reduction',
-                           target: '- 40%',
-                           rationale: 'Riduzione ore uomo dedicate a task di manutenzione ripetitivi.'
-                        });
-                     } else {
-                        kpis.push({
-                           name: 'Cycle Time Reduction',
-                           target: '- 30%',
-                           rationale: 'Riduzione della durata media dei cicli grazie all\'eliminazione delle frizioni.'
-                        });
-                     }
+                  case 'efficiency_cost':
                      kpis.push({
-                        name: 'Lead Time per Strategia',
-                        target: '- 25%',
-                        rationale: 'Tempo recuperato nell\'execution strategica post-ottimizzazione.'
+                        name: 'OpEx Reduction Year-over-Year',
+                        target: '- 20%',
+                        rationale: 'Impatto diretto sull\'EBITDA senza compromettere la capacità produttiva.'
+                     });
+                     kpis.push({
+                        name: 'ROI dell\'Automazione',
+                        target: '> 3.5x',
+                        rationale: 'Ogni euro investito in tecnologia deve liberare almeno 3.5 euro di valore.'
                      });
                      break;
+
+                  case 'efficiency_speed':
+                     kpis.push({
+                        name: 'Time-to-Market (Concept to Cash)',
+                        target: '- 40%',
+                        rationale: 'La velocità di esecuzione è l\'unico vantaggio competitivo sostenibile oggi.'
+                     });
+                     kpis.push({
+                        name: 'Process Cycle Efficiency',
+                        target: '> 65%',
+                        rationale: 'Eliminare i tempi morti (wait time) massimizza l\'output a parità di risorse.'
+                     });
+                     break;
+
 
                   case 'innovation':
                      kpis.push({
-                        name: 'AI Adoption Rate',
-                        target: '> 60%',
-                        rationale: 'Percentuale di processi strategici gestiti tramite modelli AI dai team.'
+                        name: '% Revenue da Nuovi Prodotti (< 2 anni)',
+                        target: '> 30%',
+                        rationale: 'Indice di vitalità aziendale: se non innoviamo, stiamo morendo lentamente.'
                      });
                      kpis.push({
-                        name: 'Time to Value (TtV)',
-                        target: '< 15 giorni',
-                        rationale: 'Tempo medio tra l\'inizio del progetto e il primo risultato tangibile.'
+                        name: 'AI Adoption Rate (Processi Core)',
+                        target: '> 75%',
+                        rationale: 'Non basta "usare l\'AI", deve diventare il motore operativo principale.'
                      });
                      break;
 
                   case 'growth':
                      kpis.push({
-                        name: 'MRR Growth QoQ',
-                        target: '> 15%',
-                        rationale: 'Crescita trimestrale dei ricavi ricorrenti, vitale per la scalabilità.'
+                        name: 'CLTV (Customer Lifetime Value)',
+                        target: '> € 15k',
+                        rationale: 'Massimizzare il valore del cliente è più efficiente che acquisirne di nuovi.'
                      });
                      kpis.push({
                         name: 'CAC Payback Period',
-                        target: '< 6 mesi',
-                        rationale: 'Tempo necessario per rientrare del costo di acquisizione cliente.'
+                        target: '< 4 mesi',
+                        rationale: 'La scalabilità del modello dipende dalla velocità di rientro dell\'investimento sales.'
                      });
                      break;
 
                   case 'quality':
                      kpis.push({
-                        name: 'Bug Escape Rate',
-                        target: '< 2%',
-                        rationale: 'Percentuale di difetti che raggiungono il cliente finale (target eccellenza).'
+                        name: 'NPS (Net Promoter Score)',
+                        target: '> 75',
+                        rationale: 'La qualità percepita è l\'unica barriera contro la commoditizzazione.'
                      });
                      kpis.push({
-                        name: 'Technical Debt Ratio',
+                        name: 'Cost of Poor Quality (COPQ)',
                         target: '< 5%',
-                        rationale: 'Mantenimento di un codice pulito per garantire evolutività futura.'
+                        rationale: 'I costi di rilavorazione e bug fixing erodono silenziosamente i margini.'
                      });
                      break;
 
                   default:
-                     // Fallback "Strong"
+                     // Fallback Strategico
                      kpis.push({
-                        name: 'ROI (Return on Investment)',
-                        target: '> 120%',
-                        rationale: 'Ritorno economico generato rispetto all\'investimento effettuato.'
+                        name: 'Strategic ROI',
+                        target: '> 25%',
+                        rationale: 'Ritorno sull\'investimento complessivo dell\'iniziativa.'
                      });
                      kpis.push({
-                        name: 'Employee Engagement',
-                        target: '> 8.5/10',
-                        rationale: 'Livello di coinvolgimento del team, precursore della produttività.'
+                        name: 'Stakeholder Satisfaction',
+                        target: '> 9/10',
+                        rationale: 'Supporto interno essenziale per la continuità del progetto.'
                      });
                }
 
-               // 4. Arricchimento Mix & Match e Cleanup
-               if ((objectiveText.includes('ai') || objectiveText.includes('intelligence')) && primaryIntent !== 'innovation') {
+               // Mix & Match (Cross-Check logic)
+               // Se parla di software ma l'intento non è efficienza, aggiungi un check tecnico
+               if (objectiveText.includes('software') && !primaryIntent.startsWith('efficiency')) {
                   kpis.push({
-                     name: 'AI Adoption Rate',
-                     target: '> 50%',
-                     rationale: 'Integrazione dell\'AI nei processi core.'
+                     name: 'Technical Debt Ratio',
+                     target: '< 10%',
+                     rationale: 'Garantire che la velocità non crei passività future insostenibili.'
                   });
                }
 
