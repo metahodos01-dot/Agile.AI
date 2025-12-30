@@ -598,7 +598,7 @@ const Sprint = () => {
         if (activeSprint.status === 'active') {
             updateBurndownSnapshot();
         }
-    }, [activeSprint.id, activeSprint.status, kanbanTasks]); // Added kanbanTasks dependency
+    }, [activeSprint.id, activeSprint.status, kanbanTasks, activeSprint.startDate]); // Added kanbanTasks and activeSprint.startDate dependency
 
 
     // --- SIMULATION HANDLERS (Time Travel) ---

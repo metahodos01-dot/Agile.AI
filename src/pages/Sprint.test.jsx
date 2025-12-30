@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import Sprint from './Sprint';
 import { ProjectContext } from '../context/ProjectContext';
 import React from 'react';
@@ -55,9 +56,11 @@ const renderSprint = (projectOverride = {}) => {
     };
 
     return render(
-        <ProjectContext.Provider value={projectValue}>
-            <Sprint />
-        </ProjectContext.Provider>
+        <MemoryRouter>
+            <ProjectContext.Provider value={projectValue}>
+                <Sprint />
+            </ProjectContext.Provider>
+        </MemoryRouter>
     );
 };
 

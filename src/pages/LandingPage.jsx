@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Zap, Target, Users, ShieldCheck, CheckCircle, Cpu, Activity, Brain, Layers, BarChart, Flag, FileText, Lock, Download } from 'lucide-react';
+import { ArrowRight, Zap, Target, Users, ShieldCheck, CheckCircle, Cpu, Activity, Brain, Layers, BarChart, Flag, FileText, Lock, Download, X, MessageSquare, Send } from 'lucide-react';
+
 
 const LandingPage = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [submitted, setSubmitted] = useState(false);
+
+    // Modal States
+    const [showVideo, setShowVideo] = useState(false);
+    const [showContact, setShowContact] = useState(false);
+
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -35,7 +41,7 @@ const LandingPage = () => {
                     </div>
                 </div>
                 <div className="hidden md:flex gap-4">
-                    <button className="text-slate-400 hover:text-white font-medium transition-colors">Caso Studio</button>
+                    <button onClick={() => setShowVideo(true)} className="text-slate-400 hover:text-white font-medium transition-colors">Caso Studio</button>
                     <button className="px-6 py-2 rounded-full border border-white/20 hover:bg-white/10 transition-colors">Accedi</button>
                 </div>
             </nav>
@@ -103,10 +109,10 @@ const LandingPage = () => {
                             )}
                         </div>
 
-                        <button className="flex items-center gap-2 text-slate-300 hover:text-white transition-colors px-6 py-4 rounded-xl border border-white/10 hover:bg-white/10 backdrop-blur-sm">
-                            <FileText size={18} /> Leggi il Caso Studio
-                        </button>
+                        {/* REMOVED: "Leggi il Caso Studio" Button */}
+
                     </div>
+
 
                     <div className="mt-8 flex justify-center gap-6 text-xs text-slate-400 animate-fade-in-up delay-500 font-medium">
                         <span className="flex items-center gap-1"><Lock size={12} /> Privacy Dati Garantita al 100%</span>
@@ -165,7 +171,7 @@ const LandingPage = () => {
                     </div>
 
                 </div>
-            </section>
+            </section >
 
             {/* --- Vision & Mission Section --- */}
             <section className="py-24 bg-gradient-to-b from-slate-900 to-slate-950 relative overflow-hidden text-center md:text-left">
@@ -217,7 +223,7 @@ const LandingPage = () => {
                         </div>
                     </div>
                 </div>
-            </section>
+            </section >
 
             {/* --- CTA Footer --- */}
             <footer className="py-24 bg-slate-950 text-center border-t border-slate-900 relative">
@@ -234,14 +240,51 @@ const LandingPage = () => {
                         >
                             Inizia il Viaggio
                         </button>
-                        <button className="px-10 py-5 rounded-full font-bold text-xl border border-white/10 hover:bg-white/5 transition-all">
+                        <button onClick={() => setShowContact(true)} className="px-10 py-5 rounded-full font-bold text-xl border border-white/10 hover:bg-white/5 transition-all">
                             Parla con un Esperto
                         </button>
                     </div>
                     <p className="mt-12 text-slate-600 text-sm">© 2024 Metahodòs. All rights reserved. Agile.AI™ is a registered trademark.</p>
                 </div>
             </footer>
-        </div>
+            {/* --- Video Modal --- */}
+            {
+                showVideo && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-fade-in">
+                        <div className="relative w-full max-w-5xl bg-zinc-900 rounded-2xl border border-zinc-700 shadow-2xl overflow-hidden">
+                            <button
+                                onClick={() => setShowVideo(false)}
+                                className="absolute top-4 right-4 z-10 p-2 bg-black/50 hover:bg-red-500/80 rounded-full text-white transition-all backdrop-blur-sm"
+                            >
+                                <X size={24} />
+                            </button>
+                            <div className="aspect-video w-full bg-black">
+                                <video
+                                    src="/VideoDEMO.mov"
+                                    controls
+                                    autoPlay
+                                    className="w-full h-full object-contain"
+                                >
+                                    Il tuo browser non supporta il tag video.
+                                </video>
+                            </div>
+                            <div className="p-6 bg-zinc-900">
+                                <h3 className="text-xl font-bold text-white mb-2">Agile.AI in Azione</h3>
+                                <p className="text-zinc-400">Guarda come trasformiamo la strategia in esecuzione in pochi minuti.</p>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
+            {/* --- Contact Modal --- */}
+            {
+                showContact && (
+                    <ContactModal onClose={() => setShowContact(false)} />
+                )
+            }
+        </div >
+
     );
 };
 
@@ -266,3 +309,126 @@ const TrustBadge = ({ icon: Icon, text }) => (
 );
 
 export default LandingPage;
+
+// --- Helper for Contact Modal ---
+const ContactModal = ({ onClose }) => {
+    const [formData, setFormData] = useState({
+        nome: '',
+        cognome: '',
+        email: '',
+        argomento: ''
+    });
+    const [sent, setSent] = useState(false);
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        // Simulate sending
+        console.log("Contact Form Submitted:", formData);
+        console.log("Sending to: francesco.desario@metahodos.com");
+
+        // Mock Success
+        setTimeout(() => {
+            setSent(true);
+        }, 800);
+    };
+
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
+            <div className="relative w-full max-w-lg bg-zinc-900 rounded-2xl border border-zinc-700 shadow-2xl p-8">
+                <button
+                    onClick={onClose}
+                    className="absolute top-4 right-4 p-2 text-zinc-500 hover:text-white transition-colors"
+                >
+                    <X size={24} />
+                </button>
+
+                {!sent ? (
+                    <>
+                        <div className="mb-6">
+                            <h3 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+                                <MessageSquare className="text-amber-500" /> Parla con un Esperto
+                            </h3>
+                            <p className="text-zinc-400 text-sm">
+                                Compila il modulo. Risponderemo entro 24 ore lavorative.
+                            </p>
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <label className="text-xs font-bold text-zinc-500 uppercase">Nome</label>
+                                    <input
+                                        type="text" name="nome" required
+                                        value={formData.nome} onChange={handleChange}
+                                        className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-white focus:border-amber-500 focus:outline-none transition-colors"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-xs font-bold text-zinc-500 uppercase">Cognome</label>
+                                    <input
+                                        type="text" name="cognome" required
+                                        value={formData.cognome} onChange={handleChange}
+                                        className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-white focus:border-amber-500 focus:outline-none transition-colors"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-zinc-500 uppercase">Email Aziendale</label>
+                                <input
+                                    type="email" name="email" required
+                                    value={formData.email} onChange={handleChange}
+                                    className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-white focus:border-amber-500 focus:outline-none transition-colors"
+                                />
+                            </div>
+
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-zinc-500 uppercase">Oggetto della richiesta</label>
+                                <select
+                                    name="argomento"
+                                    value={formData.argomento} onChange={handleChange}
+                                    className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-white focus:border-amber-500 focus:outline-none transition-colors"
+                                >
+                                    <option value="" disabled selected>Seleziona un argomento...</option>
+                                    <option value="Demo">Richiesta Demo Approfondita</option>
+                                    <option value="Pricing">Informazioni sui Piani Enterprise</option>
+                                    <option value="Partnership">Proposta di Partnership</option>
+                                    <option value="Altro">Altro</option>
+                                </select>
+                            </div>
+
+                            <button
+                                type="submit"
+                                className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold py-3 rounded-xl shadow-lg transform active:scale-95 transition-all flex items-center justify-center gap-2 mt-4"
+                            >
+                                <Send size={18} /> Invia Richiesta
+                            </button>
+                        </form>
+                    </>
+                ) : (
+                    <div className="text-center py-10 animate-fade-in-up">
+                        <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <CheckCircle size={40} className="text-green-500" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-white mb-2">Richiesta Inviata!</h3>
+                        <p className="text-zinc-400 mb-6">
+                            Grazie {formData.nome}. Abbiamo ricevuto la tua richiesta.<br />
+                            Ti abbiamo inviato una conferma a <span className="text-white">{formData.email}</span>.
+                        </p>
+                        <button
+                            onClick={onClose}
+                            className="bg-zinc-800 hover:bg-zinc-700 text-white font-medium px-6 py-2 rounded-lg transition-colors"
+                        >
+                            Chiudi
+                        </button>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
