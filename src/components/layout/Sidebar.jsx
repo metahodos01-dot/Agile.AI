@@ -10,19 +10,19 @@ import {
 import { useAuth } from '../../context/AuthContext';
 
 const steps = [
-    { path: '/mindset', name: '0. Mindset Agile', icon: RefreshCw },
-    { path: '/vision', name: '1. Product vision', icon: Eye },
-    { path: '/objectives', name: '2. Obiettivi', icon: Target },
-    { path: '/kpi', name: '3. KPI e target', icon: Sliders },
-    { path: '/team', name: '4. Team', icon: Users },
-    { path: '/obeya', name: '5. Obeya', icon: LayoutDashboard },
-    { path: '/backlog', name: '6. Backlog', icon: Database },
-    { path: '/estimates', name: '7. Stime', icon: Clock },
-    { path: '/roadmap', name: '8. Roadmap', icon: Map },
-    { path: '/sprint', name: '9. Sprint', icon: Play },
+    { path: '/app/mindset', name: '0. Mindset Agile', icon: RefreshCw },
+    { path: '/app/vision', name: '1. Product vision', icon: Eye },
+    { path: '/app/objectives', name: '2. Obiettivi', icon: Target },
+    { path: '/app/kpi', name: '3. KPI e target', icon: Sliders },
+    { path: '/app/team', name: '4. Team', icon: Users },
+    { path: '/app/obeya', name: '5. Obeya', icon: LayoutDashboard },
+    { path: '/app/backlog', name: '6. Backlog', icon: Database },
+    { path: '/app/estimates', name: '7. Stime', icon: Clock },
+    { path: '/app/roadmap', name: '8. Roadmap', icon: Map },
+    { path: '/app/sprint', name: '9. Sprint', icon: Play },
 ];
 
-const adminStep = { path: '/admin', name: 'Admin Panel', icon: Shield };
+const adminStep = { path: '/app/admin', name: 'Admin Panel', icon: Shield };
 
 const MOTO_DEMO_PROJECT = {
     name: 'Moto Elettrica Future',
@@ -461,7 +461,7 @@ const Sidebar = () => {
                 {/* Navigation */}
                 <nav className="flex-1 px-3 py-4 overflow-y-auto z-40">
                     <NavLink
-                        to="/"
+                        to="/app"
                         end
                         className={({ isActive }) =>
                             `flex items-center gap-3 px-4 py-3 rounded-xl mb-1 transition-all duration-200 ${isActive
