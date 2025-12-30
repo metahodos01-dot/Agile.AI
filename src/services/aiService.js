@@ -40,32 +40,34 @@ export const generateAIResponseV2 = async (prompt, type) => {
                resolve(objectives);
 
             } else if (type === 'kpi') {
-               // KPI industriali
-               resolve(`KPI suggeriti per il settore industriale:
-   
-   📊 **Efficienza produttiva**
-   • OEE (Overall Equipment Effectiveness)
-   • Tempo di ciclo medio
-   • Tasso di utilizzo impianti
-   • Lead time di produzione
-   
-   📈 **Qualità**
-   • Tasso di difettosità (PPM - Parti Per Milione)
-   • First Pass Yield (FPY)
-   • Costo della non-qualità
-   • Reclami cliente
-   
-   💰 **Costi**
-   • Costo per unità prodotta
-   • Consumo energetico per unità
-   • Valore del magazzino (giorni di copertura)
-   • Costo manutenzione per asset
-   
-   🚚 **Logistica e consegne**
-   • On-Time Delivery (OTD)
-   • Tasso di evasione ordini
-   • Tempo medio di consegna
-   • Precisione dell'inventario`);
+               // KPI Generati contestualmente all'obiettivo
+               const objectiveText = (prompt.objective || "").toLowerCase();
+               const kpis = [];
+
+               // Logica simulata per rilevare il contesto
+               if (objectiveText.includes('software') || objectiveText.includes('app') || objectiveText.includes('agile') || objectiveText.includes('piattaforma') || objectiveText.includes('codice') || objectiveText.includes('utent') || objectiveText.includes('relasc')) {
+                  // Contesto Software / Agile / Product
+                  if (objectiveText.includes('rilasci') || objectiveText.includes('mvp') || objectiveText.includes('version')) {
+                     kpis.push({ name: 'Release Burnup', target: '100% scope' });
+                     kpis.push({ name: 'Time to Market', target: '< 3 mesi' });
+                  } else if (objectiveText.includes('utent') || objectiveText.includes('adozione')) {
+                     kpis.push({ name: 'MAU (Monthly Active Users)', target: '> 1000' });
+                     kpis.push({ name: 'NPS (Net Promoter Score)', target: '> 50' });
+                  } else if (objectiveText.includes('qualità') || objectiveText.includes('bug')) {
+                     kpis.push({ name: 'Bug Escape Rate', target: '< 5%' });
+                     kpis.push({ name: 'Code Coverage', target: '> 80%' });
+                  } else {
+                     // Generico Software
+                     kpis.push({ name: 'Deployment Frequency', target: 'Settimanale' });
+                     kpis.push({ name: 'Lead Time for Changes', target: '< 2 giorni' });
+                  }
+               } else {
+                  // Contesto Industriale / Generico (Fallback su originali se sembra manufatturiero)
+                  kpis.push({ name: 'OEE (Overall Equipment Effectiveness)', target: '> 85%' });
+                  kpis.push({ name: 'Tasso di difettosità (PPM)', target: '< 50 PPM' });
+               }
+
+               resolve(kpis);
 
             } else if (type === 'team') {
                // Team industriale
